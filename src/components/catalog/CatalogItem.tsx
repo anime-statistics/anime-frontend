@@ -9,12 +9,13 @@ import { CatalogCard } from './CatalogCard';
 export interface CatalogItemProps
 {
 	item : ItemDTO;
+	size : number;
 }
 
-export function CatalogItem ({ item }: CatalogItemProps)
+export function CatalogItem ({ item, size }: CatalogItemProps)
 {
 	return (
-		<Col xs={2}>
+		<Col xs={size}>
 			<CatalogCard {...item} />
 		</Col>
 	);
