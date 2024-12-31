@@ -6,6 +6,8 @@ import { ItemDTO } from '../../DTOs/ItemDTO';
 
 
 const ImageContainer = styled.div({
+	position : 'relative',
+
 	aspectRatio : '1 / 1',
 	overflow    : 'hidden',
 
@@ -13,12 +15,25 @@ const ImageContainer = styled.div({
 	alignItems : 'center',
 });
 
+const ImageBackground = styled.img({
+	position : 'absolute',
+	left     : '50%',
+	top      : 0,
+
+	transform : 'translateX(-50%)',
+	opacity   : '0.3',
+
+	height : '100%',
+	width  : 'auto',
+});
+
 export function CatalogCard (item: ItemDTO)
 {
 	return (
-		<Card className='mb-2'>
+		<Card className='mb-2 overflow-hidden'>
 			<ImageContainer>
-				<Card.Img title='poster' loading='lazy' src={ 'https://shikimori.one' + item.image.original } />
+				<ImageBackground className='z-1' title='poster' loading='lazy' src={ 'https://shikimori.one' + item.image.original } />
+				<Card.Img        className='z-2' title='poster' loading='lazy' src={ 'https://shikimori.one' + item.image.original } />
 			</ImageContainer>
 
 			<Card.Body>
