@@ -57,7 +57,7 @@ export function Sidebar ()
 	return (
 		<Stack as='aside' gap={2} className='bg-white p-2 rounded'>
 			<Search {...{setType, type, setSearch, search}} />
-			<Catalog {...{next, data}} />
+			<Catalog {...{next, data, type}} />
 		</Stack>
 	);
 }

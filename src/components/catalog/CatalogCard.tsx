@@ -27,13 +27,20 @@ const ImageBackground = styled.img({
 	width  : 'auto',
 });
 
-export function CatalogCard (item: ItemDTO)
+export interface CatalogCardProps
+{
+	isActive : boolean;
+
+	item : ItemDTO;
+}
+
+export function CatalogCard ({ isActive, item }: CatalogCardProps)
 {
 	return (
-		<Card className='mb-2 overflow-hidden'>
+		<Card className={ 'mb-2 overflow-hidden' + (isActive && ' border-primary') }>
 			<ImageContainer>
 				<ImageBackground className='z-1' title='poster' loading='lazy' src={ 'https://shikimori.one' + item.image.original } />
-				<Card.Img        className='z-2' title='poster' loading='lazy' src={ 'https://shikimori.one' + item.image.original } />
+				<Card.Img        className='z-2' title='poster' loading='lazy' src={ 'https://shikimori.one' + item.image.original } variant='top' />
 			</ImageContainer>
 
 			<Card.Body>

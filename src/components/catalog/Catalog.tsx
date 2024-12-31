@@ -12,9 +12,10 @@ export interface CatalogProps
 {
 	next : () => void;
 	data : ItemDTO[];
+	type : string;
 }
 
-export function Catalog ({ next, data }: CatalogProps)
+export function Catalog ({ next, data, type }: CatalogProps)
 {
 	const [ size, setSize ] = useState(2);
 
@@ -42,7 +43,7 @@ export function Catalog ({ next, data }: CatalogProps)
 				}
 			>
 				<Row>
-					{ data.map((item, key) => <CatalogItem key={key} {...{item, size}} />) }
+					{ data.map((item, key) => <CatalogItem key={key} {...{item, type, size}} />) }
 				</Row>
 			</InfiniteScroll>
 		</>
