@@ -21,8 +21,8 @@ export function Search ({ setType, type, setSearch, search }: SearchProps)
 				onChange = { ev => setType(ev.target.value) }
 				value    = { type }
 			>
-				<option>Аниме</option>
-				<option>Манга</option>
+				<option value='animes'>Аниме</option>
+				<option value='mangas'>Манга</option>
 			</Form.Select>
 
 			<FloatingLabel label='Найти по названию'>

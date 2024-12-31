@@ -2,11 +2,15 @@
 import { Row } from 'react-bootstrap';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
+import { ItemDTO } from '../../DTOs/ItemDTO';
+
+import { CatalogItem } from './CatalogItem';
+
 
 export interface CatalogProps
 {
 	next : () => void;
-	data : unknown[];
+	data : ItemDTO[];
 }
 
 export function Catalog ({ next, data }: CatalogProps)
@@ -23,7 +27,7 @@ export function Catalog ({ next, data }: CatalogProps)
 				}
 			>
 				<Row>
-					{ data.map((item, key) => null) }
+					{ data.map((item, key) => <CatalogItem key={key} {...{item}} />) }
 				</Row>
 			</InfiniteScroll>
 		</>
