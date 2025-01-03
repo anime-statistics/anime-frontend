@@ -21,6 +21,6 @@ export interface ItemDTO
 	episodes       : number;
 	episodes_aired : number;
 
-	aired_on    : string;
+	aired_on    : string | null;
 	released_on : string | null;
 }

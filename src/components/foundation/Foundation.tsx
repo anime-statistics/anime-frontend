@@ -1,12 +1,17 @@
 
 import { useState } from 'react';
-import { Stack } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
 
 import { Header } from '../header/Header';
 import { Sidebar } from '../sidebar/Sidebar';
 
 
-export function Foundation ()
+export interface FoundationProps
+{
+	children ?: JSX.Element;
+}
+
+export function Foundation ({ children }: FoundationProps)
 {
 	const [ visibility, setVisibility ] = useState(false);
 
@@ -17,9 +22,21 @@ export function Foundation ()
 		<>
 			<Header {...{setShow}} />
 
-			<Stack className='p-2 bg-light'>
-				<Sidebar show={visibility} {...{setHide}} />
-			</Stack>
+			<Row className='p-2 bg-light'>
+				<Col xs='12' md={ children && '3' }>
+					<Sidebar show={visibility} {...{setHide}} />
+				</Col>
+
+				{ children && (
+					<>
+						<Col xs='12' md='9'>
+							<main className='p-2 bg-white rounded'>
+								{ children }
+							</main>
+						</Col>
+					</>
+				) }
+			</Row>
 		</>
 	);
 }
