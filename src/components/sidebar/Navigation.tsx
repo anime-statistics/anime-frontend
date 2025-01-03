@@ -8,27 +8,41 @@ import { Catalog } from '../catalog/Catalog';
 import { Search } from './Search';
 
 
-export function server
+export async function server
 (
 	signal  : AbortSignal,
+
+	page    : number,
 	type    : string,
 	search  : string,
-	setData : React.Dispatch<React.SetStateAction<ItemDTO[]>>,
+
+	setHasMore : React.Dispatch<React.SetStateAction<boolean>>,
+	setData    : React.Dispatch<React.SetStateAction<ItemDTO[]>>,
 )
 {
-	fetch(`https://shikimori.one/api/${ type }?search=${ search }&limit=50`, { signal })
-		.then(data => data.json())
-		.then(data => setData(data))
+	try
+	{
+		const resource = await fetch(`https://shikimori.one/api/${ type }?search=${ search }&page=${ page }&limit=50`, { signal });
+		const response = await resource.json();
 
-		.catch(function (error)
+		setData(old => [...old, ...response]);
+
+		if (response.length === 50)
 		{
-			if (error instanceof Error && error.name === 'AbortError')
-			{
-				return;
-			}
+			return;
+		}
 
-			throw error;
-		});
+		setHasMore(false);
+	}
+	catch (error)
+	{
+		if (error instanceof Error && error.name === 'AbortError')
+		{
+			return;
+		}
+
+		throw error;
+	}
 }
 
 export function Navigation ()
@@ -36,28 +50,38 @@ export function Navigation ()
 	const [ type,   setType   ] = useState('animes');
 	const [ search, setSearch ] = useState('');
 
-	const [ data, setData ] = useState<ItemDTO[]>([]);
+	const [ hasMore, setHasMore ] = useState(true);
+	const [ page,    setPage    ] = useState(1);
+	const [ data,    setData    ] = useState<ItemDTO[]>([]);
 
 	const next = function (): void
 	{
+		setPage(page + 1);
 	};
 
 	useEffect(function ()
 	{
+		setHasMore(true);
+		setPage(1);
+		setData([]);
+	}, [ type, search ]);
+
+	useEffect(function ()
+	{
 		const abort = new AbortController();
-		const timer = setTimeout(server.bind(undefined, abort.signal, type, search, setData), 1_000);
+		const timer = setTimeout(() => server(abort.signal, page, type, search, setHasMore, setData), 1_000);
 
 		return function ()
 		{
 			clearTimeout(timer);
 			abort.abort();
 		};
-	}, [ type, search ]);
+	}, [ page, type, search ]);
 
 	return (
 		<Stack as='nav' gap={2} className='bg-white p-md-2 rounded'>
 			<Search {...{setType, type, setSearch, search}} />
-			<Catalog {...{next, data, type}} />
+			<Catalog {...{next, hasMore, data, type}} />
 		</Stack>
 	);
 }
