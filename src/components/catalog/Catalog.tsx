@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Form, Row, Stack } from 'react-bootstrap';
+import { Form, Row, Spinner, Stack } from 'react-bootstrap';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { ItemDTO } from '../../DTOs/ItemDTO';
@@ -39,7 +39,10 @@ export function Catalog ({ next, data, type }: CatalogProps)
 
 				hasMore = {true}
 				loader  = {
-					<h5 className='m-5 text-center'>Загрузка...</h5>
+					<Stack direction='horizontal' gap={2} className='justify-content-center m-5'>
+						<Spinner />
+						<h5 className='m-0'>Загрузка...</h5>
+					</Stack>
 				}
 			>
 				<Row>
