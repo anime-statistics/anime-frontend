@@ -1,19 +1,12 @@
 
-import { Stack } from 'react-bootstrap';
-
-import { Header } from '../../components/header/Header';
-import { Sidebar } from '../../components/sidebar/Sidebar';
+import { Foundation } from '../../components/foundation/Foundation';
 
 
 export function Home ()
 {
 	return (
 		<>
-			<Header />
-
-			<Stack className='p-2 bg-light'>
-				<Sidebar />
-			</Stack>
+			<Foundation />
 		</>
 	);
 }

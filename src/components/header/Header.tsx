@@ -2,11 +2,17 @@
 import { Navbar } from 'react-bootstrap';
 
 
-export function Header ()
+export interface HeaderProps
+{
+	setShow : () => void;
+}
+
+export function Header ({ setShow }: HeaderProps)
 {
 	return (
-		<Navbar as='header' className='p-2'>
+		<Navbar as='header' expand='md' className='p-2'>
 			<Navbar.Brand>Anime Statistics</Navbar.Brand>
+			<Navbar.Toggle onClick={setShow} />
 		</Navbar>
 	);
 }
