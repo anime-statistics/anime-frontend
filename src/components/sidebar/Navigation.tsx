@@ -4,47 +4,11 @@ import { Stack } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 
 import { ItemDTO } from '../../DTOs/ItemDTO';
+import { RequestWithDelay } from '../../tools/requests/RequestWithDelay';
 
 import { Catalog } from '../catalog/Catalog';
 import { Search } from './Search';
 
-
-export async function server
-(
-	signal  : AbortSignal,
-
-	page    : number,
-	type    : string,
-	search  : string,
-
-	setHasMore : React.Dispatch<React.SetStateAction<boolean>>,
-	setData    : React.Dispatch<React.SetStateAction<ItemDTO[]>>,
-)
-{
-	try
-	{
-		const resource = await fetch(`https://shikimori.one/api/${ type }?search=${ search }&page=${ page }&limit=50`, { signal });
-		const response = await resource.json();
-
-		setData(old => [...old, ...response]);
-
-		if (response.length === 50)
-		{
-			return;
-		}
-
-		setHasMore(false);
-	}
-	catch (error)
-	{
-		if (error instanceof Error && error.name === 'AbortError')
-		{
-			return;
-		}
-
-		throw error;
-	}
-}
 
 export function Navigation ()
 {
@@ -91,14 +55,24 @@ export function Navigation ()
 			search,
 		});
 
-		const abort = new AbortController();
-		const timer = setTimeout(() => server(abort.signal, page, type, search, setHasMore, setData), 1_000);
+		const req = new RequestWithDelay(
+			1_000,
+			`https://shikimori.one/api/${ type }?search=${ search }&page=${ page }&limit=50`,
 
-		return function ()
-		{
-			clearTimeout(timer);
-			abort.abort();
-		};
+			function (response: any): void
+			{
+				setData(old => [...old, ...response]);
+
+				if (response.length === 50)
+				{
+					return;
+				}
+	
+				setHasMore(false);
+			}
+		);
+
+		return req.dispose.bind(req);
 	}, [ page, type, search ]);
 
 	return (
