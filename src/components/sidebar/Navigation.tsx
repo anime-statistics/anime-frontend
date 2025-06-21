@@ -57,13 +57,7 @@ export function Navigation ()
 			function (response: any): void
 			{
 				setData(old => [...old, ...response]);
-
-				if (response.length === 50)
-				{
-					return;
-				}
-	
-				setHasMore(false);
+				setHasMore(response.length === limit);
 			}
 		);
 
