@@ -43,7 +43,8 @@ export function Navigation ()
 	useEffect(function ()
 	{
 		setSearchParams({
-			page : String(page),
+			page  : String(page),
+			limit : String(limit),
 
 			type,
 			search,
@@ -51,7 +52,7 @@ export function Navigation ()
 
 		const req = new RequestWithDelay(
 			1_000,
-			`https://shikimori.one/api/${ type }?search=${ search }&page=${ page }&limit=${ limit }`,
+			`https://shikimori.one/api/${ type }?page=${ page }&limit=${ limit }&search=${ search }`,
 
 			function (response: any): void
 			{
@@ -67,7 +68,7 @@ export function Navigation ()
 		);
 
 		return req.dispose.bind(req);
-	}, [ page, type, search ]);
+	}, [ setSearchParams, type, page, limit, search ]);
 
 	return (
 		<Stack as='nav' gap={2} className='bg-white p-md-2 rounded'>
