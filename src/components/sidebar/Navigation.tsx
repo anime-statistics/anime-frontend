@@ -14,18 +14,12 @@ export function Navigation ()
 {
 	const [ search_params, setSearchParams ] = useSearchParams();
 
-	const param_type   = search_params.get('type')   || 'animes';
-	const param_search = search_params.get('search') || '';
-
-	const param_page = Number(search_params.get('page') || '1');
-
-	// ===== ===== ===== ===== =====
-
-	const [ type,   setType   ] = useState(param_type);
-	const [ search, setSearch ] = useState(param_search);
+	const [ type,   setType   ] = useState(search_params.get('type') || 'animes');
+	const [ page,   setPage   ] = useState(Number(search_params.get('page') || '1'));
+	const [ limit,  setLimit  ] = useState(Number(search_params.get('limit') || '50'));
+	const [ search, setSearch ] = useState(search_params.get('search') || '');
 
 	const [ hasMore, setHasMore ] = useState(true);
-	const [ page,    setPage    ] = useState(param_page);
 	const [ data,    setData    ] = useState<ItemDTO[]>([]);
 
 	const next = function (): void
@@ -57,7 +51,7 @@ export function Navigation ()
 
 		const req = new RequestWithDelay(
 			1_000,
-			`https://shikimori.one/api/${ type }?search=${ search }&page=${ page }&limit=50`,
+			`https://shikimori.one/api/${ type }?search=${ search }&page=${ page }&limit=${ limit }`,
 
 			function (response: any): void
 			{
