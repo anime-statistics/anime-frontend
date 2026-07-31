@@ -51,7 +51,7 @@ function onAiTap(): void {
         <button
           type="button"
           class="flex size-full min-h-[44px] flex-col items-center justify-center gap-1 text-xs text-gray-500 transition-colors dark:text-gray-400"
-          :aria-label="translate('ai.open')"
+          :title="translate('ai.open')"
           @click="onAiTap"
         >
           <i class="pi pi-sparkles text-base" />

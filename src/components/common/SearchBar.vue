@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import VoiceInput from '@/components/voice/VoiceInput.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
@@ -7,12 +7,19 @@ import { useSearchHistory } from '@/composables/useSearchHistory'
 import { ALL_SOURCES, FILTER_KEYS } from '@/core/utils/filterParser'
 import { useSearchStore } from '@/stores/useSearchStore'
 
+const props = withDefaults(defineProps<{ autofocus?: boolean }>(), { autofocus: false })
+
 const { translate } = useAppI18n()
 const store = useSearchStore()
 const { searchNow } = useDebouncedSearch()
 const history = useSearchHistory()
 
 const isFocused = ref(false)
+const input = ref<HTMLInputElement | null>(null)
+
+onMounted(() => {
+  if (props.autofocus) input.value?.focus()
+})
 
 const SUGGESTION_VALUES: Record<string, readonly string[]> = {
   status: ['watching', 'planned', 'completed', 'on_hold', 'dropped', 'rewatching'],
@@ -76,6 +83,7 @@ function onVoiceTranscript(text: string): void {
       >
         <i class="pi pi-search shrink-0 text-gray-400" />
         <input
+          ref="input"
           :value="store.rawQuery"
           type="search"
           class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"

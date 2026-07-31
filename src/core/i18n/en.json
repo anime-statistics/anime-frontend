@@ -396,7 +396,21 @@
     "notFound": "Not found",
     "validation": "The server returned unexpected data",
     "rateLimited": "Too many requests, please wait",
-    "unknown": "Something went wrong"
+    "unknown": "Something went wrong",
+    "unexpected": "Something went wrong on this page",
+    "retry": "Try again"
+  },
+  "offline": {
+    "banner": "No connection — showing cached data"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "search": "Focus search",
+    "tags": "Open tags",
+    "newNote": "New note",
+    "selectAll": "Select every card",
+    "help": "Show this list",
+    "close": "Close"
   },
   "validation": {
     "required": "This field is required",

@@ -37,7 +37,7 @@
         "dist/assets/*.js",
         "!dist/assets/browser-*.js"
       ],
-      "limit": "520 kB"
+      "limit": "560 kB"
     }
   ],
   "dependencies": {

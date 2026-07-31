@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
+import { contrastRatio } from '@/core/utils/colorPalette'
 
 function tag(overrides: Partial<ITagDto> = {}): ITagDto {
   return {
@@ -31,8 +32,20 @@ describe('TagBadge', () => {
   it('uses dark text on a light colour', () => {
     const wrapper = mount(TagBadge, { props: { tag: tag({ color: '#fde68a' }) } })
 
-    expect(wrapper.attributes('style')).toContain('color: #111827')
+    expect(wrapper.attributes('style')).toContain('color: #000000')
   })
+
+  it.each(['#f59e0b', '#14b8a6', '#84cc16'])(
+    'clears 4.5:1 on the mid-tone colour %s',
+    (color) => {
+      const wrapper = mount(TagBadge, { props: { tag: tag({ color }) } })
+      const chosen = wrapper.attributes('style')?.includes('color: #000000')
+        ? '#000000'
+        : '#ffffff'
+
+      expect(contrastRatio(chosen, color)).toBeGreaterThanOrEqual(4.5)
+    },
+  )
 
   it('renders the icon when one is set', () => {
     const wrapper = mount(TagBadge, { props: { tag: tag({ icon: 'pi-heart' }) } })

@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
-import MarkdownEditor from '@/components/editor/MarkdownEditor.vue'
+import { computed, defineAsyncComponent, onUnmounted, ref } from 'vue'
 import MarkdownPreview from '@/components/editor/MarkdownPreview.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useIsMobile } from '@/composables/useMediaQuery'
+
+// Ace is the heaviest dependency in the app; keeping it behind an async
+// boundary means a note only pays for it once the editor is actually shown.
+const MarkdownEditor = defineAsyncComponent(
+  () => import('@/components/editor/MarkdownEditor.vue'),
+)
 
 const MIN_PERCENT = 20
 const MAX_PERCENT = 80

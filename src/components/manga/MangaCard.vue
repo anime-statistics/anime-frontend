@@ -4,6 +4,7 @@ import Tag from 'primevue/tag'
 import { ref } from 'vue'
 import type { IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { usePrefetchRoute } from '@/composables/usePrefetchRoute'
 
 const props = withDefaults(
   defineProps<{ manga: IMangaSearchResultDto, selected?: boolean, selectable?: boolean }>(),
@@ -16,6 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const { translate, translatePlural } = useAppI18n()
+const { prefetch } = usePrefetchRoute()
 const hasImageError = ref(false)
 
 function onContextMenu(event: MouseEvent): void {
@@ -33,6 +35,7 @@ function onContextMenu(event: MouseEvent): void {
     class="relative h-full overflow-hidden transition-shadow hover:shadow-lg"
     :class="props.selected ? 'ring-2 ring-brand-500' : ''"
     @contextmenu.prevent="onContextMenu"
+    @pointerenter="prefetch('manga-detail')"
   >
     <template #header>
       <div class="relative">

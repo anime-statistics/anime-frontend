@@ -54,6 +54,43 @@ export function buildBrandPalette(hex: string): Record<BrandShade, string> | nul
   return shades
 }
 
+// Pure black rather than gray-900: on mid-tone brand colours such as indigo the
+// extra bit of contrast is the difference between 4.47:1 and 4.80:1.
+export const DARK_TEXT = '#000000'
+export const LIGHT_TEXT = '#ffffff'
+
+function relativeLuminance([red, green, blue]: Rgb): number {
+  const [r, g, b] = [red, green, blue]
+    .map((channel) => channel / 255)
+    .map((value) => (value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4))
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+export function contrastRatio(foreground: string, background: string): number {
+  const foregroundRgb = hexToRgb(foreground)
+  const backgroundRgb = hexToRgb(background)
+  if (!foregroundRgb || !backgroundRgb) return 1
+
+  const first = relativeLuminance(foregroundRgb)
+  const second = relativeLuminance(backgroundRgb)
+  const lighter = Math.max(first, second)
+  const darker = Math.min(first, second)
+
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+/**
+ * Picks whichever of the two text colours actually contrasts better against the
+ * given background. A fixed luminance threshold gets mid-tone colours such as
+ * amber wrong, which is how tag labels ended up below the 4.5:1 floor.
+ */
+export function readableTextColor(background: string): string {
+  return contrastRatio(DARK_TEXT, background) >= contrastRatio(LIGHT_TEXT, background)
+    ? DARK_TEXT
+    : LIGHT_TEXT
+}
+
 export function applyBrandPalette(hex: string): boolean {
   const palette = buildBrandPalette(hex)
   if (!palette) return false

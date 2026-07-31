@@ -6,6 +6,7 @@ const { toasts, dismiss } = useToast()
 const SEVERITY_CLASSES = {
   info: 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900',
   success: 'bg-emerald-600 text-white',
+  warn: 'bg-amber-600 text-white',
   error: 'bg-red-600 text-white',
 } as const
 </script>

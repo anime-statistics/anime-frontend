@@ -1,6 +1,6 @@
 import { readonly, ref, type Ref } from 'vue'
 
-export type ToastSeverity = 'info' | 'success' | 'error'
+export type ToastSeverity = 'info' | 'success' | 'warn' | 'error'
 
 export interface IToast {
   id: number
@@ -28,6 +28,7 @@ export function useToast(): {
   toasts: Readonly<Ref<readonly IToast[]>>
   show: typeof show
   success: (message: string) => number
+  warn: (message: string) => number
   error: (message: string) => number
   dismiss: typeof dismiss
   clear: () => void
@@ -36,6 +37,7 @@ export function useToast(): {
     toasts: readonly(toasts),
     show,
     success: (message: string) => show(message, 'success'),
+    warn: (message: string) => show(message, 'warn'),
     error: (message: string) => show(message, 'error'),
     dismiss,
     clear: () => {

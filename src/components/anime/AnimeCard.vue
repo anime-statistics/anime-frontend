@@ -5,6 +5,7 @@ import { computed, ref } from 'vue'
 import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { usePrefetchRoute } from '@/composables/usePrefetchRoute'
 import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 
 const VISIBLE_TAGS = 3
@@ -33,6 +34,7 @@ const emit = defineEmits<{
 }>()
 
 const { translate, translatePlural } = useAppI18n()
+const { prefetch } = usePrefetchRoute()
 const hasImageError = ref(false)
 
 function onContextMenu(event: MouseEvent): void {
@@ -50,6 +52,7 @@ function onContextMenu(event: MouseEvent): void {
     class="relative h-full overflow-hidden transition-shadow hover:shadow-lg"
     :class="props.selected ? 'ring-2 ring-brand-500' : ''"
     @contextmenu.prevent="onContextMenu"
+    @pointerenter="prefetch('anime-detail')"
   >
     <template #header>
       <div class="relative">

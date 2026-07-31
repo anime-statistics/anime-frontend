@@ -41,6 +41,7 @@ function toggleLocale(): void {
       <RouterLink
         :to="{ name: 'home' }"
         class="flex items-center gap-2 font-semibold text-brand-600 dark:text-brand-300"
+        :aria-label="translate('app.title')"
       >
         <i class="pi pi-play-circle" />
         <span class="hidden sm:inline">{{ translate('app.title') }}</span>
@@ -73,6 +74,7 @@ function toggleLocale(): void {
       <RouterLink
         :to="{ name: 'search' }"
         class="ml-auto flex min-h-[44px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:border-brand-400 sm:min-h-0 sm:max-w-md dark:border-gray-700 dark:text-gray-400"
+        :title="`${translate('nav.search')} (Ctrl+K)`"
       >
         <i class="pi pi-search shrink-0" />
         <span class="truncate">{{ translate('anime.search.placeholder') }}</span>
@@ -90,7 +92,7 @@ function toggleLocale(): void {
         <button
           type="button"
           class="flex size-11 items-center justify-center rounded-lg text-xs font-medium uppercase text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-          :aria-label="translate('layout.toggleLocale')"
+          :aria-label="`${settingsStore.locale.toUpperCase()} — ${translate('layout.toggleLocale')}`"
           @click="toggleLocale"
         >
           {{ settingsStore.locale }}

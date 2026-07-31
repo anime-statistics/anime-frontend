@@ -25,10 +25,10 @@ useSwipe(drawer, {
 })
 
 const NAV_ITEMS = [
-  { name: 'home', icon: 'pi-home', labelKey: 'nav.home' },
-  { name: 'search', icon: 'pi-search', labelKey: 'nav.search' },
-  { name: 'tags', icon: 'pi-tags', labelKey: 'nav.tags' },
-  { name: 'settings', icon: 'pi-cog', labelKey: 'nav.settings' },
+  { name: 'home', icon: 'pi-home', labelKey: 'nav.home', hint: '' },
+  { name: 'search', icon: 'pi-search', labelKey: 'nav.search', hint: ' (Ctrl+K)' },
+  { name: 'tags', icon: 'pi-tags', labelKey: 'nav.tags', hint: ' (Ctrl+Shift+T)' },
+  { name: 'settings', icon: 'pi-cog', labelKey: 'nav.settings', hint: '' },
 ] as const
 
 onMounted(() => {
@@ -79,7 +79,7 @@ onMounted(() => {
         :to="{ name: item.name }"
         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
         active-class="bg-brand-50 text-brand-700 dark:bg-gray-800 dark:text-brand-300"
-        :title="translate(item.labelKey)"
+        :title="`${translate(item.labelKey)}${item.hint}`"
         @click="emit('close')"
       >
         <i :class="['pi', item.icon, 'shrink-0']" />

@@ -56,7 +56,7 @@ watch(
       </p>
     </header>
 
-    <SearchBar />
+    <SearchBar autofocus />
 
     <div class="grid gap-6 lg:grid-cols-[220px_1fr]">
       <FilterPanel
@@ -89,9 +89,11 @@ watch(
           {{ translate('anime.search.empty') }}
         </p>
 
-        <ul
+        <TransitionGroup
           v-else
-          class="flex flex-col gap-2"
+          tag="ul"
+          name="result-list"
+          class="relative flex flex-col gap-2"
         >
           <li
             v-for="item in store.results"
@@ -124,7 +126,7 @@ watch(
               </span>
             </RouterLink>
           </li>
-        </ul>
+        </TransitionGroup>
       </div>
     </div>
   </section>

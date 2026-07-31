@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { VueQueryPlugin } from '@tanstack/vue-query'
+import { createHead } from '@vueuse/head'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import App from '@/App.vue'
@@ -17,6 +18,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(i18n)
+app.use(createHead())
 
 app.use(PrimeVue, {
   theme: {

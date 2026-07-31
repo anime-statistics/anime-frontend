@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { useSwipe } from '@vueuse/core'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { AnimeStatus } from '@/apis/dtos/animeDto'
 import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
 import AnimeCard from '@/components/anime/AnimeCard.vue'
 import AnimeCardSkeleton from '@/components/anime/AnimeCardSkeleton.vue'
-import AnimeKanban from '@/components/anime/AnimeKanban.vue'
 import AnimeList from '@/components/anime/AnimeList.vue'
-import AnimeTable from '@/components/anime/AnimeTable.vue'
 import BulkActionBar from '@/components/anime/BulkActionBar.vue'
 import SortSelector from '@/components/anime/SortSelector.vue'
 import ColumnSlider from '@/components/common/ColumnSlider.vue'
@@ -20,7 +18,6 @@ import Pagination from '@/components/common/Pagination.vue'
 import ViewModeToggle from '@/components/common/ViewModeToggle.vue'
 import MangaCard from '@/components/manga/MangaCard.vue'
 import MangaList from '@/components/manga/MangaList.vue'
-import MangaTable from '@/components/manga/MangaTable.vue'
 import { useAnimeLibrary, useAnimeStatusMutation } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useHaptic } from '@/composables/useHaptic'
@@ -30,6 +27,7 @@ import { useIsMobile } from '@/composables/useMediaQuery'
 import { useMediaSort } from '@/composables/useMediaSort'
 import { usePullToRefresh } from '@/composables/usePullToRefresh'
 import { useMaxColumns } from '@/composables/useResponsiveColumns'
+import { vReveal } from '@/composables/useReveal'
 import { useToast } from '@/composables/useToast'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import { useAnimeStore } from '@/stores/useAnimeStore'
@@ -39,6 +37,13 @@ import type { IViewMode } from '@/types/settings'
 
 const SKELETON_COUNT = 8
 const SWIPE_THRESHOLD_PX = 80
+
+// Only one view mode renders at a time, and cards are the default. Keeping the
+// table, kanban and their PrimeVue/drag-and-drop dependencies behind async
+// boundaries takes them off the first-paint path.
+const AnimeTable = defineAsyncComponent(() => import('@/components/anime/AnimeTable.vue'))
+const AnimeKanban = defineAsyncComponent(() => import('@/components/anime/AnimeKanban.vue'))
+const MangaTable = defineAsyncComponent(() => import('@/components/manga/MangaTable.vue'))
 
 const route = useRoute()
 const router = useRouter()
@@ -360,6 +365,15 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <AnimeCard
           v-for="item in visibleAnime"
           :key="item.id"
+          v-memo="[
+            item.id,
+            item.status,
+            item.score,
+            item.myTags,
+            tagStore.tags,
+            animeStore.isSelected(item.id),
+          ]"
+          v-reveal
           :anime="item"
           :tags="tagsFor(item)"
           selectable
@@ -416,6 +430,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <MangaCard
           v-for="item in visibleManga"
           :key="item.id"
+          v-memo="[item.id, item.status, item.score]"
+          v-reveal
           :manga="item"
           @open-menu="openMenu"
         />
