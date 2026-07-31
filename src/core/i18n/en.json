@@ -1,0 +1,115 @@
+{
+  "app": {
+    "title": "Anime Statistics",
+    "loading": "Loading…",
+    "language": "Language",
+    "themeLight": "Light theme",
+    "themeDark": "Dark theme",
+    "themeSystem": "System theme"
+  },
+  "nav": {
+    "home": "Home",
+    "anime": "Anime",
+    "manga": "Manga",
+    "tags": "Tags",
+    "search": "Search",
+    "settings": "Settings"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "retry": "Retry",
+    "reset": "Reset",
+    "apply": "Apply",
+    "close": "Close"
+  },
+  "anime": {
+    "title": "Anime",
+    "episodes": "{count} episode | {count} episodes",
+    "watchedOf": "{watched} of {total} watched",
+    "search": {
+      "placeholder": "Search anime…",
+      "empty": "No anime found",
+      "hint": "Type at least 2 characters"
+    },
+    "status": {
+      "watching": "Watching",
+      "planned": "Planned",
+      "completed": "Completed",
+      "on_hold": "On hold",
+      "dropped": "Dropped",
+      "rewatching": "Rewatching"
+    },
+    "fields": {
+      "score": "Score",
+      "genres": "Genres",
+      "aired": "Aired",
+      "duration": "Duration",
+      "rating": "Rating",
+      "synopsis": "Synopsis"
+    }
+  },
+  "manga": {
+    "title": "Manga",
+    "volumes": "{count} volume | {count} volumes",
+    "chapters": "{count} chapter | {count} chapters",
+    "search": {
+      "placeholder": "Search manga…",
+      "empty": "No manga found"
+    },
+    "status": {
+      "reading": "Reading",
+      "planned": "Planned",
+      "completed": "Completed",
+      "on_hold": "On hold",
+      "dropped": "Dropped"
+    },
+    "fields": {
+      "authors": "Authors",
+      "published": "Published"
+    }
+  },
+  "tags": {
+    "title": "Tags",
+    "count": "{count} tag | {count} tags",
+    "placeholder": "Tag name",
+    "empty": "No tags yet",
+    "color": "Colour",
+    "hidden": "Hidden"
+  },
+  "notes": {
+    "title": "Notes",
+    "count": "{count} note | {count} notes",
+    "placeholder": "Write a note…",
+    "empty": "No notes yet"
+  },
+  "settings": {
+    "title": "Settings",
+    "viewMode": "View mode",
+    "columns": "Columns",
+    "pageSize": "Items per page",
+    "voiceInput": "Voice input",
+    "ai": "AI assistant"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {total}",
+    "results": "{count} result | {count} results"
+  },
+  "errors": {
+    "network": "Network error. Check your connection.",
+    "notFound": "Not found",
+    "validation": "The server returned unexpected data",
+    "rateLimited": "Too many requests, please wait",
+    "unknown": "Something went wrong"
+  },
+  "validation": {
+    "required": "This field is required",
+    "maxLength": "No more than {max} characters",
+    "hexColor": "Expected a colour like #6366f1"
+  }
+}

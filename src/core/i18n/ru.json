@@ -1,0 +1,115 @@
+{
+  "app": {
+    "title": "Статистика аниме",
+    "loading": "Загрузка…",
+    "language": "Язык",
+    "themeLight": "Светлая тема",
+    "themeDark": "Тёмная тема",
+    "themeSystem": "Системная тема"
+  },
+  "nav": {
+    "home": "Главная",
+    "anime": "Аниме",
+    "manga": "Манга",
+    "tags": "Теги",
+    "search": "Поиск",
+    "settings": "Настройки"
+  },
+  "actions": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "create": "Создать",
+    "retry": "Повторить",
+    "reset": "Сбросить",
+    "apply": "Применить",
+    "close": "Закрыть"
+  },
+  "anime": {
+    "title": "Аниме",
+    "episodes": "{count} эпизод | {count} эпизода | {count} эпизодов",
+    "watchedOf": "Просмотрено {watched} из {total}",
+    "search": {
+      "placeholder": "Поиск аниме…",
+      "empty": "Аниме не найдено",
+      "hint": "Введите минимум 2 символа"
+    },
+    "status": {
+      "watching": "Смотрю",
+      "planned": "Запланировано",
+      "completed": "Просмотрено",
+      "on_hold": "Отложено",
+      "dropped": "Брошено",
+      "rewatching": "Пересматриваю"
+    },
+    "fields": {
+      "score": "Оценка",
+      "genres": "Жанры",
+      "aired": "Выходило",
+      "duration": "Длительность",
+      "rating": "Рейтинг",
+      "synopsis": "Описание"
+    }
+  },
+  "manga": {
+    "title": "Манга",
+    "volumes": "{count} том | {count} тома | {count} томов",
+    "chapters": "{count} глава | {count} главы | {count} глав",
+    "search": {
+      "placeholder": "Поиск манги…",
+      "empty": "Манга не найдена"
+    },
+    "status": {
+      "reading": "Читаю",
+      "planned": "Запланировано",
+      "completed": "Прочитано",
+      "on_hold": "Отложено",
+      "dropped": "Брошено"
+    },
+    "fields": {
+      "authors": "Авторы",
+      "published": "Публиковалось"
+    }
+  },
+  "tags": {
+    "title": "Теги",
+    "count": "{count} тег | {count} тега | {count} тегов",
+    "placeholder": "Название тега",
+    "empty": "Тегов пока нет",
+    "color": "Цвет",
+    "hidden": "Скрыт"
+  },
+  "notes": {
+    "title": "Заметки",
+    "count": "{count} заметка | {count} заметки | {count} заметок",
+    "placeholder": "Напишите заметку…",
+    "empty": "Заметок пока нет"
+  },
+  "settings": {
+    "title": "Настройки",
+    "viewMode": "Режим отображения",
+    "columns": "Колонки",
+    "pageSize": "Элементов на странице",
+    "voiceInput": "Голосовой ввод",
+    "ai": "AI-ассистент"
+  },
+  "pagination": {
+    "previous": "Назад",
+    "next": "Вперёд",
+    "page": "Страница {page} из {total}",
+    "results": "{count} результат | {count} результата | {count} результатов"
+  },
+  "errors": {
+    "network": "Ошибка сети. Проверьте подключение.",
+    "notFound": "Не найдено",
+    "validation": "Сервер вернул неожиданные данные",
+    "rateLimited": "Слишком много запросов, подождите",
+    "unknown": "Что-то пошло не так"
+  },
+  "validation": {
+    "required": "Обязательное поле",
+    "maxLength": "Не более {max} символов",
+    "hexColor": "Ожидается цвет вида #6366f1"
+  }
+}
