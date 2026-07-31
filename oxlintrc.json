@@ -13,7 +13,8 @@
   },
   "rules": {
     "no-console": "warn",
-    "typescript/no-explicit-any": "error"
+    "typescript/no-explicit-any": "error",
+    "no-underscore-dangle": ["warn", { "allow": ["__APP_VERSION__"] }]
   },
   "ignorePatterns": [
     "dist",

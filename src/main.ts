@@ -6,6 +6,7 @@ import Aura from '@primevue/themes/aura'
 import App from '@/App.vue'
 import { config } from '@/core/constants/config'
 import { i18n } from '@/core/i18n'
+import { router } from '@/router'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import 'primeicons/primeicons.css'
 import '@/assets/styles/main.css'
@@ -14,6 +15,7 @@ const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
+app.use(router)
 app.use(i18n)
 
 app.use(PrimeVue, {

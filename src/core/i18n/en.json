@@ -15,6 +15,39 @@
     "search": "Search",
     "settings": "Settings"
   },
+  "layout": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "toggleTheme": "Switch theme",
+    "toggleLocale": "Switch language",
+    "skipToContent": "Skip to content",
+    "myTags": "My tags",
+    "showTag": "Show tag",
+    "hideTag": "Hide tag",
+    "detailPanel": "Details"
+  },
+  "footer": {
+    "version": "Version {version}",
+    "synced": "Synced at {time}",
+    "neverSynced": "Not synced yet",
+    "pendingConflicts": "{count} unresolved conflict | {count} unresolved conflicts",
+    "rights": "Personal anime and manga tracker"
+  },
+  "pages": {
+    "homeTitle": "Library",
+    "homeSubtitle": "Everything you track, in one place",
+    "searchTitle": "Search",
+    "searchHint": "Search across Shikimori and AniLiberty",
+    "tagsTitle": "Tags",
+    "settingsTitle": "Settings",
+    "animeDetailTitle": "Anime details",
+    "mangaDetailTitle": "Manga details",
+    "notFoundTitle": "Page not found",
+    "notFoundHint": "The page you were looking for does not exist.",
+    "backHome": "Back to home"
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",

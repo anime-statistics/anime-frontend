@@ -15,6 +15,39 @@
     "search": "Поиск",
     "settings": "Настройки"
   },
+  "layout": {
+    "openMenu": "Открыть меню",
+    "closeMenu": "Закрыть меню",
+    "collapseSidebar": "Свернуть панель",
+    "expandSidebar": "Развернуть панель",
+    "toggleTheme": "Сменить тему",
+    "toggleLocale": "Сменить язык",
+    "skipToContent": "Перейти к содержимому",
+    "myTags": "Мои теги",
+    "showTag": "Показать тег",
+    "hideTag": "Скрыть тег",
+    "detailPanel": "Подробности"
+  },
+  "footer": {
+    "version": "Версия {version}",
+    "synced": "Синхронизировано в {time}",
+    "neverSynced": "Ещё не синхронизировано",
+    "pendingConflicts": "{count} неразрешённый конфликт | {count} неразрешённых конфликта | {count} неразрешённых конфликтов",
+    "rights": "Персональный трекер аниме и манги"
+  },
+  "pages": {
+    "homeTitle": "Библиотека",
+    "homeSubtitle": "Всё, что вы отслеживаете, в одном месте",
+    "searchTitle": "Поиск",
+    "searchHint": "Поиск по Shikimori и AniLiberty",
+    "tagsTitle": "Теги",
+    "settingsTitle": "Настройки",
+    "animeDetailTitle": "Об аниме",
+    "mangaDetailTitle": "О манге",
+    "notFoundTitle": "Страница не найдена",
+    "notFoundHint": "Такой страницы не существует.",
+    "backHome": "На главную"
+  },
   "actions": {
     "save": "Сохранить",
     "cancel": "Отмена",
