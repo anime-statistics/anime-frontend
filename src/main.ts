@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import App from '@/App.vue'
+import { config } from '@/core/constants/config'
 import { i18n } from '@/core/i18n'
 import 'primeicons/primeicons.css'
 import '@/assets/styles/main.css'
@@ -23,4 +24,13 @@ app.use(PrimeVue, {
   },
 })
 
-app.mount('#app')
+async function initApp(): Promise<void> {
+  if (config.mockEnabled) {
+    const { worker } = await import('@/mocks/browser')
+    await worker.start({ onUnhandledRequest: 'bypass' })
+  }
+
+  app.mount('#app')
+}
+
+void initApp()

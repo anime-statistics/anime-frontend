@@ -1,0 +1,65 @@
+import type { INoteDto } from '@/apis/dtos/noteDto'
+
+export const notes: INoteDto[] = [
+  {
+    id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a601',
+    mediaId: 'shikimori_5114-fullmetal-alchemist-brotherhood',
+    content: [
+      '# Fullmetal Alchemist: Brotherhood',
+      '',
+      'Пересмотр перед финалом манги.',
+      '',
+      '- [x] Арка Ишвара',
+      '- [x] Арка Обещанного дня',
+      '- [ ] Сравнить с версией 2003 года',
+    ].join('\n'),
+    createdAt: '2024-01-12T10:15:00.000Z',
+    updatedAt: '2024-02-03T18:40:00.000Z',
+  },
+  {
+    id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a602',
+    mediaId: 'shikimori_9253-steins-gate',
+    content: [
+      '## Таймлайны',
+      '',
+      'Ключевые расхождения мировых линий:',
+      '',
+      '| Линия | Дивергенция |',
+      '| --- | --- |',
+      '| Альфа | 0.456903 |',
+      '| Бета | 1.130205 |',
+      '',
+      '> El Psy Kongroo',
+    ].join('\n'),
+    createdAt: '2024-03-02T09:00:00.000Z',
+    updatedAt: '2024-03-02T09:00:00.000Z',
+  },
+  {
+    id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a603',
+    mediaId: 'shikimori_16498-attack-on-titan',
+    content: [
+      '### Прогресс',
+      '',
+      'Остановился на 12 серии — вернуться после экзаменов.',
+      '',
+      '```',
+      'watched: 12/25',
+      '```',
+    ].join('\n'),
+    createdAt: '2024-04-18T20:05:00.000Z',
+    updatedAt: '2024-05-01T12:30:00.000Z',
+  },
+  {
+    id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a604',
+    mediaId: 'shikimori_2-berserk',
+    content: [
+      '# Berserk',
+      '',
+      'Читаю в издании Deluxe. Лучшая графика в арке *Золотого века*.',
+      '',
+      '**Следующий том:** 23',
+    ].join('\n'),
+    createdAt: '2024-05-22T14:45:00.000Z',
+    updatedAt: '2024-06-11T08:20:00.000Z',
+  },
+]
