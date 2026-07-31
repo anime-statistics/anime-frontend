@@ -49,7 +49,10 @@ export const animeHandlers = [
     const item = mutableAnime.find((anime) => anime.id === id)
     if (!item) return new HttpResponse(null, { status: 404 })
 
-    return HttpResponse.json(toSnakeCase(animeDetails[id] ?? item))
+    // The mutable record wins so PATCHed fields show up here; the static detail
+    // fixture only contributes the extra detail-only fields.
+    const detail = animeDetails[id]
+    return HttpResponse.json(toSnakeCase(detail ? { ...detail, ...item } : item))
   }),
 
   http.patch(`${API_PREFIX}/anime/:id/status`, async ({ params, request }) => {

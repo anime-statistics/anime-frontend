@@ -2,6 +2,8 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { AnimeStatus } from '@/apis/dtos/animeDto'
+import type { ITagDto } from '@/apis/dtos/tagDto'
+import TagBadge from '@/components/common/TagBadge.vue'
 import AnimeCard from '@/components/anime/AnimeCard.vue'
 import AnimeCardSkeleton from '@/components/anime/AnimeCardSkeleton.vue'
 import AnimeKanban from '@/components/anime/AnimeKanban.vue'
@@ -24,6 +26,7 @@ import { useMediaSort } from '@/composables/useMediaSort'
 import { useToast } from '@/composables/useToast'
 import { useAnimeStore } from '@/stores/useAnimeStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
+import { useTagStore } from '@/stores/useTagStore'
 import type { IViewMode } from '@/types/settings'
 
 const MOBILE_MAX_COLUMNS = 2
@@ -33,6 +36,7 @@ const route = useRoute()
 const { translate, translatePlural } = useAppI18n()
 const animeStore = useAnimeStore()
 const settingsStore = useSettingsStore()
+const tagStore = useTagStore()
 const isMobile = useIsMobile()
 const toast = useToast()
 const statusMutation = useAnimeStatusMutation()
@@ -45,9 +49,27 @@ const mangaLibrary = useMangaLibrary()
 const animeItems = computed(() => animeLibrary.data.value?.items ?? [])
 const mangaItems = computed(() => mangaLibrary.data.value?.items ?? [])
 
-const { sortField, sortOrder, sorted: sortedAnime, setSortField, setSortOrder }
+const { sortField, sortOrder, sorted: allSortedAnime, setSortField, setSortOrder }
   = useMediaSort(animeItems)
-const { sorted: sortedManga } = useMediaSort(mangaItems)
+const { sorted: allSortedManga } = useMediaSort(mangaItems)
+
+const activeTagId = computed(() =>
+  typeof route.query.tag === 'string' ? route.query.tag : null,
+)
+const activeTag = computed(() => (activeTagId.value ? tagStore.findTag(activeTagId.value) : undefined))
+
+function matchesActiveTag(item: { myTags?: string[] }): boolean {
+  return !activeTagId.value || (item.myTags ?? []).includes(activeTagId.value)
+}
+
+const sortedAnime = computed(() => allSortedAnime.value.filter(matchesActiveTag))
+const sortedManga = computed(() => allSortedManga.value.filter(matchesActiveTag))
+
+function tagsFor(item: { myTags?: string[] }): ITagDto[] {
+  return (item.myTags ?? [])
+    .map((id) => tagStore.findTag(id))
+    .filter((tag): tag is ITagDto => tag !== undefined)
+}
 
 const isPending = computed(() =>
   mediaType.value === 'manga' ? mangaLibrary.isPending.value : animeLibrary.isPending.value,
@@ -103,7 +125,10 @@ function onKeydown(event: KeyboardEvent): void {
   animeStore.selectAll(sortedAnime.value.map((item) => item.id))
 }
 
-onMounted(() => window.addEventListener('keydown', onKeydown))
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
+  if (tagStore.tags.length === 0) void tagStore.fetchTags()
+})
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
@@ -114,8 +139,20 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {{ translate('pages.homeTitle') }}
         </h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ translatePlural('pagination.results', itemCount) }}
+        <p class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <span>{{ translatePlural('pagination.results', itemCount) }}</span>
+          <template v-if="activeTag">
+            <TagBadge
+              :tag="activeTag"
+              size="sm"
+            />
+            <RouterLink
+              :to="{ name: 'home', query: { type: route.query.type } }"
+              class="underline underline-offset-2"
+            >
+              {{ translate('tags.clearFilter') }}
+            </RouterLink>
+          </template>
         </p>
       </div>
 
@@ -181,6 +218,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           v-for="item in sortedAnime"
           :key="item.id"
           :anime="item"
+          :tags="tagsFor(item)"
           selectable
           :selected="animeStore.isSelected(item.id)"
           @toggle-select="animeStore.toggleSelection"

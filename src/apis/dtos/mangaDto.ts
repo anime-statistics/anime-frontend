@@ -25,6 +25,7 @@ export const MangaSearchResultDto = z.object({
   genres: z.array(z.string()).optional(),
   publishedFrom: z.string().optional(),
   publishedTo: z.string().optional(),
+  myTags: z.array(z.string()).optional(),
   source: z.enum(MEDIA_SOURCES),
 })
 export type IMangaSearchResultDto = z.infer<typeof MangaSearchResultDto>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useTagStore } from '@/stores/useTagStore'
 
@@ -92,20 +93,27 @@ onMounted(() => {
         <li
           v-for="tag in tagStore.tags"
           :key="tag.id"
+          class="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
+          <RouterLink
+            :to="{ name: 'home', query: { tag: tag.id } }"
+            class="min-w-0 flex-1"
+            :title="translate('tags.filterBy')"
+            @click="emit('close')"
+          >
+            <TagBadge
+              :tag="tag"
+              size="sm"
+              :dimmed="tag.isHidden"
+            />
+          </RouterLink>
           <button
             type="button"
-            class="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-sm transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-            :class="tag.isHidden ? 'text-gray-400 dark:text-gray-600' : 'text-gray-700 dark:text-gray-300'"
+            class="shrink-0 rounded p-1 text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             :aria-label="tag.isHidden ? translate('layout.showTag') : translate('layout.hideTag')"
             @click="tagStore.toggleTagVisibility(tag.id)"
           >
-            <span
-              class="size-2.5 shrink-0 rounded-full"
-              :style="{ backgroundColor: tag.color }"
-            />
-            <span class="truncate">{{ tag.name }}</span>
-            <i :class="['pi', tag.isHidden ? 'pi-eye-slash' : 'pi-eye', 'ml-auto text-xs']" />
+            <i :class="['pi', tag.isHidden ? 'pi-eye-slash' : 'pi-eye']" />
           </button>
         </li>
       </ul>

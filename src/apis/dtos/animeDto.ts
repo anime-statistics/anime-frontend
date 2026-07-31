@@ -26,6 +26,7 @@ export const AnimeSearchResultDto = z.object({
   genres: z.array(z.string()).optional(),
   airedFrom: z.string().optional(),
   airedTo: z.string().optional(),
+  myTags: z.array(z.string()).optional(),
   source: z.enum(MEDIA_SOURCES),
 })
 export type IAnimeSearchResultDto = z.infer<typeof AnimeSearchResultDto>

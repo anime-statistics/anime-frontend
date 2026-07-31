@@ -111,7 +111,22 @@
     "placeholder": "Tag name",
     "empty": "No tags yet",
     "color": "Colour",
-    "hidden": "Hidden"
+    "hidden": "Hidden",
+    "create": "Add tag",
+    "edit": "Edit tag",
+    "delete": "Delete tag",
+    "name": "Name",
+    "icon": "Icon",
+    "hideFromSidebar": "Hide from sidebar",
+    "confirmDelete": "Delete \"{name}\"?",
+    "select": "Select tags",
+    "createInline": "Create \"{name}\"",
+    "reorderHint": "Drag to reorder",
+    "filterBy": "Filter by tag",
+    "clearFilter": "Clear tag filter",
+    "more": "+{count}",
+    "nameRequired": "Enter a name of up to 50 characters",
+    "colorInvalid": "Pick a colour"
   },
   "notes": {
     "title": "Notes",

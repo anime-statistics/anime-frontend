@@ -14,6 +14,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
     genres: ['Action', 'Adventure', 'Drama', 'Fantasy'],
     airedFrom: '2009-04-05',
     airedTo: '2010-07-04',
+    myTags: ['0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f601', '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f602', '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f609'],
     source: 'shikimori',
   },
   {
@@ -29,6 +30,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
     genres: ['Sci-Fi', 'Thriller', 'Drama'],
     airedFrom: '2011-04-06',
     airedTo: '2011-09-14',
+    myTags: ['0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f601', '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f602'],
     source: 'shikimori',
   },
   {
@@ -57,6 +59,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
     genres: ['Mystery', 'Psychological', 'Thriller'],
     airedFrom: '2006-10-04',
     airedTo: '2007-06-27',
+    myTags: ['0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f602', '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f609'],
     source: 'shikimori',
   },
   {
@@ -71,6 +74,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
     genres: ['Action', 'Drama', 'Fantasy'],
     airedFrom: '2013-04-07',
     airedTo: '2013-09-29',
+    myTags: ['0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f604', '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f609'],
     source: 'shikimori',
   },
   {
@@ -154,6 +158,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
     genres: ['Action', 'Adventure', 'Comedy'],
     airedFrom: '2002-10-03',
     airedTo: '2007-02-08',
+    myTags: ['0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f603', '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f607'],
     source: 'shikimori',
   },
   {
@@ -167,6 +172,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
     imageUrl: 'https://desu.shikimori.one/system/animes/original/21.jpg',
     genres: ['Action', 'Adventure', 'Comedy', 'Fantasy'],
     airedFrom: '1999-10-20',
+    myTags: ['0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f607', '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f609'],
     source: 'shikimori',
   },
   {
@@ -205,7 +211,6 @@ export const animeDetails: Record<string, IAnimeDetailDto> = {
     rating: 'R',
     duration: 24,
     watchedEpisodes: 64,
-    myTags: ['favorite', 'classic'],
     externalLinks: [{ source: 'Shikimori', url: 'https://shikimori.one/animes/5114' }],
     relatedAnime: [
       {
@@ -222,7 +227,6 @@ export const animeDetails: Record<string, IAnimeDetailDto> = {
     rating: 'PG-13',
     duration: 24,
     watchedEpisodes: 24,
-    myTags: ['favorite'],
     externalLinks: [{ source: 'Shikimori', url: 'https://shikimori.one/animes/9253' }],
   },
   'shikimori_16498-attack-on-titan': {
@@ -232,7 +236,6 @@ export const animeDetails: Record<string, IAnimeDetailDto> = {
     rating: 'R',
     duration: 24,
     watchedEpisodes: 12,
-    myTags: ['ongoing'],
     externalLinks: [{ source: 'Shikimori', url: 'https://shikimori.one/animes/16498' }],
   },
   'shikimori_21-one-piece': {
@@ -242,7 +245,6 @@ export const animeDetails: Record<string, IAnimeDetailDto> = {
     rating: 'PG-13',
     duration: 24,
     watchedEpisodes: 640,
-    myTags: ['long-running'],
     externalLinks: [{ source: 'Shikimori', url: 'https://shikimori.one/animes/21' }],
   },
 }

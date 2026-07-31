@@ -49,7 +49,8 @@ export const mangaHandlers = [
     const item = mutableManga.find((manga) => manga.id === id)
     if (!item) return new HttpResponse(null, { status: 404 })
 
-    return HttpResponse.json(toSnakeCase(mangaDetails[id] ?? item))
+    const detail = mangaDetails[id]
+    return HttpResponse.json(toSnakeCase(detail ? { ...detail, ...item } : item))
   }),
 
   http.patch(`${API_PREFIX}/manga/:id/status`, async ({ params, request }) => {

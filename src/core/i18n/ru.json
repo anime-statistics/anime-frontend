@@ -111,7 +111,22 @@
     "placeholder": "Название тега",
     "empty": "Тегов пока нет",
     "color": "Цвет",
-    "hidden": "Скрыт"
+    "hidden": "Скрыт",
+    "create": "Добавить тег",
+    "edit": "Изменить тег",
+    "delete": "Удалить тег",
+    "name": "Название",
+    "icon": "Иконка",
+    "hideFromSidebar": "Скрыть из боковой панели",
+    "confirmDelete": "Удалить «{name}»?",
+    "select": "Выберите теги",
+    "createInline": "Создать «{name}»",
+    "reorderHint": "Перетащите, чтобы изменить порядок",
+    "filterBy": "Фильтр по тегу",
+    "clearFilter": "Сбросить фильтр по тегу",
+    "more": "+{count}",
+    "nameRequired": "Введите название до 50 символов",
+    "colorInvalid": "Выберите цвет"
   },
   "notes": {
     "title": "Заметки",

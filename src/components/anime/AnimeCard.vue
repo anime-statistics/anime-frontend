@@ -1,19 +1,31 @@
 <script setup lang="ts">
 import Card from 'primevue/card'
 import Tag from 'primevue/tag'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import type { ITagDto } from '@/apis/dtos/tagDto'
+import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
+
+const VISIBLE_TAGS = 3
 
 const props = withDefaults(
   defineProps<{
     anime: IMergedAnimeSearchResult
+    tags?: ITagDto[]
     selected?: boolean
     selectable?: boolean
     compact?: boolean
   }>(),
-  { selected: false, selectable: false, compact: false },
+  { tags: () => [], selected: false, selectable: false, compact: false },
 )
+
+const areAllTagsShown = ref(false)
+
+const visibleTags = computed(() =>
+  areAllTagsShown.value ? props.tags : props.tags.slice(0, VISIBLE_TAGS),
+)
+const hiddenTagCount = computed(() => Math.max(0, props.tags.length - VISIBLE_TAGS))
 
 const emit = defineEmits<{
   toggleSelect: [string]
@@ -114,6 +126,26 @@ function onContextMenu(event: MouseEvent): void {
           :value="genre"
           severity="secondary"
         />
+      </div>
+
+      <div
+        v-if="props.tags.length"
+        class="mt-2 flex flex-wrap items-center gap-1"
+      >
+        <TagBadge
+          v-for="tag in visibleTags"
+          :key="tag.id"
+          :tag="tag"
+          size="sm"
+        />
+        <button
+          v-if="hiddenTagCount > 0 && !areAllTagsShown"
+          type="button"
+          class="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+          @click.stop.prevent="areAllTagsShown = true"
+        >
+          {{ translate('tags.more', { count: hiddenTagCount }) }}
+        </button>
       </div>
     </template>
   </Card>

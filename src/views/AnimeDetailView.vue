@@ -1,12 +1,27 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
-import { useAnimeDetail } from '@/composables/useAnimeQueries'
+import { computed, onMounted, toRef } from 'vue'
+import TagSelector from '@/components/common/TagSelector.vue'
+import { useAnimeDetail, useAnimeTagMutation } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = defineProps<{ id: string }>()
 
 const { translate, translatePlural } = useAppI18n()
+const tagStore = useTagStore()
 const { data: anime, isPending, isError } = useAnimeDetail(toRef(props, 'id'))
+const tagMutation = useAnimeTagMutation()
+
+const selectedTagIds = computed({
+  get: () => anime.value?.myTags ?? [],
+  set: (tagIds: string[]) => {
+    void tagMutation.mutateAsync({ mediaId: props.id, tagIds })
+  },
+})
+
+onMounted(() => {
+  if (tagStore.tags.length === 0) void tagStore.fetchTags()
+})
 </script>
 
 <template>
@@ -76,6 +91,13 @@ const { data: anime, isPending, isError } = useAnimeDetail(toRef(props, 'id'))
       >
         {{ anime.synopsis }}
       </p>
+
+      <section class="flex max-w-sm flex-col gap-1">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+          {{ translate('tags.title') }}
+        </h2>
+        <TagSelector v-model="selectedTagIds" />
+      </section>
     </template>
   </section>
 </template>
