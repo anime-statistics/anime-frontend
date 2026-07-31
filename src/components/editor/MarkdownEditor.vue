@@ -100,13 +100,13 @@ function onDrop(event: DragEvent): void {
 </script>
 
 <template>
-  <div class="flex h-full min-h-[300px] flex-col md:min-h-[400px]">
+  <div class="flex h-[calc(100vh-200px)] min-h-[300px] flex-col md:h-full md:min-h-[400px]">
     <div class="flex flex-wrap items-center gap-1 border-b border-gray-200 pb-2 dark:border-gray-700">
       <button
         v-for="item in TOOLBAR"
         :key="item.labelKey"
         type="button"
-        class="rounded p-1.5 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        class="flex size-11 items-center justify-center rounded text-gray-600 hover:bg-gray-100 md:size-8 dark:text-gray-300 dark:hover:bg-gray-800"
         :title="translate(item.labelKey)"
         :aria-label="translate(item.labelKey)"
         @click="insert(item.before, item.after)"
@@ -116,7 +116,7 @@ function onDrop(event: DragEvent): void {
 
       <button
         type="button"
-        class="rounded p-1.5 text-gray-600 hover:bg-gray-100 disabled:opacity-40 dark:text-gray-300 dark:hover:bg-gray-800"
+        class="flex size-11 items-center justify-center rounded text-gray-600 hover:bg-gray-100 disabled:opacity-40 md:size-8 dark:text-gray-300 dark:hover:bg-gray-800"
         :title="translate('editor.attach')"
         :aria-label="translate('editor.attach')"
         :disabled="isUploading"
@@ -150,7 +150,7 @@ function onDrop(event: DragEvent): void {
         :value="props.modelValue"
         lang="markdown"
         :theme="theme"
-        class="size-full min-h-[300px] md:min-h-[400px]"
+        class="size-full min-h-[240px] md:min-h-[400px]"
         :options="{
           fontSize: 14,
           showPrintMargin: false,

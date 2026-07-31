@@ -26,12 +26,12 @@ function toggleLocale(): void {
 
 <template>
   <header
-    class="sticky top-0 z-30 border-b border-gray-200 bg-white/90 backdrop-blur dark:border-gray-800 dark:bg-gray-900/90"
+    class="sticky top-0 z-30 border-b border-gray-200 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur dark:border-gray-800 dark:bg-gray-900/90"
   >
-    <div class="mx-auto flex h-14 items-center gap-3 px-4">
+    <div class="mx-auto flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <button
         type="button"
-        class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden dark:text-gray-300 dark:hover:bg-gray-800"
+        class="flex size-11 shrink-0 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 lg:hidden dark:text-gray-300 dark:hover:bg-gray-800"
         :aria-label="translate('layout.openMenu')"
         @click="emit('toggleMenu')"
       >
@@ -72,16 +72,16 @@ function toggleLocale(): void {
 
       <RouterLink
         :to="{ name: 'search' }"
-        class="ml-auto flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:border-brand-400 sm:max-w-md dark:border-gray-700 dark:text-gray-400"
+        class="ml-auto flex min-h-[44px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:border-brand-400 sm:min-h-0 sm:max-w-md dark:border-gray-700 dark:text-gray-400"
       >
         <i class="pi pi-search shrink-0" />
         <span class="truncate">{{ translate('anime.search.placeholder') }}</span>
       </RouterLink>
 
-      <div class="flex items-center gap-1">
+      <div class="flex shrink-0 items-center gap-0.5 sm:gap-1">
         <button
           type="button"
-          class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          class="flex size-11 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
           :aria-label="translate('layout.toggleTheme')"
           @click="toggleTheme"
         >
@@ -89,7 +89,7 @@ function toggleLocale(): void {
         </button>
         <button
           type="button"
-          class="rounded-lg px-2 py-2 text-xs font-medium uppercase text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          class="flex size-11 items-center justify-center rounded-lg text-xs font-medium uppercase text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
           :aria-label="translate('layout.toggleLocale')"
           @click="toggleLocale"
         >
@@ -97,7 +97,7 @@ function toggleLocale(): void {
         </button>
         <RouterLink
           :to="{ name: 'settings' }"
-          class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          class="hidden size-11 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 md:flex dark:text-gray-300 dark:hover:bg-gray-800"
           :aria-label="translate('nav.settings')"
         >
           <i class="pi pi-cog" />

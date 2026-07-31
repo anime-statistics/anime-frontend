@@ -13,7 +13,13 @@
     "manga": "Манга",
     "tags": "Теги",
     "search": "Поиск",
-    "settings": "Настройки"
+    "settings": "Настройки",
+    "ai": "ИИ",
+    "bottomBar": "Основная навигация"
+  },
+  "mobile": {
+    "pullToRefresh": "Потяните, чтобы обновить",
+    "refreshed": "Список обновлён"
   },
   "layout": {
     "openMenu": "Открыть меню",

@@ -13,7 +13,13 @@
     "manga": "Manga",
     "tags": "Tags",
     "search": "Search",
-    "settings": "Settings"
+    "settings": "Settings",
+    "ai": "AI",
+    "bottomBar": "Main navigation"
+  },
+  "mobile": {
+    "pullToRefresh": "Pull to refresh",
+    "refreshed": "List refreshed"
   },
   "layout": {
     "openMenu": "Open menu",

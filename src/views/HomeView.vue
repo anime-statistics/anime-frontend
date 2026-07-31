@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { useSwipe } from '@vueuse/core'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { AnimeStatus } from '@/apis/dtos/animeDto'
 import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
@@ -22,10 +23,13 @@ import MangaList from '@/components/manga/MangaList.vue'
 import MangaTable from '@/components/manga/MangaTable.vue'
 import { useAnimeLibrary, useAnimeStatusMutation } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useHaptic } from '@/composables/useHaptic'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
 import { useMangaLibrary } from '@/composables/useMangaQueries'
 import { useIsMobile } from '@/composables/useMediaQuery'
 import { useMediaSort } from '@/composables/useMediaSort'
+import { usePullToRefresh } from '@/composables/usePullToRefresh'
+import { useMaxColumns } from '@/composables/useResponsiveColumns'
 import { useToast } from '@/composables/useToast'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import { useAnimeStore } from '@/stores/useAnimeStore'
@@ -33,15 +37,18 @@ import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useTagStore } from '@/stores/useTagStore'
 import type { IViewMode } from '@/types/settings'
 
-const MOBILE_MAX_COLUMNS = 2
 const SKELETON_COUNT = 8
+const SWIPE_THRESHOLD_PX = 80
 
 const route = useRoute()
+const router = useRouter()
 const { translate, translatePlural } = useAppI18n()
 const animeStore = useAnimeStore()
 const settingsStore = useSettingsStore()
 const tagStore = useTagStore()
 const isMobile = useIsMobile()
+const maxColumns = useMaxColumns()
+const haptic = useHaptic()
 const toast = useToast()
 const statusMutation = useAnimeStatusMutation()
 
@@ -88,7 +95,7 @@ const viewMode = computed<IViewMode>({
 })
 
 const columns = computed<number>({
-  get: () => Math.min(settingsStore.columns, isMobile.value ? MOBILE_MAX_COLUMNS : 12),
+  get: () => Math.min(settingsStore.columns, maxColumns.value),
   set: (value) => settingsStore.setColumns(value),
 })
 
@@ -157,6 +164,30 @@ watch(mediaType, () => {
   if (urlFilters.value.page !== 1) setFilters({ page: 1 })
 })
 
+const swipeArea = ref<HTMLElement | null>(null)
+
+function switchMediaType(next: 'anime' | 'manga'): void {
+  if (mediaType.value === next) return
+  haptic.lightTap()
+  void router.push({ name: 'home', query: { ...route.query, type: next, page: undefined } })
+}
+
+useSwipe(swipeArea, {
+  threshold: SWIPE_THRESHOLD_PX,
+  onSwipeEnd: (_event, direction) => {
+    if (!isMobile.value) return
+    if (direction === 'left') switchMediaType('manga')
+    if (direction === 'right') switchMediaType('anime')
+  },
+})
+
+async function refreshLibrary(): Promise<void> {
+  haptic.mediumTap()
+  await (mediaType.value === 'manga' ? mangaLibrary.refetch() : animeLibrary.refetch())
+}
+
+const pullToRefresh = usePullToRefresh(refreshLibrary)
+
 const contextTarget = ref<IContextMenuTarget | null>(null)
 
 function openMenu(target: IContextMenuTarget): void {
@@ -198,7 +229,54 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
-  <section class="flex flex-col gap-4">
+  <section
+    ref="swipeArea"
+    class="flex flex-col gap-4 overscroll-y-contain"
+    @touchstart.passive="pullToRefresh.onTouchStart"
+    @touchmove.passive="pullToRefresh.onTouchMove"
+    @touchend.passive="pullToRefresh.onTouchEnd"
+  >
+    <div
+      v-if="pullToRefresh.pullDistance.value > 0"
+      class="pointer-events-none -mb-4 flex items-end justify-center overflow-hidden md:hidden"
+      :style="{ height: `${pullToRefresh.pullDistance.value}px` }"
+      role="status"
+      :aria-label="translate('mobile.pullToRefresh')"
+    >
+      <LoadingSpinner
+        v-if="pullToRefresh.isRefreshing.value"
+        size="sm"
+      />
+      <i
+        v-else
+        class="pi pi-arrow-down text-brand-600 transition-transform dark:text-brand-300"
+        :style="{ transform: `rotate(${pullToRefresh.progress.value * 180}deg)` }"
+      />
+    </div>
+
+    <!-- The header's anime/manga switch is desktop-only, so the swipe gesture
+         needs a tappable twin here. -->
+    <div
+      class="flex items-center gap-1 rounded-lg bg-gray-100 p-1 sm:hidden dark:bg-gray-800"
+      role="tablist"
+      :aria-label="translate('nav.bottomBar')"
+    >
+      <button
+        v-for="kind in (['anime', 'manga'] as const)"
+        :key="kind"
+        type="button"
+        role="tab"
+        class="min-h-[44px] flex-1 rounded-md px-3 text-sm transition-colors"
+        :class="mediaType === kind
+          ? 'bg-white text-brand-600 shadow-sm dark:bg-gray-700 dark:text-brand-300'
+          : 'text-gray-600 dark:text-gray-400'"
+        :aria-selected="mediaType === kind"
+        @click="switchMediaType(kind)"
+      >
+        {{ translate(`nav.${kind}`) }}
+      </button>
+    </div>
+
     <header class="flex flex-wrap items-end justify-between gap-3">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -231,7 +309,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <ColumnSlider
           v-if="viewMode === 'cards'"
           v-model="columns"
-          :max="isMobile ? MOBILE_MAX_COLUMNS : 12"
+          :max="maxColumns"
         />
         <ViewModeToggle v-model="viewMode" />
       </div>

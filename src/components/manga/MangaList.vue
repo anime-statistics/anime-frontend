@@ -25,8 +25,9 @@ function markBroken(id: string): void {
         v-if="item.imageUrl && !brokenImages.has(item.id)"
         :src="item.imageUrl"
         :alt="item.title"
-        class="size-14 shrink-0 rounded object-cover"
+        class="size-14 shrink-0 rounded bg-gray-200 object-cover dark:bg-gray-700"
         loading="lazy"
+        decoding="async"
         @error="markBroken(item.id)"
       >
       <div

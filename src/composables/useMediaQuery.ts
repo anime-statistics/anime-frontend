@@ -44,3 +44,11 @@ export function useIsTablet(): Ref<boolean> {
 export function useIsDesktop(): Ref<boolean> {
   return useMediaQuery('(min-width: 1024px)')
 }
+
+export function useIsLandscape(): Ref<boolean> {
+  return useMediaQuery('(orientation: landscape)')
+}
+
+export function useIsPortrait(): Ref<boolean> {
+  return useMediaQuery('(orientation: portrait)')
+}

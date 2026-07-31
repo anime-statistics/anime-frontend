@@ -4,6 +4,7 @@ import DataTable from 'primevue/datatable'
 import { useRouter } from 'vue-router'
 import { ANIME_STATUSES } from '@/apis/dtos/animeDto'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useIsMobile } from '@/composables/useMediaQuery'
 import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 
 const props = withDefaults(
@@ -13,6 +14,7 @@ const props = withDefaults(
 
 const { translate } = useAppI18n()
 const router = useRouter()
+const isMobile = useIsMobile()
 
 function openDetail(event: { data: IMergedAnimeSearchResult }): void {
   void router.push({ name: 'anime-detail', params: { id: event.data.id } })
@@ -25,7 +27,58 @@ function statusLabel(status: string): string {
 </script>
 
 <template>
+  <ul
+    v-if="isMobile"
+    class="flex flex-col gap-2"
+    data-testid="anime-table-cards"
+  >
+    <li
+      v-for="item in props.items"
+      :key="item.id"
+      class="rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+    >
+      <RouterLink
+        :to="{ name: 'anime-detail', params: { id: item.id } }"
+        class="block min-h-[44px] text-sm font-semibold text-gray-900 hover:text-brand-600 dark:text-gray-100 dark:hover:text-brand-300"
+      >
+        {{ item.title }}
+      </RouterLink>
+
+      <dl class="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+        <div class="flex justify-between gap-2">
+          <dt class="text-gray-500 dark:text-gray-400">
+            {{ translate('filters.sources') }}
+          </dt>
+          <dd class="truncate">
+            {{ item.source }}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-2">
+          <dt class="text-gray-500 dark:text-gray-400">
+            {{ translate('sort.episodes') }}
+          </dt>
+          <dd>{{ item.episodesTotal }}</dd>
+        </div>
+        <div class="flex justify-between gap-2">
+          <dt class="text-gray-500 dark:text-gray-400">
+            {{ translate('filters.status') }}
+          </dt>
+          <dd class="truncate">
+            {{ statusLabel(item.status) }}
+          </dd>
+        </div>
+        <div class="flex justify-between gap-2">
+          <dt class="text-gray-500 dark:text-gray-400">
+            {{ translate('anime.fields.score') }}
+          </dt>
+          <dd>{{ item.score ?? '—' }}</dd>
+        </div>
+      </dl>
+    </li>
+  </ul>
+
   <DataTable
+    v-else
     :value="props.items"
     paginator
     :rows="props.rows"
@@ -35,6 +88,7 @@ function statusLabel(status: string): string {
     :sort-order="1"
     selection-mode="single"
     data-key="id"
+    responsive-layout="scroll"
     class="text-sm"
     @row-select="openDetail"
   >

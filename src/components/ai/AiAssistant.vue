@@ -5,6 +5,7 @@ import { getModels, type IAiContext, type IAiRequestOptions } from '@/apis/aiApi
 import AiChat from '@/components/ai/AiChat.vue'
 import AiParaphrase from '@/components/ai/AiParaphrase.vue'
 import AiRecommendation from '@/components/ai/AiRecommendation.vue'
+import { useAiPanel } from '@/composables/useAiPanel'
 import { useAiUsage } from '@/composables/useAiUsage'
 import { useAnimeLibrary } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
@@ -18,7 +19,7 @@ const settingsStore = useSettingsStore()
 const tagStore = useTagStore()
 const usage = useAiUsage()
 
-const isOpen = ref(false)
+const { isOpen } = useAiPanel()
 const activeTab = ref<AiTab>('chat')
 
 const TABS = [
@@ -74,7 +75,7 @@ function onTemperatureInput(event: Event): void {
   <button
     v-if="settingsStore.settings.isAiEnabled && !isOpen"
     type="button"
-    class="fixed bottom-20 right-4 z-40 flex size-12 items-center justify-center rounded-full bg-brand-600 text-white shadow-xl transition-colors hover:bg-brand-700 md:bottom-6"
+    class="fixed bottom-6 right-4 z-40 hidden size-12 items-center justify-center rounded-full bg-brand-600 text-white shadow-xl transition-colors hover:bg-brand-700 md:flex"
     :aria-label="translate('ai.open')"
     @click="isOpen = true"
   >

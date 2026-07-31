@@ -1,14 +1,28 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { useSwipe } from '@vueuse/core'
+import { onMounted, ref } from 'vue'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useTagStore } from '@/stores/useTagStore'
+
+const SWIPE_CLOSE_PX = 60
 
 const props = defineProps<{ isOpen: boolean, isCollapsed: boolean }>()
 const emit = defineEmits<{ close: [], toggleCollapsed: [] }>()
 
 const { translate } = useAppI18n()
 const tagStore = useTagStore()
+
+const drawer = ref<HTMLElement | null>(null)
+
+// Either horizontal swipe dismisses the drawer: it slides in from the left, so
+// swiping it back is natural, and there is nothing to the right to reveal.
+useSwipe(drawer, {
+  onSwipeEnd: (_event, direction) => {
+    if (props.isOpen && (direction === 'left' || direction === 'right')) emit('close')
+  },
+  threshold: SWIPE_CLOSE_PX,
+})
 
 const NAV_ITEMS = [
   { name: 'home', icon: 'pi-home', labelKey: 'nav.home' },
@@ -30,7 +44,8 @@ onMounted(() => {
   />
 
   <aside
-    class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white p-3 transition-transform lg:static lg:z-auto lg:w-auto lg:translate-x-0 dark:border-gray-800 dark:bg-gray-900"
+    ref="drawer"
+    class="fixed inset-y-0 left-0 z-40 flex w-64 touch-pan-y flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white p-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-transform lg:static lg:z-auto lg:w-auto lg:translate-x-0 dark:border-gray-800 dark:bg-gray-900"
     :class="props.isOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <div class="flex items-center justify-between lg:justify-end">

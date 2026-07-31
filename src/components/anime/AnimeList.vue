@@ -41,21 +41,26 @@ function onContextMenu(event: MouseEvent, item: IMergedAnimeSearchResult): void 
         : 'border-gray-200 dark:border-gray-700'"
       @contextmenu.prevent="onContextMenu($event, item)"
     >
-      <input
+      <label
         v-if="props.selectable"
-        type="checkbox"
-        class="shrink-0 accent-brand-600"
-        :checked="props.selectedIds.has(item.id)"
-        :aria-label="item.title"
-        @change="emit('toggleSelect', item.id)"
+        class="-m-2 flex size-11 shrink-0 cursor-pointer items-center justify-center"
       >
+        <input
+          type="checkbox"
+          class="accent-brand-600"
+          :checked="props.selectedIds.has(item.id)"
+          :aria-label="item.title"
+          @change="emit('toggleSelect', item.id)"
+        >
+      </label>
 
       <img
         v-if="item.imageUrl && !brokenImages.has(item.id)"
         :src="item.imageUrl"
         :alt="item.title"
-        class="size-14 shrink-0 rounded object-cover"
+        class="size-14 shrink-0 rounded bg-gray-200 object-cover dark:bg-gray-700"
         loading="lazy"
+        decoding="async"
         @error="markBroken(item.id)"
       >
       <div

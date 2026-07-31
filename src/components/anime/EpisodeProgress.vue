@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import VirtualList from '@/components/common/VirtualList.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useHaptic } from '@/composables/useHaptic'
 import type { AppMessageKey } from '@/core/i18n/types'
 
 const props = withDefaults(
@@ -27,6 +28,7 @@ const props = withDefaults(
 const emit = defineEmits<{ update: [number] }>()
 
 const { translate, translatePlural } = useAppI18n()
+const haptic = useHaptic()
 
 const EPISODES_PER_ROW = 10
 const VIRTUAL_ROW_PX = 40
@@ -51,7 +53,10 @@ function episodesInRow(row: number): number[] {
 
 function setWatched(value: number): void {
   const next = Math.min(props.total, Math.max(0, value))
-  if (next !== props.watched) emit('update', next)
+  if (next === props.watched) return
+
+  haptic.lightTap()
+  emit('update', next)
 }
 
 function toggleEpisode(episodeNumber: number): void {

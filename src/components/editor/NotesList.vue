@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import type { INoteDto } from '@/apis/dtos/noteDto'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useHaptic } from '@/composables/useHaptic'
 
 const props = defineProps<{ notes: INoteDto[], selectedId: string | null }>()
 const emit = defineEmits<{
@@ -13,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const { translate, translatePlural, locale } = useAppI18n()
+const haptic = useHaptic()
 
 const search = ref('')
 const openMenuId = ref<string | null>(null)
@@ -38,8 +40,10 @@ function formatDate(iso: string): string {
 
 function runAction(action: 'remove' | 'exportMarkdown' | 'exportPdf', id: string): void {
   openMenuId.value = null
-  if (action === 'remove') emit('remove', id)
-  else if (action === 'exportMarkdown') emit('exportMarkdown', id)
+  if (action === 'remove') {
+    haptic.error()
+    emit('remove', id)
+  } else if (action === 'exportMarkdown') emit('exportMarkdown', id)
   else emit('exportPdf', id)
 }
 </script>

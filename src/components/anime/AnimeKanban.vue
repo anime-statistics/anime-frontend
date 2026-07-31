@@ -4,12 +4,14 @@ import { VueDraggable } from 'vue-draggable-plus'
 import type { AnimeStatus } from '@/apis/dtos/animeDto'
 import AnimeCard from '@/components/anime/AnimeCard.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useHaptic } from '@/composables/useHaptic'
 import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 
 const props = defineProps<{ items: IMergedAnimeSearchResult[] }>()
 const emit = defineEmits<{ statusChange: [{ mediaId: string, status: AnimeStatus }] }>()
 
 const { translate } = useAppI18n()
+const haptic = useHaptic()
 
 const KANBAN_STATUSES = ['watching', 'planned', 'completed', 'on_hold', 'dropped'] as const
 type KanbanStatus = (typeof KANBAN_STATUSES)[number]
@@ -40,6 +42,7 @@ watch(
 )
 
 function onAdd(status: KanbanStatus, event: { data: IMergedAnimeSearchResult }): void {
+  haptic.success()
   emit('statusChange', { mediaId: event.data.id, status })
 }
 </script>

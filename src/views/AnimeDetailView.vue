@@ -124,11 +124,16 @@ async function toggleNotifications(): Promise<void> {
 
     <template v-else>
       <div class="flex flex-col gap-6 md:flex-row">
+        <!-- The poster is the largest paint on this route; lazy-loading it would
+             only delay LCP. -->
         <img
           v-if="anime.imageUrl && !hasImageError"
           :src="anime.imageUrl"
           :alt="anime.title"
-          class="max-h-80 w-full rounded-lg object-cover md:w-56"
+          class="max-h-80 w-full rounded-lg bg-gray-200 object-cover md:w-56 dark:bg-gray-700"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
           @error="hasImageError = true"
         >
         <div
@@ -289,7 +294,7 @@ async function toggleNotifications(): Promise<void> {
 
       <div class="flex flex-col gap-4">
         <div
-          class="flex gap-1 border-b border-gray-200 dark:border-gray-800"
+          class="flex gap-1 overflow-x-auto border-b border-gray-200 dark:border-gray-800"
           role="tablist"
         >
           <button
@@ -297,7 +302,7 @@ async function toggleNotifications(): Promise<void> {
             :key="tab.value"
             type="button"
             role="tab"
-            class="-mb-px border-b-2 px-3 py-2 text-sm transition-colors"
+            class="-mb-px min-h-[44px] shrink-0 whitespace-nowrap border-b-2 px-3 py-2 text-sm transition-colors"
             :class="activeTab === tab.value
               ? 'border-brand-600 text-brand-600 dark:text-brand-300'
               : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'"
