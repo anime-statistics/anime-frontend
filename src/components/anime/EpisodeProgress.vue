@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import VirtualList from '@/components/common/VirtualList.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import type { AppMessageKey } from '@/core/i18n/types'
 
@@ -27,11 +28,26 @@ const emit = defineEmits<{ update: [number] }>()
 
 const { translate, translatePlural } = useAppI18n()
 
+const EPISODES_PER_ROW = 10
+const VIRTUAL_ROW_PX = 40
+
 const percent = computed(() =>
   props.total === 0 ? 0 : Math.min(100, Math.round((props.watched / props.total) * 100)),
 )
 const canAdvance = computed(() => props.watched < props.total)
+const isVirtualised = computed(() => props.total > props.gridLimit)
 const gridEpisodes = computed(() => Math.min(props.total, props.gridLimit))
+
+const virtualRows = computed(() => {
+  if (!isVirtualised.value) return []
+  return Array.from({ length: Math.ceil(props.total / EPISODES_PER_ROW) }, (_, row) => row)
+})
+
+function episodesInRow(row: number): number[] {
+  const first = row * EPISODES_PER_ROW + 1
+  const last = Math.min(props.total, first + EPISODES_PER_ROW - 1)
+  return Array.from({ length: last - first + 1 }, (_, offset) => first + offset)
+}
 
 function setWatched(value: number): void {
   const next = Math.min(props.total, Math.max(0, value))
@@ -102,7 +118,37 @@ function toggleEpisode(episodeNumber: number): void {
       <legend class="pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
         {{ translate(props.gridLabelKey) }}
       </legend>
-      <div class="flex flex-wrap gap-1">
+      <VirtualList
+        v-if="isVirtualised"
+        :items="virtualRows"
+        :row-height="VIRTUAL_ROW_PX"
+        :max-height="400"
+      >
+        <template #default="{ item: row }">
+          <div class="flex gap-1 pb-2">
+            <button
+              v-for="episode in episodesInRow(row)"
+              :key="episode"
+              type="button"
+              class="size-8 rounded border text-xs tabular-nums transition-colors"
+              :class="episode <= props.watched
+                ? 'border-brand-600 bg-brand-600 text-white'
+                : 'border-gray-200 text-gray-500 hover:border-brand-400 dark:border-gray-700 dark:text-gray-400'"
+              :aria-pressed="episode <= props.watched"
+              :aria-label="translate(props.itemLabelKey, { number: episode })"
+              :disabled="props.isBusy"
+              @click="toggleEpisode(episode)"
+            >
+              {{ episode }}
+            </button>
+          </div>
+        </template>
+      </VirtualList>
+
+      <div
+        v-else
+        class="flex flex-wrap gap-1"
+      >
         <button
           v-for="episode in gridEpisodes"
           :key="episode"

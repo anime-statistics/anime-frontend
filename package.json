@@ -21,9 +21,20 @@
   },
   "size-limit": [
     {
-      "name": "app bundle (brotli)",
-      "path": "dist/assets/*.js",
-      "limit": "400 kB"
+      "name": "initial load (brotli)",
+      "path": [
+        "dist/assets/index-*.js",
+        "dist/assets/index-*.css"
+      ],
+      "limit": "140 kB"
+    },
+    {
+      "name": "shipped code, dev mocks excluded (brotli)",
+      "path": [
+        "dist/assets/*.js",
+        "!dist/assets/browser-*.js"
+      ],
+      "limit": "520 kB"
     }
   ],
   "dependencies": {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { AnimeStatus } from '@/apis/dtos/animeDto'
 import type { ITagDto } from '@/apis/dtos/tagDto'
@@ -13,17 +13,21 @@ import BulkActionBar from '@/components/anime/BulkActionBar.vue'
 import SortSelector from '@/components/anime/SortSelector.vue'
 import ColumnSlider from '@/components/common/ColumnSlider.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import MediaContextMenu, { type IContextMenuTarget } from '@/components/common/MediaContextMenu.vue'
+import Pagination from '@/components/common/Pagination.vue'
 import ViewModeToggle from '@/components/common/ViewModeToggle.vue'
 import MangaCard from '@/components/manga/MangaCard.vue'
 import MangaList from '@/components/manga/MangaList.vue'
 import MangaTable from '@/components/manga/MangaTable.vue'
 import { useAnimeLibrary, useAnimeStatusMutation } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
 import { useMangaLibrary } from '@/composables/useMangaQueries'
 import { useIsMobile } from '@/composables/useMediaQuery'
 import { useMediaSort } from '@/composables/useMediaSort'
 import { useToast } from '@/composables/useToast'
+import { useUrlFilters } from '@/composables/useUrlFilters'
 import { useAnimeStore } from '@/stores/useAnimeStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useTagStore } from '@/stores/useTagStore'
@@ -92,6 +96,67 @@ const gridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${columns.value}, minmax(0, 1fr))`,
 }))
 
+const { filters: urlFilters, setFilters } = useUrlFilters({
+  defaultSize: settingsStore.settings.pageSize,
+})
+
+const paginationMode = computed(() => settingsStore.settings.paginationMode)
+// Kanban shows every column at once; the table paginates itself.
+const isPaged = computed(() => viewMode.value === 'cards' || viewMode.value === 'list')
+
+const pagedAnime = computed(() => {
+  if (!isPaged.value || paginationMode.value !== 'pagination') return sortedAnime.value
+  const start = (urlFilters.value.page - 1) * urlFilters.value.size
+  return sortedAnime.value.slice(start, start + urlFilters.value.size)
+})
+
+const pagedManga = computed(() => {
+  if (!isPaged.value || paginationMode.value !== 'pagination') return sortedManga.value
+  const start = (urlFilters.value.page - 1) * urlFilters.value.size
+  return sortedManga.value.slice(start, start + urlFilters.value.size)
+})
+
+const infiniteAnime = useInfiniteScroll((page) => {
+  const size = urlFilters.value.size
+  const slice = sortedAnime.value.slice((page - 1) * size, page * size)
+  return Promise.resolve({ items: slice, hasMore: page * size < sortedAnime.value.length })
+})
+
+const infiniteManga = useInfiniteScroll((page) => {
+  const size = urlFilters.value.size
+  const slice = sortedManga.value.slice((page - 1) * size, page * size)
+  return Promise.resolve({ items: slice, hasMore: page * size < sortedManga.value.length })
+})
+
+const isInfinite = computed(() => isPaged.value && paginationMode.value === 'infinite')
+
+const visibleAnime = computed(() =>
+  isInfinite.value ? infiniteAnime.items.value : pagedAnime.value,
+)
+const visibleManga = computed(() =>
+  isInfinite.value ? infiniteManga.items.value : pagedManga.value,
+)
+
+// The source lists change with sorting, tag filters and mutations; the infinite
+// accumulators must restart from page one when that happens.
+watch(
+  [sortedAnime, sortedManga, isInfinite],
+  () => {
+    if (!isInfinite.value) return
+    void infiniteAnime.reset()
+    void infiniteManga.reset()
+  },
+  { immediate: true },
+)
+
+function onPageChange(change: { page: number, size: number }): void {
+  setFilters({ page: change.page, size: change.size })
+}
+
+watch(mediaType, () => {
+  if (urlFilters.value.page !== 1) setFilters({ page: 1 })
+})
+
 const contextTarget = ref<IContextMenuTarget | null>(null)
 
 function openMenu(target: IContextMenuTarget): void {
@@ -122,7 +187,7 @@ function onKeydown(event: KeyboardEvent): void {
   if (mediaType.value !== 'anime') return
 
   event.preventDefault()
-  animeStore.selectAll(sortedAnime.value.map((item) => item.id))
+  animeStore.selectAll(visibleAnime.value.map((item) => item.id))
 }
 
 onMounted(() => {
@@ -202,7 +267,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
       <AnimeList
         v-else-if="viewMode === 'list'"
-        :items="sortedAnime"
+        :items="visibleAnime"
         :selected-ids="animeStore.selectedIds"
         selectable
         @toggle-select="animeStore.toggleSelection"
@@ -215,7 +280,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         :style="gridStyle"
       >
         <AnimeCard
-          v-for="item in sortedAnime"
+          v-for="item in visibleAnime"
           :key="item.id"
           :anime="item"
           :tags="tagsFor(item)"
@@ -225,6 +290,26 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           @open-menu="openMenu"
         />
       </div>
+
+      <template v-if="isPaged">
+        <Pagination
+          v-if="paginationMode === 'pagination'"
+          :page="urlFilters.page"
+          :size="urlFilters.size"
+          :total="sortedAnime.length"
+          @change="onPageChange"
+        />
+        <div
+          v-else
+          :ref="(el) => { infiniteAnime.sentinel.value = el as HTMLElement | null }"
+          class="flex justify-center py-4"
+        >
+          <LoadingSpinner
+            v-if="infiniteAnime.isLoading.value"
+            size="sm"
+          />
+        </div>
+      </template>
 
       <BulkActionBar
         :selected-count="animeStore.selectedCount"
@@ -242,7 +327,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
       <MangaList
         v-else-if="viewMode === 'list'"
-        :items="sortedManga"
+        :items="visibleManga"
       />
 
       <div
@@ -251,12 +336,32 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         :style="gridStyle"
       >
         <MangaCard
-          v-for="item in sortedManga"
+          v-for="item in visibleManga"
           :key="item.id"
           :manga="item"
           @open-menu="openMenu"
         />
       </div>
+
+      <template v-if="isPaged">
+        <Pagination
+          v-if="paginationMode === 'pagination'"
+          :page="urlFilters.page"
+          :size="urlFilters.size"
+          :total="sortedManga.length"
+          @change="onPageChange"
+        />
+        <div
+          v-else
+          :ref="(el) => { infiniteManga.sentinel.value = el as HTMLElement | null }"
+          class="flex justify-center py-4"
+        >
+          <LoadingSpinner
+            v-if="infiniteManga.isLoading.value"
+            size="sm"
+          />
+        </div>
+      </template>
     </template>
 
     <MediaContextMenu

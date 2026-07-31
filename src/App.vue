@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import MobileNav from '@/components/layout/MobileNav.vue'
-import AiAssistant from '@/components/ai/AiAssistant.vue'
 import ToastContainer from '@/components/common/ToastContainer.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { DETAIL_ROUTE_NAMES } from '@/router'
 
 const route = useRoute()
 const { translate } = useAppI18n()
+
+// The assistant drags in markdown-it, DOMPurify and diff; keeping it out of the
+// entry chunk saves every visitor who never opens the panel.
+const AiAssistant = defineAsyncComponent(() => import('@/components/ai/AiAssistant.vue'))
 
 const detailRoutes = new Set<string>(DETAIL_ROUTE_NAMES)
 const isMobileMenuOpen = ref(false)

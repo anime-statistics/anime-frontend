@@ -1,15 +1,32 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import ErrorMessage from '@/components/common/ErrorMessage.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useUrlFilters } from '@/composables/useUrlFilters'
 import { useSearchStore } from '@/stores/useSearchStore'
 
 const { translate, translatePlural } = useAppI18n()
 const store = useSearchStore()
+const { filters: urlFilters, setFilters } = useUrlFilters()
 
 const knownGenres = ref<string[]>([])
+
+onMounted(() => {
+  if (urlFilters.value.query && urlFilters.value.query !== store.rawQuery) {
+    store.setQuery(urlFilters.value.query)
+    void store.search()
+  }
+})
+
+watch(
+  () => store.rawQuery,
+  (query) => {
+    if (query !== urlFilters.value.query) setFilters({ query })
+  },
+)
 
 const query = computed({
   get: () => store.rawQuery,
@@ -59,12 +76,11 @@ watch(
           <span v-else>{{ translate('anime.search.hint') }}</span>
         </div>
 
-        <p
+        <ErrorMessage
           v-if="store.errorMessage"
-          class="text-sm text-red-600 dark:text-red-400"
-        >
-          {{ store.errorMessage }}
-        </p>
+          :message="store.errorMessage"
+          @close="store.errorMessage = null"
+        />
 
         <p
           v-else-if="store.hasQuery && !store.isSearching && store.results.length === 0"

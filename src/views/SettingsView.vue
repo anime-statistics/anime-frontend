@@ -13,7 +13,7 @@ import { isObject } from '@/core/utils/caseConverter'
 import { readSecret, saveSecret } from '@/core/utils/secureStorage'
 import { normaliseSettings, useSettingsStore } from '@/stores/useSettingsStore'
 import { useSyncStore } from '@/stores/useSyncStore'
-import type { IAppLocale, ISyncInterval, IThemeMode, IUiDensity, IViewMode, IVoiceModel } from '@/types/settings'
+import type { IAppLocale, IPaginationMode, ISyncInterval, IThemeMode, IUiDensity, IViewMode, IVoiceModel } from '@/types/settings'
 
 type SettingsSection = 'general' | 'appearance' | 'ai' | 'integrations' | 'sync' | 'storage' | 'about'
 
@@ -257,6 +257,18 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.defaultColumns') }}</span>
             <ColumnSlider v-model="columnsModel" />
           </div>
+
+          <label class="flex flex-col gap-1 text-sm">
+            <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.paginationMode') }}</span>
+            <select
+              :value="settingsStore.settings.paginationMode"
+              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              @change="settingsStore.update({ paginationMode: ($event.target as HTMLSelectElement).value as IPaginationMode })"
+            >
+              <option value="pagination">{{ translate('settings.paginationClassic') }}</option>
+              <option value="infinite">{{ translate('settings.paginationInfinite') }}</option>
+            </select>
+          </label>
 
           <label
             v-if="isDev"

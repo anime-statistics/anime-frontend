@@ -7,6 +7,7 @@ import { applyBrandPalette, hexToRgb } from '@/core/utils/colorPalette'
 import type {
   IAppLocale,
   IAppSettings,
+  IPaginationMode,
   ISyncInterval,
   IThemeMode,
   IUiDensity,
@@ -23,6 +24,7 @@ const LOCALES: IAppLocale[] = ['ru', 'en']
 const DENSITIES: IUiDensity[] = ['compact', 'standard', 'relaxed']
 const VOICE_MODELS: IVoiceModel[] = ['browser', 'whisper-1']
 const SYNC_INTERVALS: ISyncInterval[] = ['never', '15m', '30m', '1h', '6h']
+const PAGINATION_MODES: IPaginationMode[] = ['pagination', 'infinite']
 
 const DENSITY_FACTOR: Record<IUiDensity, number> = {
   compact: 0.875,
@@ -49,6 +51,7 @@ export const DEFAULT_SETTINGS: IAppSettings = {
   uiDensity: 'standard',
   uiFontSize: 16,
   syncInterval: 'never',
+  paginationMode: 'pagination',
   autoCommitShikimori: false,
   autoCommitAniliberty: false,
   promptTemplates: { ...DEFAULT_PROMPT_TEMPLATES },
@@ -118,6 +121,7 @@ export function normaliseSettings(raw: unknown): IAppSettings {
     uiDensity: pickFrom(DENSITIES, raw.uiDensity, DEFAULT_SETTINGS.uiDensity),
     uiFontSize: clampNumber(raw.uiFontSize, 12, 20, DEFAULT_SETTINGS.uiFontSize),
     syncInterval: pickFrom(SYNC_INTERVALS, raw.syncInterval, DEFAULT_SETTINGS.syncInterval),
+    paginationMode: pickFrom(PAGINATION_MODES, raw.paginationMode, DEFAULT_SETTINGS.paginationMode),
     autoCommitShikimori: raw.autoCommitShikimori === true,
     autoCommitAniliberty: raw.autoCommitAniliberty === true,
     promptTemplates: normalisePromptTemplates(raw.promptTemplates),

@@ -10,6 +10,8 @@ export type IVoiceModel = 'browser' | 'whisper-1'
 
 export type ISyncInterval = 'never' | '15m' | '30m' | '1h' | '6h'
 
+export type IPaginationMode = 'pagination' | 'infinite'
+
 export interface ILlmProviderConfig {
   id: string
   name: string
@@ -38,6 +40,7 @@ export interface IAppSettings {
   uiDensity: IUiDensity
   uiFontSize: number
   syncInterval: ISyncInterval
+  paginationMode: IPaginationMode
   autoCommitShikimori: boolean
   autoCommitAniliberty: boolean
   promptTemplates: Record<string, string>

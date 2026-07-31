@@ -29,6 +29,7 @@ function statusLabel(status: string): string {
     :value="props.items"
     paginator
     :rows="props.rows"
+    :rows-per-page-options="[10, 20, 50]"
     striped-rows
     sort-field="title"
     :sort-order="1"
