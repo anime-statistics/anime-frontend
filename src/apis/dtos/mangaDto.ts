@@ -9,6 +9,8 @@ export const MANGA_STATUSES = [
   'dropped',
 ] as const
 
+export type MangaStatus = (typeof MANGA_STATUSES)[number]
+
 export const MangaSearchResultDto = z.object({
   id: z.string().regex(/^(shikimori|aniliberty)_\d+-[\w-]+$/),
   title: z.string().min(1),

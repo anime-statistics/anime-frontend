@@ -14,8 +14,16 @@ export const animeKeys = {
   searches: () => [...animeKeys.all, 'search'] as const,
   search: (query: Ref<string> | string, sources: MediaSource[]) =>
     [...animeKeys.searches(), query, sources] as const,
+  library: (sources: MediaSource[]) => [...animeKeys.all, 'library', sources] as const,
   details: () => [...animeKeys.all, 'detail'] as const,
   detail: (mediaId: Ref<string> | string) => [...animeKeys.details(), mediaId] as const,
+}
+
+export function useAnimeLibrary(sources: MediaSource[] = ALL_SOURCES) {
+  return useQuery({
+    queryKey: animeKeys.library(sources),
+    queryFn: ({ signal }) => mediaAdapter.search({ query: '', sources }, signal),
+  })
 }
 
 export function useAnimeSearch(query: Ref<string>, sources: MediaSource[] = ALL_SOURCES) {
@@ -54,7 +62,7 @@ export function useAnimeStatusMutation() {
     },
     onSuccess: async (_result, { mediaId }) => {
       await queryClient.invalidateQueries({ queryKey: animeKeys.detail(mediaId) })
-      await queryClient.invalidateQueries({ queryKey: animeKeys.searches() })
+      await queryClient.invalidateQueries({ queryKey: animeKeys.all })
     },
   })
 }

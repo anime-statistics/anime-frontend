@@ -9,6 +9,8 @@ export const ANIME_STATUSES = [
   'rewatching',
 ] as const
 
+export type AnimeStatus = (typeof ANIME_STATUSES)[number]
+
 export const MEDIA_SOURCES = ['shikimori', 'aniliberty'] as const
 
 export const AnimeSearchResultDto = z.object({

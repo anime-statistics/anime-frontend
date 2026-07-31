@@ -127,6 +127,49 @@
     "voiceInput": "Голосовой ввод",
     "ai": "AI-ассистент"
   },
+  "viewMode": {
+    "label": "Режим отображения",
+    "cards": "Карточки",
+    "list": "Список",
+    "table": "Таблица",
+    "kanban": "Канбан"
+  },
+  "sort": {
+    "label": "Сортировка",
+    "title": "Название",
+    "score": "Оценка",
+    "episodes": "Эпизоды",
+    "aired": "Дата выхода",
+    "added": "Добавлено",
+    "ascending": "По возрастанию",
+    "descending": "По убыванию"
+  },
+  "common": {
+    "columns": "колонок",
+    "selected": "Выбрано: {count}",
+    "clearSelection": "Снять выделение",
+    "selectAll": "Выбрать все",
+    "of": "из"
+  },
+  "bulk": {
+    "changeStatus": "Сменить статус",
+    "addTag": "Добавить тег",
+    "applied": "Применено к {count} элементам"
+  },
+  "contextMenu": {
+    "addTag": "Добавить тег",
+    "changeStatus": "Сменить статус",
+    "openShikimori": "Открыть на Shikimori",
+    "openAniliberty": "Открыть на AniLiberty",
+    "copyLink": "Копировать ссылку",
+    "linkCopied": "Ссылка скопирована",
+    "copyFailed": "Не удалось скопировать ссылку"
+  },
+  "empty": {
+    "title": "Ничего не найдено",
+    "hint": "Попробуйте ослабить фильтры",
+    "reset": "Сбросить фильтры"
+  },
   "filters": {
     "title": "Фильтры",
     "sources": "Источники",

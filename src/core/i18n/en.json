@@ -127,6 +127,49 @@
     "voiceInput": "Voice input",
     "ai": "AI assistant"
   },
+  "viewMode": {
+    "label": "View mode",
+    "cards": "Cards",
+    "list": "List",
+    "table": "Table",
+    "kanban": "Kanban"
+  },
+  "sort": {
+    "label": "Sort by",
+    "title": "Title",
+    "score": "Score",
+    "episodes": "Episodes",
+    "aired": "Aired",
+    "added": "Added",
+    "ascending": "Ascending",
+    "descending": "Descending"
+  },
+  "common": {
+    "columns": "columns",
+    "selected": "{count} selected",
+    "clearSelection": "Clear selection",
+    "selectAll": "Select all",
+    "of": "of"
+  },
+  "bulk": {
+    "changeStatus": "Change status",
+    "addTag": "Add tag",
+    "applied": "Applied to {count} items"
+  },
+  "contextMenu": {
+    "addTag": "Add tag",
+    "changeStatus": "Change status",
+    "openShikimori": "Open on Shikimori",
+    "openAniliberty": "Open on AniLiberty",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "copyFailed": "Could not copy the link"
+  },
+  "empty": {
+    "title": "Nothing found",
+    "hint": "Try loosening the filters",
+    "reset": "Reset filters"
+  },
   "filters": {
     "title": "Filters",
     "sources": "Sources",

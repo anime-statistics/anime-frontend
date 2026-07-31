@@ -14,8 +14,16 @@ export const mangaKeys = {
   searches: () => [...mangaKeys.all, 'search'] as const,
   search: (query: Ref<string> | string, sources: MediaSource[]) =>
     [...mangaKeys.searches(), query, sources] as const,
+  library: (sources: MediaSource[]) => [...mangaKeys.all, 'library', sources] as const,
   details: () => [...mangaKeys.all, 'detail'] as const,
   detail: (mediaId: Ref<string> | string) => [...mangaKeys.details(), mediaId] as const,
+}
+
+export function useMangaLibrary(sources: MediaSource[] = ALL_SOURCES) {
+  return useQuery({
+    queryKey: mangaKeys.library(sources),
+    queryFn: ({ signal }) => mediaAdapter.searchManga({ query: '', sources }, signal),
+  })
 }
 
 export function useMangaSearch(query: Ref<string>, sources: MediaSource[] = ALL_SOURCES) {
