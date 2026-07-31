@@ -5,15 +5,9 @@ import { ANIME_STATUSES, type AnimeStatus } from '@/apis/dtos/animeDto'
 import EpisodeProgress from '@/components/anime/EpisodeProgress.vue'
 import WatchHistory from '@/components/anime/WatchHistory.vue'
 import TagSelector from '@/components/common/TagSelector.vue'
-import NotesList from '@/components/editor/NotesList.vue'
+import NotesPanel from '@/components/editor/NotesPanel.vue'
 import { useAnimeDetail, useAnimeStatusMutation, useAnimeTagMutation } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
-import {
-  useCreateNote,
-  useDeleteNote,
-  useNotes,
-  useUpdateNote,
-} from '@/composables/useNoteQueries'
 import { useToast } from '@/composables/useToast'
 import { DEFAULT_EPISODE_MINUTES, useWatchHistory } from '@/composables/useWatchHistory'
 import { buildExternalUrl } from '@/core/utils/externalLinks'
@@ -33,11 +27,6 @@ const toast = useToast()
 const { data: anime, isPending, isError } = useAnimeDetail(mediaId)
 const statusMutation = useAnimeStatusMutation()
 const tagMutation = useAnimeTagMutation()
-
-const notesQuery = useNotes(mediaId)
-const createNote = useCreateNote(mediaId)
-const updateNote = useUpdateNote(mediaId)
-const deleteNote = useDeleteNote(mediaId)
 
 const history = useWatchHistory(mediaId)
 
@@ -327,13 +316,9 @@ async function toggleNotifications(): Promise<void> {
           @update="onProgressUpdate"
         />
 
-        <NotesList
+        <NotesPanel
           v-else-if="activeTab === 'notes'"
-          :notes="notesQuery.data.value ?? []"
-          :is-busy="createNote.isPending.value"
-          @create="(content) => createNote.mutate({ mediaId: props.id, content })"
-          @update="(payload) => updateNote.mutate(payload)"
-          @remove="(id) => deleteNote.mutate(id)"
+          :media-id="props.id"
         />
 
         <WatchHistory

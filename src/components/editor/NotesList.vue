@@ -1,69 +1,68 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { INoteDto } from '@/apis/dtos/noteDto'
 import { useAppI18n } from '@/composables/useAppI18n'
 
-const props = withDefaults(
-  defineProps<{ notes: INoteDto[], isBusy?: boolean }>(),
-  { isBusy: false },
-)
-const emit = defineEmits<{ create: [string], update: [{ id: string, content: string }], remove: [string] }>()
+const props = defineProps<{ notes: INoteDto[], selectedId: string | null }>()
+const emit = defineEmits<{
+  select: [string]
+  create: []
+  remove: [string]
+  exportMarkdown: [string]
+  exportPdf: [string]
+}>()
 
 const { translate, translatePlural, locale } = useAppI18n()
 
-const draft = ref('')
-const editingId = ref<string | null>(null)
-const editingContent = ref('')
+const search = ref('')
+const openMenuId = ref<string | null>(null)
+
+const sortedNotes = computed(() =>
+  props.notes.toSorted((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
+)
+
+const filteredNotes = computed(() => {
+  const query = search.value.trim().toLowerCase()
+  if (!query) return sortedNotes.value
+  return sortedNotes.value.filter((note) => note.content.toLowerCase().includes(query))
+})
+
+function preview(note: INoteDto): string {
+  const firstLine = note.content.split('\n').find((line) => line.trim().length > 0)
+  return firstLine?.replace(/^#+\s*/, '').slice(0, 60) ?? translate('notes.untitled')
+}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' })
 }
 
-function submitDraft(): void {
-  const content = draft.value.trim()
-  if (!content) return
-  emit('create', content)
-  draft.value = ''
-}
-
-function startEdit(note: INoteDto): void {
-  editingId.value = note.id
-  editingContent.value = note.content
-}
-
-function submitEdit(): void {
-  if (!editingId.value) return
-  emit('update', { id: editingId.value, content: editingContent.value })
-  editingId.value = null
-}
-
-function remove(note: INoteDto): void {
-  if (!window.confirm(translate('notes.confirmDelete'))) return
-  emit('remove', note.id)
+function runAction(action: 'remove' | 'exportMarkdown' | 'exportPdf', id: string): void {
+  openMenuId.value = null
+  if (action === 'remove') emit('remove', id)
+  else if (action === 'exportMarkdown') emit('exportMarkdown', id)
+  else emit('exportPdf', id)
 }
 </script>
 
 <template>
-  <section class="flex flex-col gap-3">
-    <form
-      class="flex flex-col gap-2"
-      @submit.prevent="submitDraft"
-    >
-      <textarea
-        v-model="draft"
-        rows="3"
-        class="w-full rounded-lg border border-gray-200 bg-transparent p-2 text-sm dark:border-gray-700"
-        :placeholder="translate('notes.placeholder')"
-        :aria-label="translate('notes.add')"
-      />
-      <button
-        type="submit"
-        class="self-start rounded-lg bg-brand-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-brand-700 disabled:opacity-40"
-        :disabled="props.isBusy || !draft.trim()"
+  <section class="flex flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <input
+        v-model="search"
+        type="search"
+        class="min-w-0 flex-1 rounded-lg border border-gray-200 bg-transparent px-3 py-1.5 text-sm dark:border-gray-700"
+        :placeholder="translate('notes.search')"
+        :aria-label="translate('notes.search')"
       >
+      <button
+        type="button"
+        class="shrink-0 rounded-lg bg-brand-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-brand-700"
+        @click="emit('create')"
+      >
+        <i class="pi pi-plus mr-1 text-xs" />
         {{ translate('notes.add') }}
       </button>
-    </form>
+    </div>
 
     <p class="text-xs text-gray-500 dark:text-gray-400">
       {{ translatePlural('notes.count', props.notes.length) }}
@@ -76,66 +75,80 @@ function remove(note: INoteDto): void {
       {{ translate('notes.empty') }}
     </p>
 
+    <p
+      v-else-if="filteredNotes.length === 0"
+      class="text-sm text-gray-500 dark:text-gray-400"
+    >
+      {{ translate('notes.searchEmpty') }}
+    </p>
+
     <ul
       v-else
-      class="flex flex-col gap-2"
+      class="flex flex-col gap-1"
     >
       <li
-        v-for="note in props.notes"
+        v-for="note in filteredNotes"
         :key="note.id"
-        class="rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+        class="relative flex items-center gap-2 rounded-lg border p-2 transition-colors"
+        :class="note.id === props.selectedId
+          ? 'border-brand-500 bg-brand-50 dark:bg-gray-800'
+          : 'border-gray-200 hover:border-brand-400 dark:border-gray-700'"
       >
-        <div
-          v-if="editingId === note.id"
-          class="flex flex-col gap-2"
+        <button
+          type="button"
+          class="min-w-0 flex-1 text-left"
+          @click="emit('select', note.id)"
         >
-          <textarea
-            v-model="editingContent"
-            rows="6"
-            class="w-full rounded-lg border border-gray-200 bg-transparent p-2 font-mono text-xs dark:border-gray-700"
-            :aria-label="translate('actions.edit')"
-          />
-          <div class="flex gap-2">
-            <button
-              type="button"
-              class="rounded-lg bg-brand-600 px-3 py-1 text-sm text-white"
-              @click="submitEdit"
-            >
-              {{ translate('actions.save') }}
-            </button>
-            <button
-              type="button"
-              class="rounded-lg border border-gray-200 px-3 py-1 text-sm dark:border-gray-700"
-              @click="editingId = null"
-            >
-              {{ translate('actions.cancel') }}
-            </button>
-          </div>
-        </div>
+          <span class="block truncate text-sm text-gray-800 dark:text-gray-100">
+            {{ preview(note) }}
+          </span>
+          <span class="block text-xs text-gray-500 dark:text-gray-400">
+            {{ translate('notes.updated', { date: formatDate(note.updatedAt) }) }}
+          </span>
+        </button>
 
-        <div
-          v-else
-          class="flex flex-col gap-2"
+        <button
+          type="button"
+          class="shrink-0 rounded p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+          :aria-label="translate('actions.edit')"
+          :aria-expanded="openMenuId === note.id"
+          @click="openMenuId = openMenuId === note.id ? null : note.id"
         >
-          <pre class="whitespace-pre-wrap break-words font-sans text-sm text-gray-800 dark:text-gray-200">{{ note.content }}</pre>
-          <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-            <span>{{ translate('notes.updated', { date: formatDate(note.updatedAt) }) }}</span>
+          <i class="pi pi-ellipsis-v text-sm" />
+        </button>
+
+        <ul
+          v-if="openMenuId === note.id"
+          class="absolute right-2 top-full z-20 mt-1 w-52 overflow-hidden rounded-lg border border-gray-200 bg-white text-sm shadow-xl dark:border-gray-700 dark:bg-gray-800"
+        >
+          <li>
             <button
               type="button"
-              class="ml-auto underline underline-offset-2"
-              @click="startEdit(note)"
+              class="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+              @click="runAction('exportMarkdown', note.id)"
             >
-              {{ translate('actions.edit') }}
+              {{ translate('notes.exportMarkdown') }}
             </button>
+          </li>
+          <li>
             <button
               type="button"
-              class="text-red-500 underline underline-offset-2"
-              @click="remove(note)"
+              class="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+              @click="runAction('exportPdf', note.id)"
+            >
+              {{ translate('notes.exportPdf') }}
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="w-full px-3 py-2 text-left text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              @click="runAction('remove', note.id)"
             >
               {{ translate('actions.delete') }}
             </button>
-          </div>
-        </div>
+          </li>
+        </ul>
       </li>
     </ul>
   </section>

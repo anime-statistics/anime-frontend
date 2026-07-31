@@ -16,7 +16,41 @@ function nextNoteId(): string {
   return `1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a6${suffix}`
 }
 
+// Chunked so a multi-megabyte upload cannot blow the call stack via spread.
+function toBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  const chunkSize = 0x8000
+  let binary = ''
+
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize))
+  }
+
+  return btoa(binary)
+}
+
 export const noteHandlers = [
+  http.post(`${API_PREFIX}/notes/attachments`, async ({ request }) => {
+    if (!checkRateLimit()) return rateLimitedResponse()
+
+    const form = await request.formData()
+    const file = form.get('file')
+    if (!(file instanceof File)) return new HttpResponse(null, { status: 400 })
+
+    const url = `data:${file.type};base64,${toBase64(await file.arrayBuffer())}`
+
+    return HttpResponse.json(
+      toSnakeCase({
+        id: `attachment-${mutableNotes.length + 1}`,
+        name: file.name,
+        mimeType: file.type,
+        sizeBytes: file.size,
+        url,
+      }),
+      { status: 201 },
+    )
+  }),
+
   http.get(`${API_PREFIX}/notes`, ({ request }) => {
     if (!checkRateLimit()) return rateLimitedResponse()
 

@@ -3,15 +3,9 @@ import Rating from 'primevue/rating'
 import { computed, ref, toRef } from 'vue'
 import { MANGA_STATUSES, type MangaStatus } from '@/apis/dtos/mangaDto'
 import EpisodeProgress from '@/components/anime/EpisodeProgress.vue'
-import NotesList from '@/components/editor/NotesList.vue'
+import NotesPanel from '@/components/editor/NotesPanel.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useMangaDetail, useMangaStatusMutation } from '@/composables/useMangaQueries'
-import {
-  useCreateNote,
-  useDeleteNote,
-  useNotes,
-  useUpdateNote,
-} from '@/composables/useNoteQueries'
 import { buildExternalUrl } from '@/core/utils/externalLinks'
 
 type DetailTab = 'chapters' | 'notes'
@@ -23,11 +17,6 @@ const { translate, translatePlural } = useAppI18n()
 
 const { data: manga, isPending, isError } = useMangaDetail(mediaId)
 const statusMutation = useMangaStatusMutation()
-
-const notesQuery = useNotes(mediaId)
-const createNote = useCreateNote(mediaId)
-const updateNote = useUpdateNote(mediaId)
-const deleteNote = useDeleteNote(mediaId)
 
 const activeTab = ref<DetailTab>('chapters')
 const hasImageError = ref(false)
@@ -245,13 +234,9 @@ function onStatusChange(event: Event): void {
           </section>
         </div>
 
-        <NotesList
+        <NotesPanel
           v-else
-          :notes="notesQuery.data.value ?? []"
-          :is-busy="createNote.isPending.value"
-          @create="(content) => createNote.mutate({ mediaId: props.id, content })"
-          @update="(payload) => updateNote.mutate(payload)"
-          @remove="(id) => deleteNote.mutate(id)"
+          :media-id="props.id"
         />
       </div>
     </template>
