@@ -1,4 +1,4 @@
-export type IViewMode = 'cards' | 'table' | 'list'
+export type IViewMode = 'cards' | 'table' | 'list' | 'kanban'
 
 export type IThemeMode = 'light' | 'dark' | 'system'
 
