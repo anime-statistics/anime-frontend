@@ -132,7 +132,11 @@
     "title": "Notes",
     "count": "{count} note | {count} notes",
     "placeholder": "Write a note…",
-    "empty": "No notes yet"
+    "empty": "No notes yet",
+    "add": "Add note",
+    "created": "Created {date}",
+    "updated": "Updated {date}",
+    "confirmDelete": "Delete this note?"
   },
   "settings": {
     "title": "Settings",
@@ -141,6 +145,41 @@
     "pageSize": "Items per page",
     "voiceInput": "Voice input",
     "ai": "AI assistant"
+  },
+  "detail": {
+    "episodesTab": "Episodes",
+    "notesTab": "Notes",
+    "historyTab": "History",
+    "status": "Watch status",
+    "score": "Your score",
+    "progress": "Progress",
+    "watchedOfTotal": "{watched} of {total}",
+    "markNext": "Mark next episode",
+    "markNextVolume": "Mark next volume",
+    "markNextChapter": "Mark next chapter",
+    "episodeGrid": "Episode checklist",
+    "volumeGrid": "Volume checklist",
+    "chapterGrid": "Chapter checklist",
+    "episode": "Episode {number}",
+    "volume": "Volume {number}",
+    "chapter": "Chapter {number}",
+    "related": "Related entries",
+    "externalLinks": "External links",
+    "notify": "Notify about new episodes",
+    "notifyEnabled": "Notifications on",
+    "notifyDisabled": "Notifications off",
+    "notifyDenied": "Notifications are blocked in the browser",
+    "volumesRead": "Volumes read",
+    "chaptersRead": "Chapters read",
+    "saving": "Saving…"
+  },
+  "history": {
+    "empty": "No watch history yet",
+    "entry": "{count} episode | {count} episodes",
+    "totalEpisodes": "Episodes watched",
+    "totalHours": "Hours watched",
+    "averagePerDay": "Average per day",
+    "clear": "Clear history"
   },
   "viewMode": {
     "label": "View mode",

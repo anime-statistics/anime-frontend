@@ -132,7 +132,11 @@
     "title": "Заметки",
     "count": "{count} заметка | {count} заметки | {count} заметок",
     "placeholder": "Напишите заметку…",
-    "empty": "Заметок пока нет"
+    "empty": "Заметок пока нет",
+    "add": "Добавить заметку",
+    "created": "Создано {date}",
+    "updated": "Обновлено {date}",
+    "confirmDelete": "Удалить заметку?"
   },
   "settings": {
     "title": "Настройки",
@@ -141,6 +145,41 @@
     "pageSize": "Элементов на странице",
     "voiceInput": "Голосовой ввод",
     "ai": "AI-ассистент"
+  },
+  "detail": {
+    "episodesTab": "Эпизоды",
+    "notesTab": "Заметки",
+    "historyTab": "История",
+    "status": "Статус просмотра",
+    "score": "Ваша оценка",
+    "progress": "Прогресс",
+    "watchedOfTotal": "{watched} из {total}",
+    "markNext": "Отметить следующий эпизод",
+    "markNextVolume": "Отметить следующий том",
+    "markNextChapter": "Отметить следующую главу",
+    "episodeGrid": "Список эпизодов",
+    "volumeGrid": "Список томов",
+    "chapterGrid": "Список глав",
+    "episode": "Эпизод {number}",
+    "volume": "Том {number}",
+    "chapter": "Глава {number}",
+    "related": "Связанные записи",
+    "externalLinks": "Внешние ссылки",
+    "notify": "Уведомлять о новых эпизодах",
+    "notifyEnabled": "Уведомления включены",
+    "notifyDisabled": "Уведомления выключены",
+    "notifyDenied": "Уведомления заблокированы в браузере",
+    "volumesRead": "Прочитано томов",
+    "chaptersRead": "Прочитано глав",
+    "saving": "Сохранение…"
+  },
+  "history": {
+    "empty": "Истории просмотра пока нет",
+    "entry": "{count} эпизод | {count} эпизода | {count} эпизодов",
+    "totalEpisodes": "Просмотрено эпизодов",
+    "totalHours": "Часов просмотра",
+    "averagePerDay": "В среднем за день",
+    "clear": "Очистить историю"
   },
   "viewMode": {
     "label": "Режим отображения",

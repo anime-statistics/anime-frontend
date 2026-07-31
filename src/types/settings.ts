@@ -21,6 +21,7 @@ export interface IAppSettings {
   pageSize: number
   isVoiceInputEnabled: boolean
   isAiEnabled: boolean
+  notifyAnimeIds: string[]
   llmProviders: ILlmProviderConfig[]
   activeLlmProviderId?: string
 }

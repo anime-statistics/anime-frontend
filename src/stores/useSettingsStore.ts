@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: IAppSettings = {
   pageSize: 20,
   isVoiceInputEnabled: false,
   isAiEnabled: false,
+  notifyAnimeIds: [],
   llmProviders: [],
 }
 
@@ -42,6 +43,9 @@ export function normaliseSettings(raw: unknown): IAppSettings {
     pageSize: clampNumber(raw.pageSize, 5, 100, DEFAULT_SETTINGS.pageSize),
     isVoiceInputEnabled: raw.isVoiceInputEnabled === true,
     isAiEnabled: raw.isAiEnabled === true,
+    notifyAnimeIds: Array.isArray(raw.notifyAnimeIds)
+      ? raw.notifyAnimeIds.filter((id): id is string => typeof id === 'string')
+      : [],
     llmProviders: Array.isArray(raw.llmProviders) ? [] : [],
     activeLlmProviderId:
       typeof raw.activeLlmProviderId === 'string' ? raw.activeLlmProviderId : undefined,
@@ -104,6 +108,20 @@ export const useSettingsStore = defineStore('settings', () => {
     update({ columnsCount: count })
   }
 
+  function isNotified(mediaId: string): boolean {
+    return settings.value.notifyAnimeIds.includes(mediaId)
+  }
+
+  function toggleNotify(mediaId: string): boolean {
+    const enabled = !isNotified(mediaId)
+    update({
+      notifyAnimeIds: enabled
+        ? [...settings.value.notifyAnimeIds, mediaId]
+        : settings.value.notifyAnimeIds.filter((id) => id !== mediaId),
+    })
+    return enabled
+  }
+
   function reset(): void {
     settings.value = { ...DEFAULT_SETTINGS }
     applyTheme()
@@ -124,6 +142,8 @@ export const useSettingsStore = defineStore('settings', () => {
     setLocale,
     setViewMode,
     setColumns,
+    isNotified,
+    toggleNotify,
     reset,
   }
 })
