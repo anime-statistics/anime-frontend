@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "eslint.validate": ["vue", "typescript"],
+  "files.associations": { "*.css": "tailwindcss" },
+  "i18n-ally.localesPaths": ["src/core/i18n"],
+  "i18n-ally.keystyle": "nested"
+}

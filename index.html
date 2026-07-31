@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:3000 http://localhost:5000 https://*.shikimori.one; font-src 'self' https://cdn.jsdelivr.net"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="description" content="Персональный трекер аниме и манги" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    <title>Anime Statistics</title>
+    <script>
+      (() => {
+        const stored = localStorage.getItem('anime-statistics:theme')
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (stored !== 'light' && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
