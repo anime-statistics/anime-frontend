@@ -97,6 +97,7 @@ watch(
             v-for="item in store.results"
             :key="item.id"
             class="rounded-lg border border-gray-200 p-3 transition-colors hover:border-brand-400 dark:border-gray-700"
+            data-testid="anime-card"
           >
             <RouterLink
               :to="{ name: 'anime-detail', params: { id: item.id } }"

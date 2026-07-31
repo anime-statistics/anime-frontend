@@ -47,8 +47,10 @@ async function createFromFilter(): Promise<void> {
     filter
     display="chip"
     class="w-full"
+    data-testid="add-tag-btn"
     :placeholder="translate('tags.select')"
     :aria-label="translate('tags.select')"
+    :pt="{ pcFilterContainer: { root: { 'data-testid': 'tag-input-wrap' } } }"
     @filter="onFilter"
     @update:model-value="emit('update:modelValue', $event)"
   >

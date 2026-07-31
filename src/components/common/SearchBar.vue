@@ -79,6 +79,7 @@ function onVoiceTranscript(text: string): void {
           :value="store.rawQuery"
           type="search"
           class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
+          data-testid="search-input"
           :placeholder="translate('anime.search.placeholder')"
           :aria-label="translate('nav.search')"
           @input="store.setQuery(($event.target as HTMLInputElement).value)"

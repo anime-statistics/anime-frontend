@@ -17,6 +17,17 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     include: ['tests/**/*.spec.ts'],
+    exclude: ['tests/e2e/**', 'tests/visual/**'],
     globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      reportsDirectory: 'coverage',
+      include: [
+        'src/core/utils/**/*.ts',
+        'src/stores/**/*.ts',
+        'src/composables/**/*.ts',
+      ],
+    },
   },
 })

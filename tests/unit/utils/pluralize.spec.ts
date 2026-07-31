@@ -30,5 +30,6 @@ describe('pluralize', () => {
     expect(pluralize(101, EPISODES)).toBe('101 эпизод')
     expect(pluralize(102, EPISODES)).toBe('102 эпизода')
     expect(pluralize(100, EPISODES)).toBe('100 эпизодов')
+    expect(pluralize(122, EPISODES)).toBe('122 эпизода')
   })
 })
