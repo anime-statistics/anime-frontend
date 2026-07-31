@@ -4,6 +4,12 @@ export type IThemeMode = 'light' | 'dark' | 'system'
 
 export type IAppLocale = 'ru' | 'en'
 
+export type IUiDensity = 'compact' | 'standard' | 'relaxed'
+
+export type IVoiceModel = 'browser' | 'whisper-1'
+
+export type ISyncInterval = 'never' | '15m' | '30m' | '1h' | '6h'
+
 export interface ILlmProviderConfig {
   id: string
   name: string
@@ -26,6 +32,14 @@ export interface IAppSettings {
   aiDeepThink: boolean
   aiTemperature: number
   aiShareContext: boolean
+  aiMaxTokens: number
+  aiVoiceModel: IVoiceModel
+  uiPrimaryColor: string
+  uiDensity: IUiDensity
+  uiFontSize: number
+  syncInterval: ISyncInterval
+  autoCommitShikimori: boolean
+  autoCommitAniliberty: boolean
   promptTemplates: Record<string, string>
   llmProviders: ILlmProviderConfig[]
   activeLlmProviderId?: string

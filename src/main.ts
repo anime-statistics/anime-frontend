@@ -45,7 +45,15 @@ app.use(VueQueryPlugin, {
 })
 
 async function initApp(): Promise<void> {
-  if (config.mockEnabled) {
+  // The settings page can override the mock mode in dev; the choice needs a
+  // reload because the worker must start before anything issues requests.
+  const mockOverride = localStorage.getItem('anime-statistics:mock-override')
+  const useMocks
+    = import.meta.env.DEV && mockOverride !== null
+      ? mockOverride === 'on'
+      : config.mockEnabled
+
+  if (useMocks) {
     const { worker } = await import('@/mocks/browser')
     await worker.start({ onUnhandledRequest: 'bypass' })
   }

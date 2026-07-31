@@ -1,8 +1,18 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { AppSettingsSchema } from '@/apis/dtos/settingsDto'
 import { DEFAULT_PROMPT_TEMPLATES } from '@/core/constants/promptTemplates'
 import { isObject } from '@/core/utils/caseConverter'
-import type { IAppLocale, IAppSettings, IThemeMode, IViewMode } from '@/types/settings'
+import { applyBrandPalette, hexToRgb } from '@/core/utils/colorPalette'
+import type {
+  IAppLocale,
+  IAppSettings,
+  ISyncInterval,
+  IThemeMode,
+  IUiDensity,
+  IViewMode,
+  IVoiceModel,
+} from '@/types/settings'
 
 export const SETTINGS_STORAGE_KEY = 'anime-statistics:settings'
 export const THEME_STORAGE_KEY = 'anime-statistics:theme'
@@ -10,6 +20,15 @@ export const THEME_STORAGE_KEY = 'anime-statistics:theme'
 const VIEW_MODES: IViewMode[] = ['cards', 'table', 'list', 'kanban']
 const THEME_MODES: IThemeMode[] = ['light', 'dark', 'system']
 const LOCALES: IAppLocale[] = ['ru', 'en']
+const DENSITIES: IUiDensity[] = ['compact', 'standard', 'relaxed']
+const VOICE_MODELS: IVoiceModel[] = ['browser', 'whisper-1']
+const SYNC_INTERVALS: ISyncInterval[] = ['never', '15m', '30m', '1h', '6h']
+
+const DENSITY_FACTOR: Record<IUiDensity, number> = {
+  compact: 0.875,
+  standard: 1,
+  relaxed: 1.125,
+}
 
 export const DEFAULT_SETTINGS: IAppSettings = {
   locale: 'ru',
@@ -24,6 +43,14 @@ export const DEFAULT_SETTINGS: IAppSettings = {
   aiDeepThink: false,
   aiTemperature: 0.7,
   aiShareContext: true,
+  aiMaxTokens: 2048,
+  aiVoiceModel: 'browser',
+  uiPrimaryColor: '#6366f1',
+  uiDensity: 'standard',
+  uiFontSize: 16,
+  syncInterval: 'never',
+  autoCommitShikimori: false,
+  autoCommitAniliberty: false,
   promptTemplates: { ...DEFAULT_PROMPT_TEMPLATES },
   llmProviders: [],
 }
@@ -82,6 +109,17 @@ export function normaliseSettings(raw: unknown): IAppSettings {
       return Math.min(2, Math.max(0, Math.round(value * 10) / 10))
     })(),
     aiShareContext: raw.aiShareContext !== false,
+    aiMaxTokens: clampNumber(raw.aiMaxTokens, 256, 8192, DEFAULT_SETTINGS.aiMaxTokens),
+    aiVoiceModel: pickFrom(VOICE_MODELS, raw.aiVoiceModel, DEFAULT_SETTINGS.aiVoiceModel),
+    uiPrimaryColor:
+      typeof raw.uiPrimaryColor === 'string' && hexToRgb(raw.uiPrimaryColor)
+        ? raw.uiPrimaryColor
+        : DEFAULT_SETTINGS.uiPrimaryColor,
+    uiDensity: pickFrom(DENSITIES, raw.uiDensity, DEFAULT_SETTINGS.uiDensity),
+    uiFontSize: clampNumber(raw.uiFontSize, 12, 20, DEFAULT_SETTINGS.uiFontSize),
+    syncInterval: pickFrom(SYNC_INTERVALS, raw.syncInterval, DEFAULT_SETTINGS.syncInterval),
+    autoCommitShikimori: raw.autoCommitShikimori === true,
+    autoCommitAniliberty: raw.autoCommitAniliberty === true,
     promptTemplates: normalisePromptTemplates(raw.promptTemplates),
     llmProviders: Array.isArray(raw.llmProviders) ? [] : [],
     activeLlmProviderId:
@@ -107,21 +145,33 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.setItem(THEME_STORAGE_KEY, prefersDark.value ? 'dark' : 'light')
   }
 
+  function applyAppearance(): void {
+    applyBrandPalette(settings.value.uiPrimaryColor)
+    document.documentElement.dataset.density = settings.value.uiDensity
+    document.documentElement.style.fontSize
+      = `${settings.value.uiFontSize * DENSITY_FACTOR[settings.value.uiDensity]}px`
+  }
+
   function persist(): void {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings.value))
     applyTheme()
+    applyAppearance()
   }
 
   function initFromLocalStorage(): void {
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
     if (stored) {
       try {
-        settings.value = normaliseSettings(JSON.parse(stored))
+        const parsed = AppSettingsSchema.safeParse(JSON.parse(stored))
+        settings.value = parsed.success
+          ? normaliseSettings(parsed.data)
+          : { ...DEFAULT_SETTINGS }
       } catch {
         settings.value = { ...DEFAULT_SETTINGS }
       }
     }
     applyTheme()
+    applyAppearance()
   }
 
   function update(patch: Partial<IAppSettings>): void {
@@ -162,6 +212,7 @@ export const useSettingsStore = defineStore('settings', () => {
   function reset(): void {
     settings.value = { ...DEFAULT_SETTINGS }
     applyTheme()
+    applyAppearance()
   }
 
   return {
@@ -172,6 +223,7 @@ export const useSettingsStore = defineStore('settings', () => {
     isVoiceInputEnabled,
     prefersDark,
     applyTheme,
+    applyAppearance,
     persist,
     initFromLocalStorage,
     update,
