@@ -127,6 +127,23 @@
     "voiceInput": "Voice input",
     "ai": "AI assistant"
   },
+  "filters": {
+    "title": "Filters",
+    "sources": "Sources",
+    "status": "Status",
+    "genres": "Genres",
+    "year": "Year",
+    "anyStatus": "Any status",
+    "anyYear": "Any year",
+    "clearAll": "Clear all filters",
+    "history": "Recent searches",
+    "clearHistory": "Clear history",
+    "voiceInput": "Voice input",
+    "voiceInputSoon": "Voice input arrives in a later step",
+    "suggestions": "Filter suggestions",
+    "clearQuery": "Clear query",
+    "submit": "Search"
+  },
   "pagination": {
     "previous": "Previous",
     "next": "Next",

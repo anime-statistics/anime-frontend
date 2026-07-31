@@ -158,11 +158,27 @@ export function deduplicateResults(
   return merged
 }
 
+// Partial failures degrade gracefully, but if every source failed the caller must
+// see an error rather than an empty result set.
 async function collectFulfilled<T>(
   promises: Promise<IPaginatedResult<T>>[],
 ): Promise<T[]> {
+  if (promises.length === 0) return []
+
   const results = await Promise.allSettled(promises)
-  return results.flatMap((result) => (result.status === 'fulfilled' ? result.value.items : []))
+  const fulfilled = results.filter(
+    (result): result is PromiseFulfilledResult<IPaginatedResult<T>> =>
+      result.status === 'fulfilled',
+  )
+
+  if (fulfilled.length === 0) {
+    const rejected = results.find(
+      (result): result is PromiseRejectedResult => result.status === 'rejected',
+    )
+    throw rejected?.reason ?? new Error('All media sources failed')
+  }
+
+  return fulfilled.flatMap((result) => result.value.items)
 }
 
 export const mediaAdapter = {

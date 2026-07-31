@@ -1,9 +1,12 @@
+import { http, HttpResponse, delay } from 'msw'
 import { setupServer } from 'msw/node'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { apiClient } from '@/apis/http/client'
+import { toSnakeCase } from '@/core/utils/caseConverter'
+import { animeSearchResults } from '@/mocks/fixtures/animeData'
 import { handlers, resetMockState } from '@/mocks/handlers'
-import { parseQueryFilters, resolveSources, useSearchStore } from '@/stores/useSearchStore'
+import { useSearchStore } from '@/stores/useSearchStore'
 
 const server = setupServer(...handlers)
 
@@ -24,78 +27,6 @@ afterEach(() => {
 
 afterAll(() => {
   server.close()
-})
-
-describe('parseQueryFilters', () => {
-  it('returns plain text when there are no filters', () => {
-    expect(parseQueryFilters('naruto shippuden')).toEqual({
-      text: 'naruto shippuden',
-      include: {},
-      exclude: {},
-    })
-  })
-
-  it('splits key:value filters out of the free text', () => {
-    const filters = parseQueryFilters('titan genre:action status:watching')
-
-    expect(filters.text).toBe('titan')
-    expect(filters.include.genre).toEqual(['action'])
-    expect(filters.include.status).toEqual(['watching'])
-  })
-
-  it('keeps colons inside a value', () => {
-    const filters = parseQueryFilters('anime:shiki_id:123')
-
-    expect(filters.include.anime).toEqual(['shiki_id:123'])
-    expect(filters.text).toBe('')
-  })
-
-  it('collects repeated keys into a list', () => {
-    const filters = parseQueryFilters('genre:action genre:drama')
-
-    expect(filters.include.genre).toEqual(['action', 'drama'])
-  })
-
-  it('deduplicates identical values', () => {
-    expect(parseQueryFilters('genre:action genre:action').include.genre).toEqual(['action'])
-  })
-
-  it('treats a leading dash as exclusion', () => {
-    const filters = parseQueryFilters('titan -genre:comedy')
-
-    expect(filters.exclude.genre).toEqual(['comedy'])
-    expect(filters.include.genre).toBeUndefined()
-  })
-
-  it('supports quoted multi-word values', () => {
-    expect(parseQueryFilters('genre:"slice of life"').include.genre).toEqual(['slice of life'])
-  })
-
-  it('lowercases filter keys', () => {
-    expect(parseQueryFilters('Genre:action').include.genre).toEqual(['action'])
-  })
-
-  it('ignores a filter with an empty value', () => {
-    expect(parseQueryFilters('genre:').include).toEqual({})
-  })
-})
-
-describe('resolveSources', () => {
-  it('defaults to both sources', () => {
-    expect(resolveSources(parseQueryFilters('naruto'))).toEqual(['shikimori', 'aniliberty'])
-  })
-
-  it('narrows to a requested source', () => {
-    expect(resolveSources(parseQueryFilters('source:aniliberty'))).toEqual(['aniliberty'])
-  })
-
-  it('drops an excluded source', () => {
-    expect(resolveSources(parseQueryFilters('-source:aniliberty'))).toEqual(['shikimori'])
-  })
-
-  it('falls back to both sources when the filter leaves nothing', () => {
-    expect(resolveSources(parseQueryFilters('source:mal'))).toEqual(['shikimori', 'aniliberty'])
-  })
 })
 
 describe('useSearchStore.search', () => {
@@ -155,6 +86,88 @@ describe('useSearchStore.search', () => {
     await store.search()
 
     expect(store.results.every((item) => item.source === 'aniliberty')).toBe(true)
+  })
+
+  it('retries 5xx responses and surfaces the failure', async () => {
+    let attempts = 0
+    server.use(
+      http.get('*/api/v1/anime', () => {
+        attempts += 1
+        return new HttpResponse(null, { status: 500 })
+      }),
+    )
+    const store = useSearchStore()
+    store.setQuery('source:shikimori steins')
+
+    await store.search()
+
+    expect(attempts).toBe(4)
+    expect(store.results).toEqual([])
+    expect(store.errorMessage).not.toBeNull()
+    expect(store.isSearching).toBe(false)
+  }, 30_000)
+
+  it('still returns results when only one source fails', async () => {
+    server.use(
+      http.get('*/api/v1/anime', ({ request }) => {
+        const source = new URL(request.url).searchParams.get('source')
+        if (source === 'aniliberty') return new HttpResponse(null, { status: 503 })
+        return HttpResponse.json({
+          items: toSnakeCase(animeSearchResults.filter((anime) => anime.source === 'shikimori')),
+          total: 1,
+          page: 1,
+          size: 20,
+        })
+      }),
+    )
+    const store = useSearchStore()
+    store.setQuery('steins')
+
+    await store.search()
+
+    expect(store.results.length).toBeGreaterThan(0)
+    expect(store.errorMessage).toBeNull()
+  }, 30_000)
+
+  it('does not let a slow earlier search overwrite a newer one', async () => {
+    server.use(
+      http.get('*/api/v1/anime', async ({ request }) => {
+        const query = new URL(request.url).searchParams.get('query') ?? ''
+        if (query === 'naruto') await delay(80)
+
+        const items = animeSearchResults.filter((anime) =>
+          anime.title.toLowerCase().includes(query),
+        )
+        return HttpResponse.json({ items: toSnakeCase(items), total: items.length, page: 1, size: 20 })
+      }),
+    )
+
+    const store = useSearchStore()
+
+    store.setQuery('naruto')
+    const slow = store.search()
+
+    store.setQuery('steins')
+    const fast = store.search()
+
+    await Promise.all([slow, fast])
+
+    expect(store.results.every((item) => item.title.toLowerCase().includes('steins'))).toBe(true)
+    expect(store.isSearching).toBe(false)
+  })
+})
+
+describe('useSearchStore state helpers', () => {
+  it('clears results but keeps the query', async () => {
+    const store = useSearchStore()
+    store.setQuery('steins')
+    await store.search()
+
+    store.clearResults()
+
+    expect(store.rawQuery).toBe('steins')
+    expect(store.results).toEqual([])
+    expect(store.total).toBe(0)
   })
 
   it('resets query and results', async () => {

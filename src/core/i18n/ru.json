@@ -127,6 +127,23 @@
     "voiceInput": "Голосовой ввод",
     "ai": "AI-ассистент"
   },
+  "filters": {
+    "title": "Фильтры",
+    "sources": "Источники",
+    "status": "Статус",
+    "genres": "Жанры",
+    "year": "Год",
+    "anyStatus": "Любой статус",
+    "anyYear": "Любой год",
+    "clearAll": "Сбросить фильтры",
+    "history": "Недавние запросы",
+    "clearHistory": "Очистить историю",
+    "voiceInput": "Голосовой ввод",
+    "voiceInputSoon": "Голосовой ввод появится позже",
+    "suggestions": "Подсказки фильтров",
+    "clearQuery": "Очистить запрос",
+    "submit": "Искать"
+  },
   "pagination": {
     "previous": "Назад",
     "next": "Вперёд",
