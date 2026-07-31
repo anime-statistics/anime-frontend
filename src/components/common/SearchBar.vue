@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import VoiceInput from '@/components/voice/VoiceInput.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useSearchHistory } from '@/composables/useSearchHistory'
@@ -56,6 +57,11 @@ function submit(): void {
 function clearQuery(): void {
   store.reset()
 }
+
+// The debounced watcher on rawQuery kicks off the search on its own.
+function onVoiceTranscript(text: string): void {
+  store.setQuery([store.rawQuery.trim(), text].filter(Boolean).join(' '))
+}
 </script>
 
 <template>
@@ -88,15 +94,11 @@ function clearQuery(): void {
         >
           <i class="pi pi-times" />
         </button>
-        <button
-          type="button"
-          class="shrink-0 cursor-not-allowed text-gray-300 dark:text-gray-600"
-          disabled
-          :aria-label="translate('filters.voiceInput')"
-          :title="translate('filters.voiceInputSoon')"
-        >
-          <i class="pi pi-microphone" />
-        </button>
+        <VoiceInput
+          class="shrink-0"
+          :continuous="false"
+          @transcript="onVoiceTranscript"
+        />
       </div>
 
       <button

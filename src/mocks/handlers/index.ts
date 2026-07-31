@@ -1,3 +1,4 @@
+import { aiHandlers } from '@/mocks/handlers/aiHandlers'
 import { animeHandlers, resetAnimeState } from '@/mocks/handlers/animeHandlers'
 import { mangaHandlers, resetMangaState } from '@/mocks/handlers/mangaHandlers'
 import { noteHandlers, resetNoteState } from '@/mocks/handlers/noteHandlers'
@@ -11,6 +12,7 @@ export const handlers = [
   ...tagHandlers,
   ...noteHandlers,
   ...syncHandlers,
+  ...aiHandlers,
 ]
 
 export function resetMockState(): void {

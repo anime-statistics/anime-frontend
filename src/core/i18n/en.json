@@ -146,6 +146,18 @@
     "draftRestored": "Restored an unsaved draft",
     "untitled": "Untitled note"
   },
+  "voice": {
+    "toggle": "Voice input",
+    "start": "Start recording",
+    "stop": "Stop recording",
+    "notSupported": "Voice input is not supported in this browser",
+    "listening": "Listening…",
+    "language": "Recognition language",
+    "error": "Microphone error: {reason}",
+    "processing": "Processing…",
+    "processed": "Text cleaned up",
+    "suggestions": "Suggestions"
+  },
   "editor": {
     "editorTab": "Editor",
     "previewTab": "Preview",

@@ -2,11 +2,13 @@
 import { computed, ref } from 'vue'
 import { VAceEditor } from 'vue3-ace-editor'
 import { apiClient } from '@/apis/http/client'
+import VoiceInput from '@/components/voice/VoiceInput.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useToast } from '@/composables/useToast'
 import { NOTES } from '@/core/constants/apiRoutes'
 import { isObject } from '@/core/utils/caseConverter'
 import { useSettingsStore } from '@/stores/useSettingsStore'
+import { useVoiceStore } from '@/stores/useVoiceStore'
 import 'ace-builds/src-noconflict/ace'
 import 'ace-builds/src-noconflict/mode-markdown'
 import 'ace-builds/src-noconflict/theme-monokai'
@@ -22,6 +24,7 @@ const emit = defineEmits<{ 'update:modelValue': [string] }>()
 const { translate } = useAppI18n()
 const toast = useToast()
 const settingsStore = useSettingsStore()
+const voiceStore = useVoiceStore()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDraggingOver = ref(false)
@@ -83,6 +86,12 @@ function onFileSelected(event: Event): void {
   input.value = ''
 }
 
+// Dictation is cleaned up by the AI endpoint before it lands in the note.
+async function onVoiceTranscript(text: string): Promise<void> {
+  const { processedText } = await voiceStore.processTranscript(text)
+  if (processedText) append(processedText)
+}
+
 function onDrop(event: DragEvent): void {
   isDraggingOver.value = false
   const file = event.dataTransfer?.files[0]
@@ -122,6 +131,13 @@ function onDrop(event: DragEvent): void {
         accept="image/png,image/jpeg,image/gif,image/webp"
         @change="onFileSelected"
       >
+
+      <VoiceInput
+        class="ml-auto"
+        continuous
+        show-language
+        @transcript="onVoiceTranscript"
+      />
     </div>
 
     <div
