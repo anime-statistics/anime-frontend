@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { DEFAULT_PROMPT_TEMPLATES } from '@/core/constants/promptTemplates'
 import { isObject } from '@/core/utils/caseConverter'
 import type { IAppLocale, IAppSettings, IThemeMode, IViewMode } from '@/types/settings'
 
@@ -17,9 +18,26 @@ export const DEFAULT_SETTINGS: IAppSettings = {
   columnsCount: 4,
   pageSize: 20,
   isVoiceInputEnabled: false,
-  isAiEnabled: false,
+  isAiEnabled: true,
   notifyAnimeIds: [],
+  aiModelId: 'claude-sonnet-4-5',
+  aiDeepThink: false,
+  aiTemperature: 0.7,
+  aiShareContext: true,
+  promptTemplates: { ...DEFAULT_PROMPT_TEMPLATES },
   llmProviders: [],
+}
+
+function normalisePromptTemplates(raw: unknown): Record<string, string> {
+  const templates = { ...DEFAULT_PROMPT_TEMPLATES }
+  if (!isObject(raw)) return templates
+
+  for (const [key, value] of Object.entries(raw)) {
+    if (key in templates && typeof value === 'string' && value.trim()) {
+      templates[key] = value
+    }
+  }
+  return templates
 }
 
 function pickFrom<T extends string>(allowed: T[], value: unknown, fallback: T): T {
@@ -35,6 +53,10 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
 export function normaliseSettings(raw: unknown): IAppSettings {
   if (!isObject(raw)) return { ...DEFAULT_SETTINGS }
 
+  // Payloads persisted before the AI fields existed carry isAiEnabled: false
+  // from the old default, not from a user choice — those get the new default.
+  const isPreAiSchema = raw.aiModelId === undefined
+
   return {
     locale: pickFrom(LOCALES, raw.locale, DEFAULT_SETTINGS.locale),
     theme: pickFrom(THEME_MODES, raw.theme, DEFAULT_SETTINGS.theme),
@@ -42,10 +64,25 @@ export function normaliseSettings(raw: unknown): IAppSettings {
     columnsCount: clampNumber(raw.columnsCount, 1, 12, DEFAULT_SETTINGS.columnsCount),
     pageSize: clampNumber(raw.pageSize, 5, 100, DEFAULT_SETTINGS.pageSize),
     isVoiceInputEnabled: raw.isVoiceInputEnabled === true,
-    isAiEnabled: raw.isAiEnabled === true,
+    isAiEnabled:
+      !isPreAiSchema && typeof raw.isAiEnabled === 'boolean'
+        ? raw.isAiEnabled
+        : DEFAULT_SETTINGS.isAiEnabled,
     notifyAnimeIds: Array.isArray(raw.notifyAnimeIds)
       ? raw.notifyAnimeIds.filter((id): id is string => typeof id === 'string')
       : [],
+    aiModelId:
+      typeof raw.aiModelId === 'string' && raw.aiModelId
+        ? raw.aiModelId
+        : DEFAULT_SETTINGS.aiModelId,
+    aiDeepThink: raw.aiDeepThink === true,
+    aiTemperature: (() => {
+      const value = Number(raw.aiTemperature)
+      if (!Number.isFinite(value)) return DEFAULT_SETTINGS.aiTemperature
+      return Math.min(2, Math.max(0, Math.round(value * 10) / 10))
+    })(),
+    aiShareContext: raw.aiShareContext !== false,
+    promptTemplates: normalisePromptTemplates(raw.promptTemplates),
     llmProviders: Array.isArray(raw.llmProviders) ? [] : [],
     activeLlmProviderId:
       typeof raw.activeLlmProviderId === 'string' ? raw.activeLlmProviderId : undefined,

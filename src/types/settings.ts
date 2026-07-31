@@ -22,6 +22,11 @@ export interface IAppSettings {
   isVoiceInputEnabled: boolean
   isAiEnabled: boolean
   notifyAnimeIds: string[]
+  aiModelId: string
+  aiDeepThink: boolean
+  aiTemperature: number
+  aiShareContext: boolean
+  promptTemplates: Record<string, string>
   llmProviders: ILlmProviderConfig[]
   activeLlmProviderId?: string
 }

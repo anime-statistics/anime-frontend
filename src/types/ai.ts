@@ -14,6 +14,16 @@ export interface ILLmModel {
   providerId: string
   contextWindow: number
   supportsStreaming: boolean
+  inputPrice: number
+  outputPrice: number
+}
+
+export interface ITokenUsage {
+  model: string
+  inputTokens: number
+  outputTokens: number
+  cost: number
+  timestamp: string
 }
 
 export interface IAiParaphraseResult {

@@ -5,6 +5,7 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import MobileNav from '@/components/layout/MobileNav.vue'
+import AiAssistant from '@/components/ai/AiAssistant.vue'
 import ToastContainer from '@/components/common/ToastContainer.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { DETAIL_ROUTE_NAMES } from '@/router'
@@ -81,6 +82,7 @@ watch(() => route.fullPath, () => {
 
     <AppFooter />
     <MobileNav />
+    <AiAssistant />
     <ToastContainer />
   </div>
 </template>
