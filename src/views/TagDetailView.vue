@@ -156,7 +156,6 @@ async function confirmDelete(mode: TagDeleteMode): Promise<void> {
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ translatePlural('tags.itemCount', itemCount) }}
-            <span v-if="tag.isSystem"> · {{ translate('tags.systemTag') }}</span>
           </p>
         </div>
 
@@ -177,7 +176,6 @@ async function confirmDelete(mode: TagDeleteMode): Promise<void> {
             {{ translate('tags.edit') }}
           </button>
           <button
-            v-if="!tag.isSystem"
             type="button"
             class="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition-colors hover:border-red-400 dark:border-red-900 dark:text-red-300"
             @click="isDeleteOpen = true"

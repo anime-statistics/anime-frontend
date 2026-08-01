@@ -199,10 +199,7 @@ async function persistOrder(): Promise<void> {
           >
             <i class="pi pi-pencil" />
           </button>
-          <!-- System tags are the seeded watch statuses; they can be renamed and
-               recoloured but never removed. -->
           <button
-            v-if="!tag.isSystem"
             type="button"
             class="rounded p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-gray-800"
             :aria-label="translate('tags.delete')"

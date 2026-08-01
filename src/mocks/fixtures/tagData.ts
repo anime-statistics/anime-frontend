@@ -1,14 +1,13 @@
 import type { ITagDto } from '@/apis/dtos/tagDto'
-import { SYSTEM_TAGS } from '@/core/constants/systemTags'
+import { SEEDED_TAGS } from '@/core/constants/seededTags'
 
-const customTags: ITagDto[] = [
+const ownTags: ITagDto[] = [
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f601',
     name: 'Любимое',
     color: '#ef4444',
     icon: 'pi-heart',
     isHidden: false,
-    isSystem: false,
     sortOrder: 6,
   },
   {
@@ -17,7 +16,6 @@ const customTags: ITagDto[] = [
     color: '#f59e0b',
     icon: 'pi-star',
     isHidden: false,
-    isSystem: false,
     sortOrder: 7,
   },
   {
@@ -26,7 +24,6 @@ const customTags: ITagDto[] = [
     color: '#10b981',
     icon: 'pi-replay',
     isHidden: false,
-    isSystem: false,
     sortOrder: 8,
   },
   {
@@ -35,7 +32,6 @@ const customTags: ITagDto[] = [
     color: '#6366f1',
     icon: 'pi-calendar',
     isHidden: false,
-    isSystem: false,
     sortOrder: 9,
   },
   {
@@ -44,7 +40,6 @@ const customTags: ITagDto[] = [
     color: '#8b5cf6',
     icon: 'pi-users',
     isHidden: false,
-    isSystem: false,
     sortOrder: 10,
   },
   {
@@ -53,7 +48,6 @@ const customTags: ITagDto[] = [
     color: '#ec4899',
     icon: 'pi-volume-up',
     isHidden: false,
-    isSystem: false,
     sortOrder: 11,
   },
   {
@@ -62,7 +56,6 @@ const customTags: ITagDto[] = [
     color: '#0ea5e9',
     icon: 'pi-clock',
     isHidden: false,
-    isSystem: false,
     sortOrder: 12,
   },
   {
@@ -71,7 +64,6 @@ const customTags: ITagDto[] = [
     color: '#64748b',
     icon: 'pi-question-circle',
     isHidden: true,
-    isSystem: false,
     sortOrder: 13,
   },
   {
@@ -80,9 +72,8 @@ const customTags: ITagDto[] = [
     color: '#14b8a6',
     icon: 'pi-book',
     isHidden: false,
-    isSystem: false,
     sortOrder: 14,
   },
 ]
 
-export const tags: ITagDto[] = [...SYSTEM_TAGS, ...customTags]
+export const tags: ITagDto[] = [...SEEDED_TAGS, ...ownTags]

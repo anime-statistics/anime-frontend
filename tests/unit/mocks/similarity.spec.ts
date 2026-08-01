@@ -115,14 +115,17 @@ describe('deduplicateResults', () => {
     expect(deduplicateResults(items)[0].myTags).toEqual(['tag-id'])
   })
 
-  it('leaves same-source duplicates without a secondarySource', () => {
+  // A duplicate is the same title arriving from another source; two rows from
+  // the same one are two catalogue entries and stay apart.
+  it('leaves same-source near-duplicates alone', () => {
     const items = [
       anime({ id: 'shikimori_1-steins-gate', title: 'Steins;Gate' }),
       anime({ id: 'shikimori_2-steins-gate', title: 'Steins Gate' }),
     ]
 
-    const [merged] = deduplicateResults(items)
+    const merged = deduplicateResults(items)
 
-    expect(merged.secondarySource).toBeUndefined()
+    expect(merged).toHaveLength(2)
+    expect(merged.every((item) => item.secondarySource === undefined)).toBe(true)
   })
 })

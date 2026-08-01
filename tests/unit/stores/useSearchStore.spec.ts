@@ -3,7 +3,7 @@ import { setupServer } from 'msw/node'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { apiClient } from '@/apis/http/client'
-import { SYSTEM_TAG_IDS } from '@/core/constants/systemTags'
+import { SEEDED_TAG_IDS } from '@/core/constants/seededTags'
 import { toSnakeCase } from '@/core/utils/caseConverter'
 import { animeSearchResults } from '@/mocks/fixtures/animeData'
 import { handlers, resetMockState } from '@/mocks/handlers'
@@ -111,7 +111,7 @@ describe('useSearchStore.search', () => {
     await store.search()
 
     expect(store.results.length).toBeGreaterThan(0)
-    expect(store.results.every((item) => item.myTags.includes(SYSTEM_TAG_IDS.completed))).toBe(true)
+    expect(store.results.every((item) => item.myTags.includes(SEEDED_TAG_IDS.completed))).toBe(true)
   })
 
   it('restricts the query to a single source', async () => {

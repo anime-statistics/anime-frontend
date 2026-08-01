@@ -10,7 +10,7 @@ import { useAnimeTagMutation } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useToast } from '@/composables/useToast'
 import { useUrlFilters } from '@/composables/useUrlFilters'
-import { SYSTEM_TAG_IDS } from '@/core/constants/systemTags'
+import { SEEDED_TAG_IDS } from '@/core/constants/seededTags'
 import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
 import { useSearchStore } from '@/stores/useSearchStore'
 import { useTagStore } from '@/stores/useTagStore'
@@ -44,11 +44,11 @@ async function addToCollection(item: IAnimeSearchResultDto): Promise<void> {
   try {
     await tagMutation.mutateAsync({
       mediaId: item.id,
-      tagIds: [SYSTEM_TAG_IDS.planned],
+      tagIds: [SEEDED_TAG_IDS.planned],
     })
     // The results list is a snapshot of one request; patch it so the row flips
     // without a second round trip.
-    item.myTags = [SYSTEM_TAG_IDS.planned]
+    item.myTags = [SEEDED_TAG_IDS.planned]
     toast.success(translate('collection.added', { title: displayTitle(item) }))
   } catch {
     toast.error(translate('collection.addFailed'))

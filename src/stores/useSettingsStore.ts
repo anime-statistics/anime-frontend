@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { AppSettingsSchema } from '@/apis/dtos/settingsDto'
 import { DEFAULT_PROMPT_TEMPLATES } from '@/core/constants/promptTemplates'
-import { SYSTEM_TAGS } from '@/core/constants/systemTags'
+import { SEEDED_TAGS } from '@/core/constants/seededTags'
 import { isObject } from '@/core/utils/caseConverter'
 import { applyBrandPalette, hexToRgb } from '@/core/utils/colorPalette'
 import type {
@@ -42,7 +42,7 @@ export const DEFAULT_SETTINGS: IAppSettings = {
   isVoiceInputEnabled: false,
   isAiEnabled: true,
   notifyAnimeIds: [],
-  kanbanTagIds: SYSTEM_TAGS.map((tag) => tag.id),
+  kanbanTagIds: SEEDED_TAGS.map((tag) => tag.id),
   aiModelId: 'claude-sonnet-4-5',
   aiDeepThink: false,
   aiTemperature: 0.7,

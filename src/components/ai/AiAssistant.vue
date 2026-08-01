@@ -9,7 +9,7 @@ import { useAiPanel } from '@/composables/useAiPanel'
 import { useAiUsage } from '@/composables/useAiUsage'
 import { useAnimeLibrary } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
-import { SYSTEM_TAG_IDS } from '@/core/constants/systemTags'
+import { SEEDED_TAG_IDS } from '@/core/constants/seededTags'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useTagStore } from '@/stores/useTagStore'
 
@@ -42,7 +42,7 @@ const activeModel = computed(() =>
   modelsQuery.data.value?.find((model) => model.id === settingsStore.settings.aiModelId),
 )
 
-const WATCHED_TAG_IDS = [SYSTEM_TAG_IDS.completed, SYSTEM_TAG_IDS.watching]
+const WATCHED_TAG_IDS = [SEEDED_TAG_IDS.completed, SEEDED_TAG_IDS.watching]
 
 const context = computed<IAiContext | undefined>(() => {
   if (!settingsStore.settings.aiShareContext) return undefined

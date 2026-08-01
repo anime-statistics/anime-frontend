@@ -39,7 +39,6 @@ export const tagHandlers = [
       color: String(payload.color ?? '#6366f1'),
       icon: typeof payload.icon === 'string' ? payload.icon : undefined,
       isHidden: payload.isHidden === true,
-      isSystem: false,
       sortOrder: Number(payload.sortOrder ?? mutableTags.length),
     }
 
@@ -56,12 +55,7 @@ export const tagHandlers = [
     const index = mutableTags.findIndex((tag) => tag.id === String(params.id))
     if (index === -1) return new HttpResponse(null, { status: 404 })
 
-    // isSystem is set at seed time and never by a client, so it is stripped from
-    // the patch rather than trusted.
-    const patch = toCamelCase(body)
-    delete patch.isSystem
-
-    mutableTags[index] = { ...mutableTags[index], ...patch }
+    mutableTags[index] = { ...mutableTags[index], ...toCamelCase(body) }
     return HttpResponse.json(toSnakeCase(mutableTags[index]))
   }),
 
@@ -69,10 +63,8 @@ export const tagHandlers = [
     if (!checkRateLimit()) return rateLimitedResponse()
 
     const id = String(params.id)
-    const tag = mutableTags.find((candidate) => candidate.id === id)
-    if (!tag) return new HttpResponse(null, { status: 404 })
-    if (tag.isSystem) {
-      return HttpResponse.json({ message: 'System tags cannot be deleted' }, { status: 409 })
+    if (!mutableTags.some((candidate) => candidate.id === id)) {
+      return new HttpResponse(null, { status: 404 })
     }
 
     mutableTags = mutableTags.filter((candidate) => candidate.id !== id)

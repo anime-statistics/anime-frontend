@@ -95,11 +95,8 @@ describe('tag validators', () => {
     sortOrder: 0,
   }
 
-  it('applies the isHidden and isSystem defaults', () => {
-    const parsed = validateTagDto(validTag)
-
-    expect(parsed.isHidden).toBe(false)
-    expect(parsed.isSystem).toBe(false)
+  it('applies the isHidden default', () => {
+    expect(validateTagDto(validTag).isHidden).toBe(false)
   })
 
   it('rejects a non-hex colour', () => {

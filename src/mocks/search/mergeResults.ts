@@ -1,5 +1,6 @@
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
+import type { MediaSource } from '@/core/utils/slugGenerator'
 
 // Merging the same title coming from two sources is the backend's job: the
 // client asks once and gets one card back. This module is the mock's stand-in
@@ -97,17 +98,47 @@ function mergeDuplicates(
   }
 }
 
-export function deduplicateResults(items: IAnimeSearchResultDto[]): IAnimeSearchResultDto[] {
-  const fuse = new Fuse(items, {
-    keys: [
-      { name: 'title', weight: 0.5 },
-      { name: 'titleEnglish', weight: 0.2 },
-    ],
-    threshold: 0.3,
-    ignoreLocation: true,
-    includeScore: true,
-  })
+const FUSE_OPTIONS: IFuseOptions<IAnimeSearchResultDto> = {
+  keys: [
+    { name: 'title', weight: 0.5 },
+    { name: 'titleEnglish', weight: 0.2 },
+  ],
+  threshold: 0.3,
+  ignoreLocation: true,
+  includeScore: true,
+}
 
+interface ISourceIndex {
+  source: MediaSource
+  indices: number[]
+  fuse: Fuse<IAnimeSearchResultDto>
+}
+
+// One index per source. A duplicate is by definition the same title arriving
+// from a different source, so searching only the other sources both matches the
+// intent and keeps a full-catalogue query out of quadratic territory: without
+// it every row is fuzzy-matched against every other one.
+function indexBySource(items: IAnimeSearchResultDto[]): ISourceIndex[] {
+  const grouped = new Map<MediaSource, number[]>()
+
+  for (const [index, item] of items.entries()) {
+    const bucket = grouped.get(item.source)
+    if (bucket) bucket.push(index)
+    else grouped.set(item.source, [index])
+  }
+
+  return [...grouped].map(([source, indices]) => ({
+    source,
+    indices,
+    fuse: new Fuse(
+      indices.map((index) => items[index]),
+      FUSE_OPTIONS,
+    ),
+  }))
+}
+
+export function deduplicateResults(items: IAnimeSearchResultDto[]): IAnimeSearchResultDto[] {
+  const sourceIndexes = indexBySource(items)
   const merged: IAnimeSearchResultDto[] = []
   const usedIndices = new Set<number>()
 
@@ -119,21 +150,26 @@ export function deduplicateResults(items: IAnimeSearchResultDto[]): IAnimeSearch
     const queries = [current.title, current.titleEnglish].filter(
       (value): value is string => Boolean(value),
     )
-    const candidateIndices = new Set(
-      queries
-        .flatMap((query) => fuse.search(query))
-        .map((result) => result.refIndex)
-        .filter((refIndex) => refIndex !== index && !usedIndices.has(refIndex)),
-    )
 
     let duplicateIndex: number | null = null
     let bestScore = SIMILARITY_THRESHOLD
 
-    for (const candidateIndex of candidateIndices) {
-      const score = computeSimilarity(current, items[candidateIndex])
-      if (score > bestScore) {
-        bestScore = score
-        duplicateIndex = candidateIndex
+    for (const candidate of sourceIndexes) {
+      if (candidate.source === current.source) continue
+
+      const candidateIndices = new Set(
+        queries
+          .flatMap((query) => candidate.fuse.search(query))
+          .map((result) => candidate.indices[result.refIndex])
+          .filter((refIndex) => !usedIndices.has(refIndex)),
+      )
+
+      for (const candidateIndex of candidateIndices) {
+        const score = computeSimilarity(current, items[candidateIndex])
+        if (score > bestScore) {
+          bestScore = score
+          duplicateIndex = candidateIndex
+        }
       }
     }
 

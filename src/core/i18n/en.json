@@ -119,12 +119,12 @@
     "untagged": "Everything else",
     "openPage": "Open tag page",
     "itemCount": "{count} title | {count} titles",
-    "systemTag": "System tag",
     "deleteQuestion": "What should happen to the titles carrying it?",
     "deleteKeepItems": "Untag the titles",
     "deleteKeepItemsHint": "They stay in the collection with their remaining tags",
     "deleteWithItems": "Remove the titles from the collection",
-    "deleteWithItemsHint": "All their tags are dropped and they leave the library"
+    "deleteWithItemsHint": "All their tags are dropped and they leave the library",
+    "deleteSeededWarning": "This is one of the seeded watch tags. Deleting it is not recommended: its triggers go with it. You can always create it again."
   },
   "notes": {
     "title": "Notes",

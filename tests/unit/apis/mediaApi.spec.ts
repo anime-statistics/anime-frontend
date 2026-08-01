@@ -2,7 +2,7 @@ import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { apiClient } from '@/apis/http/client'
 import { mediaApi } from '@/apis/mediaApi'
-import { SYSTEM_TAG_IDS } from '@/core/constants/systemTags'
+import { SEEDED_TAG_IDS } from '@/core/constants/seededTags'
 import { animeSearchResults } from '@/mocks/fixtures/animeData'
 import { mangaSearchResults } from '@/mocks/fixtures/mangaData'
 import { handlers, resetMockState } from '@/mocks/handlers'
@@ -108,10 +108,10 @@ describe('mediaApi.getAnimeLibrary', () => {
   })
 
   it('narrows to a single tag', async () => {
-    const { items } = await mediaApi.getAnimeLibrary({ tag: SYSTEM_TAG_IDS.completed })
+    const { items } = await mediaApi.getAnimeLibrary({ tag: SEEDED_TAG_IDS.completed })
 
     expect(items.length).toBeGreaterThan(0)
-    expect(items.every((item) => item.myTags.includes(SYSTEM_TAG_IDS.completed))).toBe(true)
+    expect(items.every((item) => item.myTags.includes(SEEDED_TAG_IDS.completed))).toBe(true)
   })
 })
 
@@ -144,7 +144,7 @@ describe('stateful mutations', () => {
   })
 
   it('adds a catalogue title to the collection when it is tagged', async () => {
-    await mediaApi.updateAnimeTags(catalogueOnlyItem.id, [SYSTEM_TAG_IDS.planned])
+    await mediaApi.updateAnimeTags(catalogueOnlyItem.id, [SEEDED_TAG_IDS.planned])
 
     const { items } = await mediaApi.getAnimeLibrary()
     expect(items.some((item) => item.id === catalogueOnlyItem.id)).toBe(true)
@@ -152,14 +152,14 @@ describe('stateful mutations', () => {
 
   it('adds and removes tags in bulk without touching the others', async () => {
     const ids = [soloItem.id, pairedItem.id]
-    const added = await mediaApi.bulkUpdateAnimeTags({ ids, add: [SYSTEM_TAG_IDS.rewatching] })
+    const added = await mediaApi.bulkUpdateAnimeTags({ ids, add: [SEEDED_TAG_IDS.rewatching] })
     expect(added).toBe(2)
 
     const tagged = await mediaApi.getAnimeById(soloItem.id)
-    expect(tagged.myTags).toContain(SYSTEM_TAG_IDS.rewatching)
+    expect(tagged.myTags).toContain(SEEDED_TAG_IDS.rewatching)
     for (const tagId of soloItem.myTags) expect(tagged.myTags).toContain(tagId)
 
-    await mediaApi.bulkUpdateAnimeTags({ ids, remove: [SYSTEM_TAG_IDS.rewatching] })
+    await mediaApi.bulkUpdateAnimeTags({ ids, remove: [SEEDED_TAG_IDS.rewatching] })
     const untagged = await mediaApi.getAnimeById(soloItem.id)
     expect(untagged.myTags).toEqual(soloItem.myTags)
   })
@@ -173,14 +173,14 @@ describe('stateful mutations', () => {
 })
 
 describe('mock tags and notes', () => {
-  it('lists system tags first', async () => {
-    const { data } = await apiClient.get<{ items: { id: string, isSystem: boolean }[] }>('/tags')
+  it('lists the seeded tags first', async () => {
+    const { data } = await apiClient.get<{ items: { id: string }[] }>('/tags')
 
-    expect(data.items[0].id).toBe(SYSTEM_TAG_IDS.watching)
-    expect(data.items.filter((tag) => tag.isSystem)).toHaveLength(6)
+    expect(data.items[0].id).toBe(SEEDED_TAG_IDS.watching)
+    expect(data.items.map((tag) => tag.id).slice(0, 6)).toEqual(Object.values(SEEDED_TAG_IDS))
   })
 
-  it('creates and deletes a custom tag', async () => {
+  it('creates and deletes a tag', async () => {
     const { data: created, status } = await apiClient.post<{ id: string, name: string }>('/tags', {
       name: 'Новый',
       color: '#123456',
@@ -194,10 +194,11 @@ describe('mock tags and notes', () => {
     expect(deleted.status).toBe(204)
   })
 
-  it('refuses to delete a system tag', async () => {
-    await expect(apiClient.delete(`/tags/${SYSTEM_TAG_IDS.watching}`)).rejects.toMatchObject({
-      code: 409,
-    })
+  // Every tag is equal now, seeded ones included.
+  it('deletes a seeded tag like any other', async () => {
+    const deleted = await apiClient.delete(`/tags/${SEEDED_TAG_IDS.watching}`)
+
+    expect(deleted.status).toBe(204)
   })
 
   it('filters notes by media id', async () => {

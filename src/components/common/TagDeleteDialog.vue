@@ -6,9 +6,11 @@ export type TagDeleteMode = 'untag' | 'removeFromCollection'
 
 <script setup lang="ts">
 import Dialog from 'primevue/dialog'
+import { computed } from 'vue'
 import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { isSeededTag } from '@/core/constants/seededTags'
 
 const props = defineProps<{ visible: boolean, tag: ITagDto | null, itemCount: number }>()
 const emit = defineEmits<{
@@ -17,6 +19,10 @@ const emit = defineEmits<{
 }>()
 
 const { translate, translatePlural } = useAppI18n()
+
+// The seeded six are ordinary tags, but they are what the whole watch-status
+// vocabulary is built on, so removing one deserves a word of warning.
+const isSeeded = computed(() => Boolean(props.tag && isSeededTag(props.tag.id)))
 
 function confirm(mode: TagDeleteMode): void {
   emit('confirm', mode)
@@ -42,6 +48,14 @@ function confirm(mode: TagDeleteMode): void {
           size="sm"
         />
         <span>{{ translatePlural('tags.itemCount', props.itemCount) }}</span>
+      </p>
+
+      <p
+        v-if="isSeeded"
+        class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+      >
+        <i class="pi pi-exclamation-triangle mt-0.5 shrink-0" />
+        <span>{{ translate('tags.deleteSeededWarning') }}</span>
       </p>
 
       <p
