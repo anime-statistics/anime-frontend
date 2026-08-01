@@ -41,12 +41,12 @@ describe('useAiChat', () => {
   it('appends the user message and the assistant reply', async () => {
     const chat = useAiChat()
 
-    await chat.sendMessage('посоветуй что-то вроде Steins Gate', options)
+    await chat.sendMessage('посоветуй что-то вроде Frieren', options)
 
     expect(chat.messages.value).toHaveLength(2)
     expect(chat.messages.value[0].role).toBe('user')
     expect(chat.messages.value[1].role).toBe('assistant')
-    expect(chat.messages.value[1].content).toContain('Steins;Gate')
+    expect(chat.messages.value[1].content).toContain('Frieren')
     expect(chat.isBusy.value).toBe(false)
   })
 

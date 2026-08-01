@@ -37,11 +37,12 @@ export const MOCK_MODELS: ILLmModel[] = [
   },
 ]
 
+// Genres arrive from Shikimori in Russian, so the moods have to match that.
 const MOOD_GENRES: Record<string, string[]> = {
-  sad: ['Drama', 'Psychological'],
-  happy: ['Comedy', 'Adventure'],
-  tense: ['Thriller', 'Action', 'Horror'],
-  romantic: ['Romance'],
+  sad: ['Драма', 'Психологическое'],
+  happy: ['Комедия', 'Приключения'],
+  tense: ['Триллер', 'Экшен', 'Детектив'],
+  romantic: ['Романтика'],
   any: [],
 }
 

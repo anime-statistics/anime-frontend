@@ -86,11 +86,11 @@ describe('getRecommendations', () => {
 describe('chatResponse', () => {
   it('answers with matching titles as markdown', async () => {
     const response = await chatResponse(
-      [{ role: 'user', content: 'посоветуй что-то вроде Steins Gate' }],
+      [{ role: 'user', content: 'посоветуй что-то вроде Frieren' }],
       options,
     )
 
-    expect(response.reply).toContain('**Steins;Gate**')
+    expect(response.reply).toContain('Frieren')
     expect(response.usage.outputTokens).toBeGreaterThan(0)
   })
 

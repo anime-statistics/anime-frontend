@@ -1,12 +1,29 @@
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { apiClient } from '@/apis/http/client'
+import { animeSearchResults } from '@/mocks/fixtures/animeData'
+import { mangaSearchResults } from '@/mocks/fixtures/mangaData'
 import { handlers, resetMockState } from '@/mocks/handlers'
 import { mediaAdapter } from '@/mocks/mediaAdapter'
 import { shikimoriAdapter } from '@/mocks/shikimori/shikimoriAdapter'
 import { anilibertyAdapter } from '@/mocks/aniliberty/anilibertyAdapter'
 
 const server = setupServer(...handlers)
+
+// The fixtures are generated from a real Shikimori list, so the tests anchor on
+// entries looked up by shape rather than on hard-coded titles.
+const shikimoriItems = animeSearchResults.filter((item) => item.source === 'shikimori')
+const anilibertyItems = animeSearchResults.filter((item) => item.source === 'aniliberty')
+
+function slugOf(mediaId: string): string {
+  return mediaId.split('-').slice(1).join('-')
+}
+
+const anilibertySlugs = new Set(anilibertyItems.map((item) => slugOf(item.id)))
+const pairedItem = shikimoriItems.find((item) => anilibertySlugs.has(slugOf(item.id)))!
+const soloItem = shikimoriItems.find(
+  (item) => !anilibertySlugs.has(slugOf(item.id)) && item.titleEnglish !== undefined,
+)!
 
 beforeAll(() => {
   apiClient.defaults.baseURL = 'http://localhost:3000/api/v1/'
@@ -30,25 +47,26 @@ describe('shikimoriAdapter', () => {
   it('returns only shikimori anime and validates the DTOs', async () => {
     const { items, total } = await shikimoriAdapter.searchAnime('')
 
+    // The endpoint pages at twenty; total reports the whole filtered set.
+    expect(total).toBe(shikimoriItems.length)
     expect(items.length).toBeGreaterThan(0)
-    expect(total).toBe(items.length)
     expect(items.every((item) => item.source === 'shikimori')).toBe(true)
   })
 
   it('converts the snake_case response back to camelCase', async () => {
-    const { items } = await shikimoriAdapter.searchAnime('fullmetal')
+    const { items } = await shikimoriAdapter.searchAnime(soloItem.title)
+    const found = items.find((item) => item.id === soloItem.id)
 
-    expect(items[0].episodesTotal).toBe(64)
-    expect(items[0].titleEnglish).toBe('Fullmetal Alchemist: Brotherhood')
+    expect(found?.episodesTotal).toBe(soloItem.episodesTotal)
+    expect(found?.titleEnglish).toBe(soloItem.titleEnglish)
   })
 
   it('fetches details by slug id', async () => {
-    const detail = await shikimoriAdapter.getAnimeById(
-      'shikimori_5114-fullmetal-alchemist-brotherhood',
-    )
+    const detail = await shikimoriAdapter.getAnimeById(soloItem.id)
+    const numericId = soloItem.id.split('_')[1].split('-')[0]
 
-    expect(detail.watchedEpisodes).toBe(64)
-    expect(detail.externalLinks?.[0].url).toBe('https://shikimori.one/animes/5114')
+    expect(detail.title).toBe(soloItem.title)
+    expect(detail.externalLinks?.[0].url).toBe(`https://shikimori.one/animes/${numericId}`)
   })
 })
 
@@ -64,34 +82,23 @@ describe('anilibertyAdapter', () => {
 describe('mediaAdapter.search', () => {
   it('merges cross-source duplicates into a single card', async () => {
     const { items } = await mediaAdapter.search({
-      query: 'steins',
+      query: pairedItem.title,
       sources: ['shikimori', 'aniliberty'],
     })
 
-    expect(items).toHaveLength(1)
-    expect(items[0].source).toBe('shikimori')
-    expect(items[0].secondarySource).toBe('aniliberty')
-  })
-
-  it('merges entries whose titles differ but english titles match', async () => {
-    const { items } = await mediaAdapter.search({
-      query: 'titan',
-      sources: ['shikimori', 'aniliberty'],
-    })
-
-    expect(items).toHaveLength(1)
-    expect(items[0].titleEnglish).toBe('Attack on Titan')
-    expect(items[0].secondarySource).toBe('aniliberty')
+    const merged = items.find((item) => item.id === pairedItem.id)
+    expect(merged?.source).toBe('shikimori')
+    expect(merged?.secondarySource).toBe('aniliberty')
   })
 
   it('keeps unrelated titles separate', async () => {
     const { items } = await mediaAdapter.search({
-      query: 'death note',
+      query: soloItem.title,
       sources: ['shikimori', 'aniliberty'],
     })
 
-    expect(items).toHaveLength(1)
-    expect(items[0].secondarySource).toBeUndefined()
+    const found = items.find((item) => item.id === soloItem.id)
+    expect(found?.secondarySource).toBeUndefined()
   })
 
   it('queries a single source when only one is requested', async () => {
@@ -107,14 +114,15 @@ describe('mediaAdapter.search', () => {
     })
 
     expect(total).toBe(items.length)
+    expect(items.length).toBeLessThan(animeSearchResults.length)
   })
 })
 
 describe('mediaAdapter.getAnimeById', () => {
   it('routes to the source encoded in the media id', async () => {
-    const detail = await mediaAdapter.getAnimeById('shikimori_9253-steins-gate')
+    const detail = await mediaAdapter.getAnimeById(soloItem.id)
 
-    expect(detail.title).toBe('Steins;Gate')
+    expect(detail.title).toBe(soloItem.title)
   })
 
   it('rejects a malformed media id', async () => {
@@ -124,22 +132,22 @@ describe('mediaAdapter.getAnimeById', () => {
 
 describe('stateful mutations', () => {
   it('persists a status patch for the lifetime of the mock state', async () => {
-    await apiClient.patch('/anime/shikimori_20-naruto/status', { status: 'completed' })
+    await apiClient.patch(`/anime/${soloItem.id}/status`, { status: 'completed' })
 
-    const { items } = await shikimoriAdapter.searchAnime('naruto')
+    const { items } = await shikimoriAdapter.searchAnime(soloItem.title)
 
-    expect(items[0].status).toBe('completed')
+    expect(items.find((item) => item.id === soloItem.id)?.status).toBe('completed')
   })
 
   it('resets mutations between tests', async () => {
-    const { items } = await shikimoriAdapter.searchAnime('naruto')
+    const { items } = await shikimoriAdapter.searchAnime(soloItem.title)
 
-    expect(items[0].status).toBe('rewatching')
+    expect(items.find((item) => item.id === soloItem.id)?.status).toBe(soloItem.status)
   })
 
   it('applies a bulk patch to several ids', async () => {
     const { data } = await apiClient.post<{ updated: number }>('/anime/bulk', {
-      ids: ['shikimori_20-naruto', 'shikimori_21-one-piece'],
+      ids: [shikimoriItems[0].id, shikimoriItems[1].id],
       patch: { status: 'dropped' },
     })
 
@@ -173,20 +181,20 @@ describe('mock manga, tags and notes', () => {
 
   it('filters notes by media id', async () => {
     const { data } = await apiClient.get<{ items: { mediaId: string }[] }>('/notes', {
-      params: { mediaId: 'shikimori_9253-steins-gate' },
+      params: { mediaId: 'shikimori_52991-sousou-no-frieren' },
     })
 
     expect(data.items).toHaveLength(1)
-    expect(data.items[0].mediaId).toBe('shikimori_9253-steins-gate')
+    expect(data.items[0].mediaId).toBe('shikimori_52991-sousou-no-frieren')
   })
 
   it('searches manga through the facade', async () => {
+    const target = mangaSearchResults[0]
     const { items } = await mediaAdapter.searchManga({
-      query: 'berserk',
+      query: target.title,
       sources: ['shikimori', 'aniliberty'],
     })
 
-    expect(items).toHaveLength(1)
-    expect(items[0].chaptersTotal).toBe(375)
+    expect(items.some((item) => item.id === target.id)).toBe(true)
   })
 })

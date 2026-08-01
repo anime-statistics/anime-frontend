@@ -35,8 +35,12 @@ describe('anime validators', () => {
     expect(isAnimeSearchResultDto({ ...validAnime, score: 11 })).toBe(false)
   })
 
+  it('accepts zero episodes for an announced title', () => {
+    expect(isAnimeSearchResultDto({ ...validAnime, episodesTotal: 0 })).toBe(true)
+  })
+
   it('throws with validate* on invalid input', () => {
-    expect(() => validateAnimeSearchResultDto({ ...validAnime, episodesTotal: 0 })).toThrow()
+    expect(() => validateAnimeSearchResultDto({ ...validAnime, episodesTotal: -1 })).toThrow()
   })
 
   it('returns parsed data with validate* on valid input', () => {

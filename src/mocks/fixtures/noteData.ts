@@ -3,7 +3,7 @@ import type { INoteDto } from '@/apis/dtos/noteDto'
 export const notes: INoteDto[] = [
   {
     id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a601',
-    mediaId: 'shikimori_5114-fullmetal-alchemist-brotherhood',
+    mediaId: 'shikimori_52991-sousou-no-frieren',
     content: [
       '# Fullmetal Alchemist: Brotherhood',
       '',
@@ -18,7 +18,7 @@ export const notes: INoteDto[] = [
   },
   {
     id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a602',
-    mediaId: 'shikimori_9253-steins-gate',
+    mediaId: 'shikimori_54492-kusuriya-no-hitorigoto',
     content: [
       '## Таймлайны',
       '',
@@ -36,7 +36,7 @@ export const notes: INoteDto[] = [
   },
   {
     id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a603',
-    mediaId: 'shikimori_16498-attack-on-titan',
+    mediaId: 'shikimori_6547-angel-beats',
     content: [
       '### Прогресс',
       '',
@@ -51,7 +51,7 @@ export const notes: INoteDto[] = [
   },
   {
     id: '1a2b3c4d-5e6f-4a70-9b81-c2d3e4f5a604',
-    mediaId: 'shikimori_2-berserk',
+    mediaId: 'shikimori_126287-sousou-no-frieren',
     content: [
       '# Berserk',
       '',

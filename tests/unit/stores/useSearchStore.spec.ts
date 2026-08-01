@@ -10,6 +10,18 @@ import { useSearchStore } from '@/stores/useSearchStore'
 
 const server = setupServer(...handlers)
 
+function slugOf(mediaId: string): string {
+  return mediaId.split('-').slice(1).join('-')
+}
+
+// A title that exists on both sources, so the dedupe path has something to merge.
+const twinSlugs = new Set(
+  animeSearchResults.filter((item) => item.source === 'aniliberty').map((item) => slugOf(item.id)),
+)
+const PAIRED = animeSearchResults.find(
+  (item) => item.source === 'shikimori' && twinSlugs.has(slugOf(item.id)),
+)!
+
 beforeAll(() => {
   apiClient.defaults.baseURL = 'http://localhost:3000/api/v1/'
   apiClient.defaults.adapter = 'fetch'
@@ -32,39 +44,39 @@ afterAll(() => {
 describe('useSearchStore.search', () => {
   it('fetches deduplicated results through mediaAdapter', async () => {
     const store = useSearchStore()
-    store.setQuery('steins')
+    store.setQuery(PAIRED.title)
 
     await store.search()
 
     expect(store.isSearching).toBe(false)
-    expect(store.results).toHaveLength(1)
-    expect(store.results[0].secondarySource).toBe('aniliberty')
-    expect(store.total).toBe(1)
+    const merged = store.results.find((item) => item.id === PAIRED.id)
+    expect(merged?.secondarySource).toBe('aniliberty')
+    expect(store.total).toBe(store.results.length)
   })
 
   it('applies genre filters on top of the adapter response', async () => {
     const store = useSearchStore()
-    store.setQuery('genre:thriller')
+    store.setQuery('genre:романтика')
 
     await store.search()
 
     expect(store.results.length).toBeGreaterThan(0)
     expect(
       store.results.every((item) =>
-        (item.genres ?? []).some((genre) => genre.toLowerCase() === 'thriller'),
+        (item.genres ?? []).some((genre) => genre.toLowerCase() === 'романтика'),
       ),
     ).toBe(true)
   })
 
   it('applies excluded genres', async () => {
     const store = useSearchStore()
-    store.setQuery('-genre:action')
+    store.setQuery('-genre:романтика')
 
     await store.search()
 
     expect(
       store.results.some((item) =>
-        (item.genres ?? []).some((genre) => genre.toLowerCase() === 'action'),
+        (item.genres ?? []).some((genre) => genre.toLowerCase() === 'романтика'),
       ),
     ).toBe(false)
   })

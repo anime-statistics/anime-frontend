@@ -19,7 +19,8 @@ export const AnimeSearchResultDto = z.object({
   titleRussian: z.string().optional(),
   titleJapanese: z.string().optional(),
   titleEnglish: z.string().optional(),
-  episodesTotal: z.number().int().positive(),
+  // Announced titles have no episode count yet, so zero is a valid answer.
+  episodesTotal: z.number().int().nonnegative(),
   status: z.enum(ANIME_STATUSES),
   score: z.number().min(0).max(10).optional(),
   imageUrl: z.string().url().optional(),

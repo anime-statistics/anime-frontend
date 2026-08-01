@@ -11,12 +11,17 @@ import {
   useAnimeStatusMutation,
   useAnimeTagMutation,
 } from '@/composables/useAnimeQueries'
+import { animeSearchResults } from '@/mocks/fixtures/animeData'
 import { handlers, resetMockState } from '@/mocks/handlers'
 import { API_PREFIX } from '@/mocks/handlers/apiPrefix'
 import { useAnimeStore } from '@/stores/useAnimeStore'
 import { withQueryClient } from '../../helpers/withQueryClient'
 
-const FMA_ID = 'shikimori_5114-fullmetal-alchemist-brotherhood'
+// Anchored on generated fixture data rather than a hard-coded title.
+const ANCHOR = animeSearchResults.find(
+  (item) => item.source === 'shikimori' && item.titleEnglish !== undefined,
+)!
+const ANCHOR_ID = ANCHOR.id
 
 const server = setupServer(...handlers)
 
@@ -48,11 +53,11 @@ describe('anime library over MSW', () => {
     const items = result.data.value?.items ?? []
     expect(items.length).toBeGreaterThan(0)
 
-    const fma = items.find((item) => item.id === FMA_ID)
-    expect(fma).toBeDefined()
-    expect(fma?.episodesTotal).toBe(64)
-    expect(fma?.titleEnglish).toBe('Fullmetal Alchemist: Brotherhood')
-    expect(fma).not.toHaveProperty('episodes_total')
+    const anchor = items.find((item) => item.id === ANCHOR_ID)
+    expect(anchor).toBeDefined()
+    expect(anchor?.episodesTotal).toBe(ANCHOR.episodesTotal)
+    expect(anchor?.titleEnglish).toBe(ANCHOR.titleEnglish)
+    expect(anchor).not.toHaveProperty('episodes_total')
 
     wrapper.unmount()
   })
@@ -77,7 +82,7 @@ describe('anime library over MSW', () => {
 
     expect(result.fetchStatus.value).toBe('idle')
 
-    query.value = 'Steins'
+    query.value = ANCHOR.title
     await vi.waitFor(() => expect(result.isSuccess.value).toBe(true))
     expect(result.data.value?.items.length).toBeGreaterThan(0)
 
@@ -85,11 +90,11 @@ describe('anime library over MSW', () => {
   })
 
   it('loads a single title by id', async () => {
-    const mediaId = ref(FMA_ID)
+    const mediaId = ref(ANCHOR_ID)
     const { result, wrapper } = withQueryClient(() => useAnimeDetail(mediaId))
 
     await vi.waitFor(() => expect(result.isSuccess.value).toBe(true))
-    expect(result.data.value?.title).toBe('Fullmetal Alchemist: Brotherhood')
+    expect(result.data.value?.title).toBe(ANCHOR.title)
 
     wrapper.unmount()
   })
@@ -97,7 +102,7 @@ describe('anime library over MSW', () => {
 
 describe('anime mutations over MSW', () => {
   it('patches the status and invalidates the cached detail', async () => {
-    const mediaId = ref(FMA_ID)
+    const mediaId = ref(ANCHOR_ID)
     const { result: detail, wrapper, queryClient } = withQueryClient(() => useAnimeDetail(mediaId))
     await vi.waitFor(() => expect(detail.isSuccess.value).toBe(true))
 
@@ -107,7 +112,7 @@ describe('anime mutations over MSW', () => {
     )
 
     const updated = await mutation.mutateAsync({
-      mediaId: FMA_ID,
+      mediaId: ANCHOR_ID,
       payload: { status: 'rewatching' },
     })
 
@@ -121,7 +126,7 @@ describe('anime mutations over MSW', () => {
   it('patches the tag list', async () => {
     const { result: mutation, wrapper } = withQueryClient(() => useAnimeTagMutation())
 
-    const updated = await mutation.mutateAsync({ mediaId: FMA_ID, tagIds: [] })
+    const updated = await mutation.mutateAsync({ mediaId: ANCHOR_ID, tagIds: [] })
 
     expect(updated.myTags).toEqual([])
     wrapper.unmount()
@@ -135,7 +140,7 @@ describe('anime mutations over MSW', () => {
     const { result: mutation, wrapper } = withQueryClient(() => useAnimeStatusMutation())
 
     await expect(
-      mutation.mutateAsync({ mediaId: FMA_ID, payload: { status: 'dropped' } }),
+      mutation.mutateAsync({ mediaId: ANCHOR_ID, payload: { status: 'dropped' } }),
     ).rejects.toThrow()
 
     wrapper.unmount()
@@ -152,7 +157,7 @@ describe('useAnimeStore against real ids', () => {
     store.selectAll(ids)
 
     expect(store.selectedCount).toBe(ids.length)
-    expect(store.isSelected(FMA_ID)).toBe(true)
+    expect(store.isSelected(ANCHOR_ID)).toBe(true)
 
     wrapper.unmount()
   })
