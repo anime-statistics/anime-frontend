@@ -357,7 +357,8 @@
     "removeFromCollection": "Убрать из коллекции",
     "moveTarget": "Перенести в тег",
     "move": "Перенести",
-    "noTagsToRemove": "У выделенного нет тегов"
+    "noTagsToRemove": "У выделенного нет тегов",
+    "noTagsToAdd": "У выделенного уже есть все теги"
   },
   "contextMenu": {
     "addTag": "Добавить тег",

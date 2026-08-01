@@ -357,7 +357,8 @@
     "removeFromCollection": "Remove from collection",
     "moveTarget": "Move to tag",
     "move": "Move",
-    "noTagsToRemove": "The selection has no tags"
+    "noTagsToRemove": "The selection has no tags",
+    "noTagsToAdd": "The selection already has every tag"
   },
   "contextMenu": {
     "addTag": "Add tag",

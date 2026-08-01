@@ -80,15 +80,20 @@ function matchesActiveTag(item: { myTags?: string[] }): boolean {
 
 const sortedAnime = computed(() => allSortedAnime.value.filter(matchesActiveTag))
 
-// Every tag worn by anything in the selection — the bulk bar only offers to
-// strip tags that are actually there.
-const selectedTagIds = computed(() => [
-  ...new Set(
-    sortedAnime.value
-      .filter((item) => animeStore.isSelected(item.id))
-      .flatMap((item) => item.myTags),
+const selectedAnime = computed(() =>
+  sortedAnime.value.filter((item) => animeStore.isSelected(item.id)),
+)
+
+// The bulk bar hides the entries that would do nothing: the union is what can
+// still be stripped, the intersection is what there is no point adding.
+const selectedTagIds = computed(() =>
+  [...new Set(selectedAnime.value.flatMap((item) => item.myTags))],
+)
+const commonTagIds = computed(() =>
+  selectedTagIds.value.filter((tagId) =>
+    selectedAnime.value.every((item) => item.myTags.includes(tagId)),
   ),
-])
+)
 const sortedManga = computed(() => allSortedManga.value.filter(matchesActiveTag))
 
 function tagsFor(item: { myTags?: string[] }): ITagDto[] {
@@ -426,6 +431,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       <BulkActionBar
         :selected-count="animeStore.selectedCount"
         :selected-tag-ids="selectedTagIds"
+        :common-tag-ids="commonTagIds"
         :is-busy="bulkTagMutation.isPending.value"
         @apply-tags="applyTags"
         @clear="animeStore.clearSelection()"

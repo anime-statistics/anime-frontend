@@ -221,10 +221,16 @@ async function confirmDelete(mode: TagDeleteMode): Promise<void> {
           </span>
         </div>
 
+        <!-- The list runs to hundreds of rows, so the actions have to travel with
+             the scroll; picking the last item is otherwise a round trip. -->
         <div
           v-if="selectedCount > 0"
-          class="flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 p-3 text-sm dark:border-gray-700"
+          class="sticky bottom-4 z-20 order-last flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-xl dark:border-gray-700 dark:bg-gray-900"
         >
+          <span class="font-medium text-gray-700 dark:text-gray-200">
+            {{ translate('common.selected', { count: selectedCount }) }}
+          </span>
+
           <button
             type="button"
             class="rounded-lg bg-brand-600 px-3 py-1.5 text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
