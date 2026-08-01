@@ -7,14 +7,17 @@ export interface IBulkTagAction {
 </script>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useTagStore } from '@/stores/useTagStore'
 
 type OpenMenu = 'add' | 'remove' | null
 
-const props = defineProps<{ selectedCount: number, isBusy?: boolean }>()
+const props = withDefaults(
+  defineProps<{ selectedCount: number, selectedTagIds?: string[], isBusy?: boolean }>(),
+  { selectedTagIds: () => [], isBusy: false },
+)
 const emit = defineEmits<{
   applyTags: [IBulkTagAction]
   clear: []
@@ -24,6 +27,11 @@ const { translate } = useAppI18n()
 const tagStore = useTagStore()
 
 const openMenu = ref<OpenMenu>(null)
+
+// Offering to strip a tag nothing in the selection carries is a dead click, so
+// the remove menu lists only what the selected titles actually wear. The add
+// menu stays complete: a tag on one of them is still worth adding to the rest.
+const removableTags = computed(() => tagStore.resolveTags(props.selectedTagIds))
 
 function toggleMenu(menu: Exclude<OpenMenu, null>): void {
   openMenu.value = openMenu.value === menu ? null : menu
@@ -99,7 +107,13 @@ function removeFromCollection(): void {
         class="absolute bottom-full left-0 mb-1 max-h-64 w-56 overflow-y-auto rounded-lg bg-white text-gray-800 shadow-xl dark:bg-gray-800 dark:text-gray-100"
       >
         <li
-          v-for="tag in tagStore.tags"
+          v-if="removableTags.length === 0"
+          class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400"
+        >
+          {{ translate('bulk.noTagsToRemove') }}
+        </li>
+        <li
+          v-for="tag in removableTags"
           :key="tag.id"
         >
           <button

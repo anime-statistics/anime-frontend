@@ -356,7 +356,8 @@
     "removeThisTag": "Remove this tag",
     "removeFromCollection": "Remove from collection",
     "moveTarget": "Move to tag",
-    "move": "Move"
+    "move": "Move",
+    "noTagsToRemove": "The selection has no tags"
   },
   "contextMenu": {
     "addTag": "Add tag",

@@ -79,6 +79,16 @@ function matchesActiveTag(item: { myTags?: string[] }): boolean {
 }
 
 const sortedAnime = computed(() => allSortedAnime.value.filter(matchesActiveTag))
+
+// Every tag worn by anything in the selection — the bulk bar only offers to
+// strip tags that are actually there.
+const selectedTagIds = computed(() => [
+  ...new Set(
+    sortedAnime.value
+      .filter((item) => animeStore.isSelected(item.id))
+      .flatMap((item) => item.myTags),
+  ),
+])
 const sortedManga = computed(() => allSortedManga.value.filter(matchesActiveTag))
 
 function tagsFor(item: { myTags?: string[] }): ITagDto[] {
@@ -415,6 +425,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
       <BulkActionBar
         :selected-count="animeStore.selectedCount"
+        :selected-tag-ids="selectedTagIds"
         :is-busy="bulkTagMutation.isPending.value"
         @apply-tags="applyTags"
         @clear="animeStore.clearSelection()"

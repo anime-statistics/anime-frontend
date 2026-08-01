@@ -19,7 +19,7 @@ import { totalRuntime, type IRuntime } from '@/core/utils/runtime'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useTagStore } from '@/stores/useTagStore'
 
-type DetailTab = 'episodes' | 'notes' | 'history'
+type DetailTab = 'notes' | 'history'
 
 const props = defineProps<{ id: string }>()
 
@@ -35,11 +35,12 @@ const tagMutation = useAnimeTagMutation()
 
 const history = useWatchHistory(mediaId)
 
-const activeTab = ref<DetailTab>('episodes')
+const activeTab = ref<DetailTab>('notes')
 const hasImageError = ref(false)
 
+// Episode progress is an action on the title, so it lives in the side panel
+// with the rest; the tabs below are the long-form content.
 const TABS = [
-  { value: 'episodes', labelKey: 'detail.episodesTab' },
   { value: 'notes', labelKey: 'detail.notesTab' },
   { value: 'history', labelKey: 'detail.historyTab' },
 ] as const
@@ -313,6 +314,16 @@ async function toggleNotifications(): Promise<void> {
             />
           </div>
 
+          <div class="flex flex-col gap-1 border-t border-gray-200 pt-4 text-sm dark:border-gray-800">
+            <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.episodesTab') }}</span>
+            <EpisodeProgress
+              :watched="watchedEpisodes"
+              :total="anime.episodesTotal"
+              :is-busy="progressMutation.isPending.value"
+              @update="onProgressUpdate"
+            />
+          </div>
+
           <div class="flex flex-col gap-2">
             <a
               v-if="externalUrl"
@@ -363,16 +374,8 @@ async function toggleNotifications(): Promise<void> {
           </button>
         </div>
 
-        <EpisodeProgress
-          v-if="activeTab === 'episodes'"
-          :watched="watchedEpisodes"
-          :total="anime.episodesTotal"
-          :is-busy="progressMutation.isPending.value"
-          @update="onProgressUpdate"
-        />
-
         <NotesPanel
-          v-else-if="activeTab === 'notes'"
+          v-if="activeTab === 'notes'"
           :media-id="props.id"
         />
 
