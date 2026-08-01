@@ -132,8 +132,6 @@ function submit(): void {
           <ColorPicker
             v-model="pickerColor"
             format="hex"
-            append-to="self"
-            class="tag-color-picker"
             :aria-label="translate('tags.color')"
           />
         </div>
