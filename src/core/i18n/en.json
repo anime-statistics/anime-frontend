@@ -314,7 +314,8 @@
     "runtimeTotal": "Total",
     "runtimeHm": "{hours}h {minutes}m",
     "runtimeM": "{minutes}m",
-    "runtimeWatched": "{value} watched"
+    "actions": "Actions",
+    "runtimeSpent": "Spent"
   },
   "history": {
     "empty": "No watch history yet",

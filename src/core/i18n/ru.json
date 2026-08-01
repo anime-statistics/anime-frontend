@@ -314,7 +314,8 @@
     "runtimeTotal": "Всего",
     "runtimeHm": "{hours} ч {minutes} мин",
     "runtimeM": "{minutes} мин",
-    "runtimeWatched": "Просмотрено {value}"
+    "actions": "Действия",
+    "runtimeSpent": "Потрачено"
   },
   "history": {
     "empty": "Истории просмотра пока нет",

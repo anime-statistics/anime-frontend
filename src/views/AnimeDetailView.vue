@@ -62,6 +62,7 @@ function formatRuntime(value: IRuntime): string {
     ? translate('detail.runtimeHm', { hours: value.hours, minutes: value.minutes })
     : translate('detail.runtimeM', { minutes: value.minutes })
 }
+
 const externalUrl = computed(() => buildExternalUrl(props.id, 'anime'))
 const isNotified = computed(() => settingsStore.isNotified(props.id))
 
@@ -134,136 +135,191 @@ async function toggleNotifications(): Promise<void> {
     </p>
 
     <template v-else>
-      <div class="flex flex-col gap-6 md:flex-row">
-        <!-- The poster is the largest paint on this route; lazy-loading it would
-             only delay LCP. -->
-        <img
-          v-if="anime.imageUrl && !hasImageError"
-          :src="anime.imageUrl"
-          :alt="displayTitle"
-          class="max-h-80 w-full rounded-lg bg-gray-200 object-cover md:w-56 dark:bg-gray-700"
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-          @error="hasImageError = true"
-        >
-        <div
-          v-else
-          class="flex h-56 w-full items-center justify-center rounded-lg bg-gradient-to-br from-brand-100 to-brand-300 md:h-80 md:w-56 dark:from-gray-800 dark:to-gray-700"
-        >
-          <i class="pi pi-image text-4xl text-brand-500 dark:text-gray-500" />
+      <!-- Two columns: what the title is on the left, what you do with it on the
+           right. The tabs below stay full width, because the notes editor is the
+           reason this page is ever open for long and it deserves the room. -->
+      <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div class="flex min-w-0 flex-col gap-5">
+          <div class="flex flex-col gap-6 sm:flex-row">
+            <!-- The poster is the largest paint on this route; lazy-loading it
+                 would only delay LCP. -->
+            <img
+              v-if="anime.imageUrl && !hasImageError"
+              :src="anime.imageUrl"
+              :alt="displayTitle"
+              class="max-h-80 w-full rounded-lg bg-gray-200 object-cover sm:w-56 dark:bg-gray-700"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              @error="hasImageError = true"
+            >
+            <div
+              v-else
+              class="flex h-56 w-full items-center justify-center rounded-lg bg-gradient-to-br from-brand-100 to-brand-300 sm:h-80 sm:w-56 dark:from-gray-800 dark:to-gray-700"
+            >
+              <i class="pi pi-image text-4xl text-brand-500 dark:text-gray-500" />
+            </div>
+
+            <div class="flex min-w-0 flex-1 flex-col gap-3">
+              <header class="flex flex-col gap-1">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {{ displayTitle }}
+                </h1>
+                <p
+                  v-if="anime.title !== displayTitle"
+                  class="text-sm text-gray-500 dark:text-gray-400"
+                >
+                  {{ anime.title }}
+                </p>
+                <p
+                  v-if="anime.titleJapanese"
+                  class="text-sm text-gray-500 dark:text-gray-400"
+                >
+                  {{ anime.titleJapanese }}
+                </p>
+                <p
+                  v-if="anime.titleEnglish && anime.titleEnglish !== anime.title"
+                  class="text-sm text-gray-500 dark:text-gray-400"
+                >
+                  {{ anime.titleEnglish }}
+                </p>
+              </header>
+
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="rounded-full bg-brand-50 px-2 py-0.5 text-brand-700 dark:bg-gray-800 dark:text-brand-300">
+                  {{ anime.source }}
+                </span>
+                <span
+                  v-if="anime.secondarySource"
+                  class="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                >
+                  {{ anime.secondarySource }}
+                </span>
+                <span
+                  v-if="anime.rating"
+                  class="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                >
+                  {{ anime.rating }}
+                </span>
+                <span class="text-gray-500 dark:text-gray-400">
+                  {{ translatePlural('anime.episodes', anime.episodesTotal) }}
+                </span>
+                <span
+                  v-if="anime.airedFrom"
+                  class="text-gray-500 dark:text-gray-400"
+                >
+                  {{ anime.airedFrom.slice(0, 4) }}
+                </span>
+              </div>
+
+              <dl
+                v-if="runtime"
+                class="flex flex-wrap gap-x-6 gap-y-1 text-xs"
+              >
+                <div class="flex items-center gap-1.5">
+                  <dt class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                    <i class="pi pi-clock" />
+                    {{ translate('detail.runtimeTotal') }}
+                  </dt>
+                  <dd class="font-medium text-gray-800 dark:text-gray-100">
+                    {{ formatRuntime(runtime) }}
+                    <span class="font-normal text-gray-400 dark:text-gray-500">
+                      · {{ translate('detail.runtimeM', { minutes: runtime.totalMinutes }) }}
+                    </span>
+                  </dd>
+                </div>
+                <div
+                  v-if="watchedRuntime"
+                  class="flex items-center gap-1.5"
+                >
+                  <dt class="text-gray-500 dark:text-gray-400">
+                    {{ translate('detail.runtimeSpent') }}
+                  </dt>
+                  <dd class="font-medium text-gray-800 dark:text-gray-100">
+                    {{ formatRuntime(watchedRuntime) }}
+                  </dd>
+                </div>
+              </dl>
+
+              <div
+                v-if="anime.genres?.length"
+                class="flex flex-wrap gap-1"
+              >
+                <span
+                  v-for="genre in anime.genres"
+                  :key="genre"
+                  class="rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-600 dark:border-gray-700 dark:text-gray-300"
+                >
+                  {{ genre }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p
+            v-if="anime.synopsis"
+            class="max-w-prose text-sm text-gray-700 dark:text-gray-300"
+          >
+            {{ anime.synopsis }}
+          </p>
+
+          <section
+            v-if="anime.relatedAnime?.length"
+            class="flex flex-col gap-2"
+          >
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+              {{ translate('detail.related') }}
+            </h2>
+            <ul class="flex flex-col gap-1 text-sm">
+              <li
+                v-for="related in anime.relatedAnime"
+                :key="related.id"
+              >
+                <RouterLink
+                  :to="{ name: 'anime-detail', params: { id: related.id } }"
+                  class="text-brand-600 hover:underline dark:text-brand-300"
+                >
+                  {{ related.title }}
+                </RouterLink>
+                <span class="text-gray-500 dark:text-gray-400"> · {{ related.relation }}</span>
+              </li>
+            </ul>
+          </section>
         </div>
 
-        <div class="flex min-w-0 flex-1 flex-col gap-3">
-          <header class="flex flex-col gap-1">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {{ displayTitle }}
-            </h1>
-            <p
-              v-if="anime.title !== displayTitle"
-              class="text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ anime.title }}
-            </p>
-            <p
-              v-if="anime.titleJapanese"
-              class="text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ anime.titleJapanese }}
-            </p>
-            <p
-              v-if="anime.titleEnglish && anime.titleEnglish !== anime.title"
-              class="text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ anime.titleEnglish }}
-            </p>
-          </header>
-
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <span class="rounded-full bg-brand-50 px-2 py-0.5 text-brand-700 dark:bg-gray-800 dark:text-brand-300">
-              {{ anime.source }}
-            </span>
-            <span
-              v-if="anime.rating"
-              class="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-            >
-              {{ anime.rating }}
-            </span>
-            <span class="text-gray-500 dark:text-gray-400">
-              {{ translatePlural('anime.episodes', anime.episodesTotal) }}
-            </span>
-            <span
-              v-if="anime.airedFrom"
-              class="text-gray-500 dark:text-gray-400"
-            >
-              {{ anime.airedFrom.slice(0, 4) }}
-            </span>
-            <span
-              v-if="runtime"
-              class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400"
-              :title="translate('detail.runtimeM', { minutes: runtime.totalMinutes })"
-            >
-              <i class="pi pi-clock" />
-              {{ translate('detail.runtimeTotal') }}
-              <span class="font-medium text-gray-700 dark:text-gray-200">
-                {{ formatRuntime(runtime) }}
-              </span>
-              <span class="text-gray-400 dark:text-gray-500">
-                · {{ translate('detail.runtimeM', { minutes: runtime.totalMinutes }) }}
-              </span>
-            </span>
-            <span
-              v-if="watchedRuntime"
-              class="text-gray-500 dark:text-gray-400"
-            >
-              {{ translate('detail.runtimeWatched', { value: formatRuntime(watchedRuntime) }) }}
-            </span>
-          </div>
-
-          <div
-            v-if="anime.genres?.length"
-            class="flex flex-wrap gap-1"
-          >
-            <span
-              v-for="genre in anime.genres"
-              :key="genre"
-              class="rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-600 dark:border-gray-700 dark:text-gray-300"
-            >
-              {{ genre }}
-            </span>
-          </div>
-
-          <div class="grid gap-3 sm:grid-cols-2">
+        <aside
+          class="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 lg:sticky lg:top-20 lg:self-start dark:border-gray-800"
+          :aria-label="translate('detail.actions')"
+        >
+          <div class="flex flex-col gap-1 text-sm">
             <!-- Watch status lives in the tag picker: a title can sit in several
                  at once, so there is nothing left for a single-choice select. -->
-            <div class="flex flex-col gap-1 text-sm">
-              <span class="text-gray-500 dark:text-gray-400">{{ translate('tags.title') }}</span>
-              <TagSelector v-model="selectedTagIds" />
-              <span
-                v-if="selectedTagIds.length === 0"
-                class="text-xs text-gray-400 dark:text-gray-500"
-              >
-                {{ translate('collection.notInCollection') }}
-              </span>
-            </div>
-
-            <div class="flex flex-col gap-1 text-sm">
-              <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.score') }}</span>
-              <Rating
-                :model-value="anime.score ?? 0"
-                :stars="10"
-                @update:model-value="(value) => patchAnime({ score: Number(value ?? 0) })"
-              />
-            </div>
+            <span class="text-gray-500 dark:text-gray-400">{{ translate('tags.title') }}</span>
+            <TagSelector v-model="selectedTagIds" />
+            <span
+              v-if="selectedTagIds.length === 0"
+              class="text-xs text-gray-400 dark:text-gray-500"
+            >
+              {{ translate('collection.notInCollection') }}
+            </span>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-col gap-1 text-sm">
+            <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.score') }}</span>
+            <Rating
+              :model-value="anime.score ?? 0"
+              :stars="10"
+              @update:model-value="(value) => patchAnime({ score: Number(value ?? 0) })"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
             <a
               v-if="externalUrl"
               :href="externalUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm transition-colors hover:border-brand-400 dark:border-gray-700"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm transition-colors hover:border-brand-400 dark:border-gray-700"
             >
               <i class="pi pi-external-link" />
               {{ translate('detail.externalLinks') }}
@@ -271,7 +327,7 @@ async function toggleNotifications(): Promise<void> {
 
             <button
               type="button"
-              class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+              class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors"
               :class="isNotified
                 ? 'border-brand-500 text-brand-600 dark:text-brand-300'
                 : 'border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-400'"
@@ -283,38 +339,8 @@ async function toggleNotifications(): Promise<void> {
               {{ isNotified ? translate('detail.notifyEnabled') : translate('detail.notifyDisabled') }}
             </button>
           </div>
-        </div>
+        </aside>
       </div>
-
-      <p
-        v-if="anime.synopsis"
-        class="max-w-prose text-sm text-gray-700 dark:text-gray-300"
-      >
-        {{ anime.synopsis }}
-      </p>
-
-      <section
-        v-if="anime.relatedAnime?.length"
-        class="flex flex-col gap-2"
-      >
-        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
-          {{ translate('detail.related') }}
-        </h2>
-        <ul class="flex flex-col gap-1 text-sm">
-          <li
-            v-for="related in anime.relatedAnime"
-            :key="related.id"
-          >
-            <RouterLink
-              :to="{ name: 'anime-detail', params: { id: related.id } }"
-              class="text-brand-600 hover:underline dark:text-brand-300"
-            >
-              {{ related.title }}
-            </RouterLink>
-            <span class="text-gray-500 dark:text-gray-400"> · {{ related.relation }}</span>
-          </li>
-        </ul>
-      </section>
 
       <div class="flex flex-col gap-4">
         <div
