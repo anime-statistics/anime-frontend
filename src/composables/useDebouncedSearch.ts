@@ -2,7 +2,9 @@ import { watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useSearchStore } from '@/stores/useSearchStore'
 
-export const DEFAULT_SEARCH_DELAY = 300
+// Long enough to sit out an ordinary typing pace: at 300ms almost every
+// keystroke outlived the timer, so the search fired once per character.
+export const DEFAULT_SEARCH_DELAY = 1000
 
 export function useDebouncedSearch(delay = DEFAULT_SEARCH_DELAY) {
   const store = useSearchStore()

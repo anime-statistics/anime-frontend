@@ -1,6 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* PrimeVue is configured to emit into a `primevue` layer between these two.
+   Without the wrappers Tailwind's preflight stays unlayered and therefore beats
+   every layered rule, and its `border-width: 0` reset wipes the borders off
+   PrimeVue widgets — checkboxes end up as invisible white squares. */
+@layer tailwind-base, primevue, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
 
 @layer base {
   :root {

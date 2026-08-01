@@ -51,9 +51,13 @@ onMounted(() => {
     @click="emit('close')"
   />
 
+  <!-- The panel's icon column has to line up with the header's sidebar toggle:
+       the header pads by 16px and centres a 20px icon inside a 44px button, so
+       its icon box sits at 28..48. lg:pl-4 plus the links' own px-3 and a fixed
+       20px icon box puts these in the same place. -->
   <aside
     ref="drawer"
-    class="fixed inset-y-0 left-0 z-40 flex w-64 touch-pan-y flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white p-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-transform lg:static lg:z-auto lg:w-auto lg:translate-x-0 dark:border-gray-800 dark:bg-gray-900"
+    class="fixed inset-y-0 left-0 z-40 flex w-64 touch-pan-y flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white p-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-transform lg:static lg:z-auto lg:w-auto lg:translate-x-0 lg:pl-4 dark:border-gray-800 dark:bg-gray-900"
     :class="props.isOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <div class="flex items-center justify-between lg:hidden">
@@ -80,7 +84,9 @@ onMounted(() => {
         :title="`${translate(item.labelKey)}${item.hint}`"
         @click="emit('close')"
       >
-        <i :class="['pi', item.icon, 'shrink-0']" />
+        <span class="flex size-5 shrink-0 items-center justify-center">
+          <i :class="['pi', item.icon]" />
+        </span>
         <span :class="props.isCollapsed ? 'lg:hidden' : ''">{{ translate(item.labelKey) }}</span>
       </RouterLink>
     </nav>
@@ -106,7 +112,7 @@ onMounted(() => {
         <li
           v-for="tag in tagStore.visibleTags"
           :key="tag.id"
-          class="flex items-center gap-1 rounded-lg px-2 py-1"
+          class="flex items-center gap-1 rounded-lg px-3 py-1"
           :class="activeTagId === tag.id
             ? 'bg-brand-50 dark:bg-gray-800'
             : 'hover:bg-gray-100 dark:hover:bg-gray-800'"

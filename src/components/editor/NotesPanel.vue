@@ -4,6 +4,7 @@ import MarkdownIt from 'markdown-it'
 import { computed, ref, toRef, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import type { INoteDto } from '@/apis/dtos/noteDto'
+import MarkdownDiff from '@/components/editor/MarkdownDiff.vue'
 import MarkdownSplitView from '@/components/editor/MarkdownSplitView.vue'
 import NotesList from '@/components/editor/NotesList.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
@@ -34,6 +35,7 @@ const notes = computed<INoteDto[]>(() => notesQuery.data.value ?? [])
 const selectedId = ref<string | null>(null)
 const content = ref('')
 const savedContent = ref('')
+const isDiffOpen = ref(false)
 
 const isDirty = computed(() => content.value !== savedContent.value)
 const currentKey = computed(() => draftKey(props.mediaId, selectedId.value))
@@ -128,7 +130,7 @@ function exportPdf(id: string): void {
       @export-pdf="exportPdf"
     />
 
-    <div class="flex items-center gap-2 text-xs">
+    <div class="flex flex-wrap items-center gap-3 text-xs">
       <span
         class="inline-flex items-center gap-1"
         :class="isDirty ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'"
@@ -136,7 +138,25 @@ function exportPdf(id: string): void {
         <i :class="['pi', isDirty ? 'pi-clock' : 'pi-check']" />
         {{ isDirty ? translate('notes.unsaved') : translate('notes.saved') }}
       </span>
+
+      <!-- Autosave rewrites the note under the author; the diff is the only way
+           to see what the pending save is about to change. -->
+      <button
+        type="button"
+        class="inline-flex items-center gap-1 rounded border border-gray-200 px-2 py-1 text-gray-600 transition-colors hover:border-brand-400 dark:border-gray-700 dark:text-gray-300"
+        :aria-expanded="isDiffOpen"
+        @click="isDiffOpen = !isDiffOpen"
+      >
+        <i :class="['pi', isDiffOpen ? 'pi-eye-slash' : 'pi-eye']" />
+        {{ isDiffOpen ? translate('notes.hideDiff') : translate('notes.showDiff') }}
+      </button>
     </div>
+
+    <MarkdownDiff
+      v-if="isDiffOpen"
+      :before="savedContent"
+      :after="content"
+    />
 
     <MarkdownSplitView v-model="content" />
   </div>

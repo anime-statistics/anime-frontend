@@ -145,7 +145,11 @@
     "unsaved": "Unsaved changes",
     "saved": "Saved",
     "draftRestored": "Restored an unsaved draft",
-    "untitled": "Untitled note"
+    "untitled": "Untitled note",
+    "showDiff": "Show changes",
+    "hideDiff": "Hide changes",
+    "diffTitle": "Changes since the last save",
+    "noChanges": "No changes"
   },
   "ai": {
     "open": "AI assistant",
