@@ -313,7 +313,11 @@
     "notifyDenied": "Уведомления заблокированы в браузере",
     "volumesRead": "Прочитано томов",
     "chaptersRead": "Прочитано глав",
-    "saving": "Сохранение…"
+    "saving": "Сохранение…",
+    "runtimeTotal": "Всего",
+    "runtimeHm": "{hours} ч {minutes} мин",
+    "runtimeM": "{minutes} мин",
+    "runtimeWatched": "Просмотрено {value}"
   },
   "history": {
     "empty": "Истории просмотра пока нет",

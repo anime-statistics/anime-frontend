@@ -313,7 +313,11 @@
     "notifyDenied": "Notifications are blocked in the browser",
     "volumesRead": "Volumes read",
     "chaptersRead": "Chapters read",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "runtimeTotal": "Total",
+    "runtimeHm": "{hours}h {minutes}m",
+    "runtimeM": "{minutes}m",
+    "runtimeWatched": "{value} watched"
   },
   "history": {
     "empty": "No watch history yet",

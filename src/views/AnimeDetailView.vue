@@ -15,6 +15,7 @@ import { useToast } from '@/composables/useToast'
 import { DEFAULT_EPISODE_MINUTES, useWatchHistory } from '@/composables/useWatchHistory'
 import { buildExternalUrl } from '@/core/utils/externalLinks'
 import { primaryTitle } from '@/core/utils/mediaTitle'
+import { totalRuntime, type IRuntime } from '@/core/utils/runtime'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useTagStore } from '@/stores/useTagStore'
 
@@ -47,6 +48,20 @@ const displayTitle = computed(() =>
   anime.value ? primaryTitle(anime.value, locale.value) : '',
 )
 const watchedEpisodes = computed(() => anime.value?.watchedEpisodes ?? 0)
+
+// How much of your life this title asks for, and how much it already took.
+const runtime = computed(() =>
+  totalRuntime(anime.value?.episodesTotal, anime.value?.duration),
+)
+const watchedRuntime = computed(() =>
+  totalRuntime(watchedEpisodes.value, anime.value?.duration),
+)
+
+function formatRuntime(value: IRuntime): string {
+  return value.hours
+    ? translate('detail.runtimeHm', { hours: value.hours, minutes: value.minutes })
+    : translate('detail.runtimeM', { minutes: value.minutes })
+}
 const externalUrl = computed(() => buildExternalUrl(props.id, 'anime'))
 const isNotified = computed(() => settingsStore.isNotified(props.id))
 
@@ -182,6 +197,26 @@ async function toggleNotifications(): Promise<void> {
               class="text-gray-500 dark:text-gray-400"
             >
               {{ anime.airedFrom.slice(0, 4) }}
+            </span>
+            <span
+              v-if="runtime"
+              class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400"
+              :title="translate('detail.runtimeM', { minutes: runtime.totalMinutes })"
+            >
+              <i class="pi pi-clock" />
+              {{ translate('detail.runtimeTotal') }}
+              <span class="font-medium text-gray-700 dark:text-gray-200">
+                {{ formatRuntime(runtime) }}
+              </span>
+              <span class="text-gray-400 dark:text-gray-500">
+                · {{ translate('detail.runtimeM', { minutes: runtime.totalMinutes }) }}
+              </span>
+            </span>
+            <span
+              v-if="watchedRuntime"
+              class="text-gray-500 dark:text-gray-400"
+            >
+              {{ translate('detail.runtimeWatched', { value: formatRuntime(watchedRuntime) }) }}
             </span>
           </div>
 
