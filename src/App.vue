@@ -27,7 +27,12 @@ const isMobileMenuOpen = ref(false)
 const isSidebarCollapsed = ref(false)
 const isShortcutOverlayOpen = ref(false)
 
-const hasDetailPanel = computed(() => detailRoutes.has(String(route.name)))
+// Reserving the third column for a named view that no route actually provides
+// left an empty bordered strip on every detail page.
+const hasDetailPanel = computed(() =>
+  detailRoutes.has(String(route.name))
+  && route.matched.some((record) => record.components?.detail !== undefined),
+)
 
 const ROUTE_TITLE_KEYS = {
   home: 'pages.homeTitle',

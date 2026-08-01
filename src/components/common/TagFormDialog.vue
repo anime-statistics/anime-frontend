@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Dialog from 'primevue/dialog'
+import Select from 'primevue/select'
 import { computed, ref, watch } from 'vue'
 import { CreateTagDto, type ICreateTagDto, type ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
@@ -36,7 +37,7 @@ const ICON_OPTIONS = [
   'pi-clock',
   'pi-book',
   'pi-bookmark',
-] as const
+].map((value) => ({ value, label: value || '—' }))
 
 const name = ref('')
 const color = ref<string>(PRESET_COLORS[3])
@@ -135,21 +136,49 @@ function submit(): void {
         </div>
       </fieldset>
 
-      <label class="flex flex-col gap-1 text-sm">
-        <span class="text-gray-600 dark:text-gray-300">{{ translate('tags.icon') }}</span>
-        <select
-          v-model="icon"
-          class="rounded-lg border border-gray-200 bg-transparent px-3 py-2 dark:border-gray-700"
+      <div class="flex flex-col gap-1 text-sm">
+        <label
+          class="text-gray-600 dark:text-gray-300"
+          for="tag-icon"
         >
-          <option
-            v-for="option in ICON_OPTIONS"
-            :key="option"
-            :value="option"
-          >
-            {{ option || '—' }}
-          </option>
-        </select>
-      </label>
+          {{ translate('tags.icon') }}
+        </label>
+        <!-- A native <option> cannot host an icon font glyph, so the list has to
+             be a rendered one for the choice to mean anything. -->
+        <Select
+          v-model="icon"
+          input-id="tag-icon"
+          :options="ICON_OPTIONS"
+          option-label="label"
+          option-value="value"
+          class="w-full"
+        >
+          <template #value="{ value }">
+            <span class="flex items-center gap-2">
+              <i
+                v-if="value"
+                :class="['pi', value]"
+              />
+              <span>{{ value || '—' }}</span>
+            </span>
+          </template>
+
+          <template #option="{ option }">
+            <span class="flex items-center gap-2">
+              <i
+                v-if="option.value"
+                :class="['pi', option.value]"
+              />
+              <span
+                v-else
+                class="inline-block w-4"
+                aria-hidden="true"
+              />
+              <span>{{ option.label }}</span>
+            </span>
+          </template>
+        </Select>
+      </div>
 
       <label class="flex items-center gap-2 text-sm">
         <input

@@ -233,7 +233,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.language') }}</span>
             <select
               v-model="localeModel"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             >
               <option value="ru">Русский</option>
               <option value="en">English</option>
@@ -244,7 +244,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.defaultViewMode') }}</span>
             <select
               v-model="viewModeModel"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             >
               <option value="cards">{{ translate('viewMode.cards') }}</option>
               <option value="list">{{ translate('viewMode.list') }}</option>
@@ -262,7 +262,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.paginationMode') }}</span>
             <select
               :value="settingsStore.settings.paginationMode"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               @change="settingsStore.update({ paginationMode: ($event.target as HTMLSelectElement).value as IPaginationMode })"
             >
               <option value="pagination">{{ translate('settings.paginationClassic') }}</option>
@@ -298,7 +298,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.theme') }}</span>
             <select
               v-model="themeModel"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             >
               <option value="light">{{ translate('app.themeLight') }}</option>
               <option value="dark">{{ translate('app.themeDark') }}</option>
@@ -321,7 +321,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.density') }}</span>
             <select
               :value="settingsStore.settings.uiDensity"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               @change="settingsStore.update({ uiDensity: ($event.target as HTMLSelectElement).value as IUiDensity })"
             >
               <option value="compact">{{ translate('settings.densityCompact') }}</option>
@@ -350,7 +350,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.aiProvider') }}</span>
             <select
               :value="settingsStore.settings.aiModelId"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               @change="settingsStore.update({ aiModelId: ($event.target as HTMLSelectElement).value })"
             >
               <option
@@ -417,7 +417,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.aiVoiceModel') }}</span>
             <select
               :value="settingsStore.settings.aiVoiceModel"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               @change="settingsStore.update({ aiVoiceModel: ($event.target as HTMLSelectElement).value as IVoiceModel })"
             >
               <option value="browser">{{ translate('settings.voiceModelBrowser') }}</option>
@@ -511,7 +511,7 @@ const CHANGELOG = [
             <span class="text-gray-600 dark:text-gray-300">{{ translate('settings.syncInterval') }}</span>
             <select
               :value="settingsStore.settings.syncInterval"
-              class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+              class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               @change="settingsStore.update({ syncInterval: ($event.target as HTMLSelectElement).value as ISyncInterval })"
             >
               <option value="never">{{ translate('settings.intervalNever') }}</option>

@@ -89,7 +89,7 @@ function clearAll(): void {
         {{ translate('filters.status') }}
       </span>
       <select
-        class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+        class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
         :value="activeStatus"
         @change="replace('status', ($event.target as HTMLSelectElement).value)"
       >

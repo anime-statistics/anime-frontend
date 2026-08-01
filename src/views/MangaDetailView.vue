@@ -124,7 +124,7 @@ function onStatusChange(event: Event): void {
             <label class="flex flex-col gap-1 text-sm">
               <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.status') }}</span>
               <select
-                class="rounded-lg border border-gray-200 bg-transparent px-2 py-1.5 dark:border-gray-700"
+                class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                 :value="manga.status"
                 :disabled="statusMutation.isPending.value"
                 @change="onStatusChange"
@@ -171,7 +171,7 @@ function onStatusChange(event: Event): void {
 
       <div class="flex flex-col gap-4">
         <div
-          class="flex gap-1 overflow-x-auto border-b border-gray-200 dark:border-gray-800"
+          class="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-gray-200 dark:border-gray-800"
           role="tablist"
         >
           <button

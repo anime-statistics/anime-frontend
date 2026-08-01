@@ -19,6 +19,13 @@
 
   html {
     @apply antialiased;
+    color-scheme: light;
+  }
+
+  /* Without this the browser keeps painting native widgets — option popups,
+     scrollbars, checkboxes — in the light scheme while the page is dark. */
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
@@ -27,6 +34,12 @@
 
   :focus-visible {
     @apply outline-none ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-gray-900;
+  }
+
+  /* Chromium paints the native option popup with the select's own colours, so a
+     transparent select produces a see-through, unreadable list. */
+  select option {
+    @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100;
   }
 }
 

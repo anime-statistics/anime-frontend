@@ -63,7 +63,7 @@ watch(
     <select
       v-if="props.showLanguage"
       v-model="voice.language.value"
-      class="rounded border border-gray-200 bg-transparent px-1 py-0.5 text-xs dark:border-gray-700"
+      class="rounded border border-gray-200 bg-white px-1 py-0.5 text-xs text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
       :aria-label="translate('voice.language')"
     >
       <option
