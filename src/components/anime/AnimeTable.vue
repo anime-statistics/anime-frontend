@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { ANIME_STATUSES } from '@/apis/dtos/animeDto'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useIsMobile } from '@/composables/useMediaQuery'
+import { primaryTitle } from '@/core/utils/mediaTitle'
 import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 
 const props = withDefaults(
@@ -12,9 +13,13 @@ const props = withDefaults(
   { rows: 20 },
 )
 
-const { translate } = useAppI18n()
+const { translate, locale } = useAppI18n()
 const router = useRouter()
 const isMobile = useIsMobile()
+
+function displayTitle(item: IMergedAnimeSearchResult): string {
+  return primaryTitle(item, locale.value)
+}
 
 function openDetail(event: { data: IMergedAnimeSearchResult }): void {
   void router.push({ name: 'anime-detail', params: { id: event.data.id } })
@@ -41,7 +46,7 @@ function statusLabel(status: string): string {
         :to="{ name: 'anime-detail', params: { id: item.id } }"
         class="block min-h-[44px] text-sm font-semibold text-gray-900 hover:text-brand-600 dark:text-gray-100 dark:hover:text-brand-300"
       >
-        {{ item.title }}
+        {{ displayTitle(item) }}
       </RouterLink>
 
       <dl class="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
@@ -96,7 +101,11 @@ function statusLabel(status: string): string {
       field="title"
       :header="translate('anime.title')"
       sortable
-    />
+    >
+      <template #body="{ data }">
+        {{ displayTitle(data) }}
+      </template>
+    </Column>
     <Column
       field="source"
       :header="translate('filters.sources')"

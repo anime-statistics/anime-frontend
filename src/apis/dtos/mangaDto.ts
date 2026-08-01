@@ -14,6 +14,7 @@ export type MangaStatus = (typeof MANGA_STATUSES)[number]
 export const MangaSearchResultDto = z.object({
   id: z.string().regex(/^(shikimori|aniliberty)_\d+-[\w-]+$/),
   title: z.string().min(1),
+  titleRussian: z.string().optional(),
   titleJapanese: z.string().optional(),
   titleEnglish: z.string().optional(),
   volumesTotal: z.number().int().nonnegative(),

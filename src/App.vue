@@ -118,7 +118,11 @@ watch(keys.Escape, (pressed) => {
 
     <OfflineBanner />
 
-    <AppHeader @toggle-menu="isMobileMenuOpen = !isMobileMenuOpen" />
+    <AppHeader
+      :is-sidebar-collapsed="isSidebarCollapsed"
+      @toggle-menu="isMobileMenuOpen = !isMobileMenuOpen"
+      @toggle-sidebar="isSidebarCollapsed = !isSidebarCollapsed"
+    />
 
     <div
       class="grid flex-1 grid-cols-1"
@@ -128,7 +132,6 @@ watch(keys.Escape, (pressed) => {
         :is-open="isMobileMenuOpen"
         :is-collapsed="isSidebarCollapsed"
         @close="isMobileMenuOpen = false"
-        @toggle-collapsed="isSidebarCollapsed = !isSidebarCollapsed"
       />
 
       <main

@@ -16,6 +16,7 @@ export const MEDIA_SOURCES = ['shikimori', 'aniliberty'] as const
 export const AnimeSearchResultDto = z.object({
   id: z.string().regex(/^(shikimori|aniliberty)_\d+-[\w-]+$/),
   title: z.string().min(1),
+  titleRussian: z.string().optional(),
   titleJapanese: z.string().optional(),
   titleEnglish: z.string().optional(),
   episodesTotal: z.number().int().positive(),

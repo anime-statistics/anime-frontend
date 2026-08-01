@@ -11,6 +11,7 @@ import { useAppI18n } from '@/composables/useAppI18n'
 import { useToast } from '@/composables/useToast'
 import { DEFAULT_EPISODE_MINUTES, useWatchHistory } from '@/composables/useWatchHistory'
 import { buildExternalUrl } from '@/core/utils/externalLinks'
+import { primaryTitle } from '@/core/utils/mediaTitle'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useTagStore } from '@/stores/useTagStore'
 
@@ -19,7 +20,7 @@ type DetailTab = 'episodes' | 'notes' | 'history'
 const props = defineProps<{ id: string }>()
 
 const mediaId = toRef(props, 'id')
-const { translate, translatePlural } = useAppI18n()
+const { translate, translatePlural, locale } = useAppI18n()
 const tagStore = useTagStore()
 const settingsStore = useSettingsStore()
 const toast = useToast()
@@ -39,6 +40,9 @@ const TABS = [
   { value: 'history', labelKey: 'detail.historyTab' },
 ] as const
 
+const displayTitle = computed(() =>
+  anime.value ? primaryTitle(anime.value, locale.value) : '',
+)
 const watchedEpisodes = computed(() => anime.value?.watchedEpisodes ?? 0)
 const externalUrl = computed(() => buildExternalUrl(props.id, 'anime'))
 const isNotified = computed(() => settingsStore.isNotified(props.id))
@@ -129,7 +133,7 @@ async function toggleNotifications(): Promise<void> {
         <img
           v-if="anime.imageUrl && !hasImageError"
           :src="anime.imageUrl"
-          :alt="anime.title"
+          :alt="displayTitle"
           class="max-h-80 w-full rounded-lg bg-gray-200 object-cover md:w-56 dark:bg-gray-700"
           loading="eager"
           fetchpriority="high"
@@ -146,8 +150,14 @@ async function toggleNotifications(): Promise<void> {
         <div class="flex min-w-0 flex-1 flex-col gap-3">
           <header class="flex flex-col gap-1">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {{ anime.title }}
+              {{ displayTitle }}
             </h1>
+            <p
+              v-if="anime.title !== displayTitle"
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >
+              {{ anime.title }}
+            </p>
             <p
               v-if="anime.titleJapanese"
               class="text-sm text-gray-500 dark:text-gray-400"

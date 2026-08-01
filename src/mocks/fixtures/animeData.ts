@@ -4,6 +4,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_5114-fullmetal-alchemist-brotherhood',
     title: 'Fullmetal Alchemist: Brotherhood',
+    titleRussian: 'Стальной алхимик: Братство',
     titleJapanese: '鋼の錬金術師 FULLMETAL ALCHEMIST',
     titleEnglish: 'Fullmetal Alchemist: Brotherhood',
     episodesTotal: 64,
@@ -20,6 +21,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_9253-steins-gate',
     title: 'Steins;Gate',
+    titleRussian: 'Врата Штейна',
     titleJapanese: 'シュタインズ・ゲート',
     titleEnglish: 'Steins;Gate',
     episodesTotal: 24,
@@ -36,6 +38,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'aniliberty_100-steins-gate',
     title: 'Steins Gate',
+    titleRussian: 'Врата Штейна',
     titleEnglish: 'Steins;Gate',
     episodesTotal: 24,
     status: 'completed',
@@ -49,6 +52,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_1535-death-note',
     title: 'Death Note',
+    titleRussian: 'Тетрадь смерти',
     titleJapanese: 'デスノート',
     titleEnglish: 'Death Note',
     episodesTotal: 37,
@@ -65,6 +69,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_16498-attack-on-titan',
     title: 'Shingeki no Kyojin',
+    titleRussian: 'Атака титанов',
     titleJapanese: '進撃の巨人',
     titleEnglish: 'Attack on Titan',
     episodesTotal: 25,
@@ -80,6 +85,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'aniliberty_204-attack-on-titan',
     title: 'Атака титанов',
+    titleRussian: 'Атака титанов',
     titleEnglish: 'Attack on Titan',
     episodesTotal: 25,
     status: 'watching',
@@ -93,6 +99,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_11061-hunter-x-hunter-2011',
     title: 'Hunter x Hunter (2011)',
+    titleRussian: 'Охотник х Охотник (2011)',
     titleJapanese: 'ハンター×ハンター',
     titleEnglish: 'Hunter x Hunter',
     episodesTotal: 148,
@@ -107,6 +114,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_32281-kimi-no-na-wa',
     title: 'Kimi no Na wa.',
+    titleRussian: 'Твоё имя',
     titleJapanese: '君の名は。',
     titleEnglish: 'Your Name.',
     episodesTotal: 1,
@@ -121,6 +129,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_38000-kimetsu-no-yaiba',
     title: 'Kimetsu no Yaiba',
+    titleRussian: 'Клинок, рассекающий демонов',
     titleJapanese: '鬼滅の刃',
     titleEnglish: 'Demon Slayer',
     episodesTotal: 26,
@@ -135,6 +144,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_31964-boku-no-hero-academia',
     title: 'Boku no Hero Academia',
+    titleRussian: 'Моя геройская академия',
     titleJapanese: '僕のヒーローアカデミア',
     titleEnglish: 'My Hero Academia',
     episodesTotal: 13,
@@ -149,6 +159,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_20-naruto',
     title: 'Naruto',
+    titleRussian: 'Наруто',
     titleJapanese: 'ナルト',
     titleEnglish: 'Naruto',
     episodesTotal: 220,
@@ -164,6 +175,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'shikimori_21-one-piece',
     title: 'One Piece',
+    titleRussian: 'Ван-Пис',
     titleJapanese: 'ワンピース',
     titleEnglish: 'One Piece',
     episodesTotal: 1100,
@@ -178,6 +190,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'aniliberty_311-frieren',
     title: 'Sousou no Frieren',
+    titleRussian: 'Провожающая в последний путь Фрирен',
     titleEnglish: 'Frieren: Beyond Journey\'s End',
     episodesTotal: 28,
     status: 'planned',
@@ -191,6 +204,7 @@ export const animeSearchResults: IAnimeSearchResultDto[] = [
   {
     id: 'aniliberty_415-cyberpunk-edgerunners',
     title: 'Cyberpunk: Edgerunners',
+    titleRussian: 'Киберпанк: Бегущие по краю',
     titleEnglish: 'Cyberpunk: Edgerunners',
     episodesTotal: 10,
     status: 'planned',

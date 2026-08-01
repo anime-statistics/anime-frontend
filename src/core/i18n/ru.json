@@ -384,7 +384,16 @@
     "voiceInputSoon": "Голосовой ввод появится позже",
     "suggestions": "Подсказки фильтров",
     "clearQuery": "Очистить запрос",
-    "submit": "Искать"
+    "submit": "Искать",
+    "keyHints": {
+      "anime": "ID аниме: shiki_id: или liberty_id:",
+      "manga": "ID манги: shiki_id: или liberty_id:",
+      "genre": "жанр, например action",
+      "year": "год выхода, например 2024",
+      "status": "статус просмотра",
+      "tag": "ваш тег",
+      "source": "источник: shikimori или aniliberty"
+    }
   },
   "pagination": {
     "previous": "Назад",

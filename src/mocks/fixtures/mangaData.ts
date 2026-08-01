@@ -4,6 +4,7 @@ export const mangaSearchResults: IMangaSearchResultDto[] = [
   {
     id: 'shikimori_2-berserk',
     title: 'Berserk',
+    titleRussian: 'Берсерк',
     titleJapanese: 'ベルセルク',
     titleEnglish: 'Berserk',
     volumesTotal: 42,
@@ -19,6 +20,7 @@ export const mangaSearchResults: IMangaSearchResultDto[] = [
   {
     id: 'shikimori_13-one-piece',
     title: 'One Piece',
+    titleRussian: 'Ван-Пис',
     titleJapanese: 'ワンピース',
     titleEnglish: 'One Piece',
     volumesTotal: 110,
@@ -33,6 +35,7 @@ export const mangaSearchResults: IMangaSearchResultDto[] = [
   {
     id: 'shikimori_1706-death-note',
     title: 'Death Note',
+    titleRussian: 'Тетрадь смерти',
     titleJapanese: 'デスノート',
     titleEnglish: 'Death Note',
     volumesTotal: 12,
@@ -48,6 +51,7 @@ export const mangaSearchResults: IMangaSearchResultDto[] = [
   {
     id: 'shikimori_656-vagabond',
     title: 'Vagabond',
+    titleRussian: 'Бродяга',
     titleJapanese: 'バガボンド',
     titleEnglish: 'Vagabond',
     volumesTotal: 37,
@@ -63,6 +67,7 @@ export const mangaSearchResults: IMangaSearchResultDto[] = [
   {
     id: 'shikimori_44347-chainsaw-man',
     title: 'Chainsaw Man',
+    titleRussian: 'Человек-бензопила',
     titleJapanese: 'チェンソーマン',
     titleEnglish: 'Chainsaw Man',
     volumesTotal: 20,
@@ -77,6 +82,7 @@ export const mangaSearchResults: IMangaSearchResultDto[] = [
   {
     id: 'aniliberty_512-vinland-saga',
     title: 'Vinland Saga',
+    titleRussian: 'Сага о Винланде',
     titleEnglish: 'Vinland Saga',
     volumesTotal: 28,
     chaptersTotal: 217,
@@ -90,6 +96,7 @@ export const mangaSearchResults: IMangaSearchResultDto[] = [
   {
     id: 'aniliberty_733-oyasumi-punpun',
     title: 'Oyasumi Punpun',
+    titleRussian: 'Спокойной ночи, Пунпун',
     titleEnglish: 'Goodnight Punpun',
     volumesTotal: 13,
     chaptersTotal: 147,

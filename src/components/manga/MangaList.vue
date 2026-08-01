@@ -3,11 +3,20 @@ import Tag from 'primevue/tag'
 import { ref } from 'vue'
 import type { IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
 
 const props = defineProps<{ items: IMangaSearchResultDto[] }>()
 
-const { translate, translatePlural } = useAppI18n()
+const { translate, translatePlural, locale } = useAppI18n()
 const brokenImages = ref<Set<string>>(new Set())
+
+function displayTitle(item: IMangaSearchResultDto): string {
+  return primaryTitle(item, locale.value)
+}
+
+function altTitle(item: IMangaSearchResultDto): string | undefined {
+  return secondaryTitle(item, locale.value)
+}
 
 function markBroken(id: string): void {
   brokenImages.value = new Set(brokenImages.value).add(id)
@@ -24,7 +33,7 @@ function markBroken(id: string): void {
       <img
         v-if="item.imageUrl && !brokenImages.has(item.id)"
         :src="item.imageUrl"
-        :alt="item.title"
+        :alt="displayTitle(item)"
         class="size-14 shrink-0 rounded bg-gray-200 object-cover dark:bg-gray-700"
         loading="lazy"
         decoding="async"
@@ -42,8 +51,14 @@ function markBroken(id: string): void {
           :to="{ name: 'manga-detail', params: { id: item.id } }"
           class="block truncate font-medium text-gray-900 hover:text-brand-600 dark:text-gray-100 dark:hover:text-brand-300"
         >
-          {{ item.title }}
+          {{ displayTitle(item) }}
         </RouterLink>
+        <p
+          v-if="altTitle(item)"
+          class="truncate text-xs text-gray-400 dark:text-gray-500"
+        >
+          {{ altTitle(item) }}
+        </p>
         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
           {{ translatePlural('manga.volumes', item.volumesTotal) }}
           · {{ translatePlural('manga.chapters', item.chaptersTotal) }}

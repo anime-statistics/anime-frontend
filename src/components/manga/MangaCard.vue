@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import Card from 'primevue/card'
 import Tag from 'primevue/tag'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { usePrefetchRoute } from '@/composables/usePrefetchRoute'
+import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
 
 const props = withDefaults(
   defineProps<{ manga: IMangaSearchResultDto, selected?: boolean, selectable?: boolean }>(),
@@ -16,9 +17,12 @@ const emit = defineEmits<{
   openMenu: [{ mediaId: string, source: string, x: number, y: number }]
 }>()
 
-const { translate, translatePlural } = useAppI18n()
+const { translate, translatePlural, locale } = useAppI18n()
 const { prefetch } = usePrefetchRoute()
 const hasImageError = ref(false)
+
+const displayTitle = computed(() => primaryTitle(props.manga, locale.value))
+const altTitle = computed(() => secondaryTitle(props.manga, locale.value))
 
 function onContextMenu(event: MouseEvent): void {
   emit('openMenu', {
@@ -75,9 +79,15 @@ function onContextMenu(event: MouseEvent): void {
     <template #title>
       <RouterLink
         :to="{ name: 'manga-detail', params: { id: props.manga.id } }"
-        class="line-clamp-2 text-sm font-semibold hover:text-brand-600 sm:text-base dark:hover:text-brand-300"
+        class="block hover:text-brand-600 dark:hover:text-brand-300"
       >
-        {{ props.manga.title }}
+        <span class="line-clamp-2 text-sm font-semibold sm:text-base">{{ displayTitle }}</span>
+        <span
+          v-if="altTitle"
+          class="mt-0.5 line-clamp-1 text-xs font-normal text-gray-500 dark:text-gray-400"
+        >
+          {{ altTitle }}
+        </span>
       </RouterLink>
     </template>
 

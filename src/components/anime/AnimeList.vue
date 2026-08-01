@@ -2,6 +2,7 @@
 import Tag from 'primevue/tag'
 import { ref } from 'vue'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
 import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 
 const props = withDefaults(
@@ -18,8 +19,16 @@ const emit = defineEmits<{
   openMenu: [{ mediaId: string, source: string, x: number, y: number }]
 }>()
 
-const { translate, translatePlural } = useAppI18n()
+const { translate, translatePlural, locale } = useAppI18n()
 const brokenImages = ref<Set<string>>(new Set())
+
+function displayTitle(item: IMergedAnimeSearchResult): string {
+  return primaryTitle(item, locale.value)
+}
+
+function altTitle(item: IMergedAnimeSearchResult): string | undefined {
+  return secondaryTitle(item, locale.value)
+}
 
 function markBroken(id: string): void {
   brokenImages.value = new Set(brokenImages.value).add(id)
@@ -49,7 +58,7 @@ function onContextMenu(event: MouseEvent, item: IMergedAnimeSearchResult): void 
           type="checkbox"
           class="accent-brand-600"
           :checked="props.selectedIds.has(item.id)"
-          :aria-label="item.title"
+          :aria-label="displayTitle(item)"
           @change="emit('toggleSelect', item.id)"
         >
       </label>
@@ -57,7 +66,7 @@ function onContextMenu(event: MouseEvent, item: IMergedAnimeSearchResult): void 
       <img
         v-if="item.imageUrl && !brokenImages.has(item.id)"
         :src="item.imageUrl"
-        :alt="item.title"
+        :alt="displayTitle(item)"
         class="size-14 shrink-0 rounded bg-gray-200 object-cover dark:bg-gray-700"
         loading="lazy"
         decoding="async"
@@ -75,8 +84,14 @@ function onContextMenu(event: MouseEvent, item: IMergedAnimeSearchResult): void 
           :to="{ name: 'anime-detail', params: { id: item.id } }"
           class="block truncate font-medium text-gray-900 hover:text-brand-600 dark:text-gray-100 dark:hover:text-brand-300"
         >
-          {{ item.title }}
+          {{ displayTitle(item) }}
         </RouterLink>
+        <p
+          v-if="altTitle(item)"
+          class="truncate text-xs text-gray-400 dark:text-gray-500"
+        >
+          {{ altTitle(item) }}
+        </p>
         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
           {{ translatePlural('anime.episodes', item.episodesTotal) }}
           · {{ translate(`anime.status.${item.status}`) }}

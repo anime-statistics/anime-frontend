@@ -7,13 +7,14 @@ import NotesPanel from '@/components/editor/NotesPanel.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useMangaDetail, useMangaStatusMutation } from '@/composables/useMangaQueries'
 import { buildExternalUrl } from '@/core/utils/externalLinks'
+import { primaryTitle } from '@/core/utils/mediaTitle'
 
 type DetailTab = 'chapters' | 'notes'
 
 const props = defineProps<{ id: string }>()
 
 const mediaId = toRef(props, 'id')
-const { translate, translatePlural } = useAppI18n()
+const { translate, translatePlural, locale } = useAppI18n()
 
 const { data: manga, isPending, isError } = useMangaDetail(mediaId)
 const statusMutation = useMangaStatusMutation()
@@ -21,6 +22,9 @@ const statusMutation = useMangaStatusMutation()
 const activeTab = ref<DetailTab>('chapters')
 const hasImageError = ref(false)
 
+const displayTitle = computed(() =>
+  manga.value ? primaryTitle(manga.value, locale.value) : '',
+)
 const volumesRead = computed(() => manga.value?.volumesRead ?? 0)
 const chaptersRead = computed(() => manga.value?.chaptersRead ?? 0)
 const externalUrl = computed(() => buildExternalUrl(props.id, 'manga'))
@@ -74,7 +78,7 @@ function onStatusChange(event: Event): void {
         <img
           v-if="manga.imageUrl && !hasImageError"
           :src="manga.imageUrl"
-          :alt="manga.title"
+          :alt="displayTitle"
           class="max-h-80 w-full rounded-lg bg-gray-200 object-cover md:w-56 dark:bg-gray-700"
           loading="eager"
           fetchpriority="high"
@@ -91,8 +95,14 @@ function onStatusChange(event: Event): void {
         <div class="flex min-w-0 flex-1 flex-col gap-3">
           <header class="flex flex-col gap-1">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {{ manga.title }}
+              {{ displayTitle }}
             </h1>
+            <p
+              v-if="manga.title !== displayTitle"
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >
+              {{ manga.title }}
+            </p>
             <p
               v-if="manga.titleJapanese"
               class="text-sm text-gray-500 dark:text-gray-400"

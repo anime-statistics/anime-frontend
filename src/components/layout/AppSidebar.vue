@@ -8,7 +8,7 @@ import { useTagStore } from '@/stores/useTagStore'
 const SWIPE_CLOSE_PX = 60
 
 const props = defineProps<{ isOpen: boolean, isCollapsed: boolean }>()
-const emit = defineEmits<{ close: [], toggleCollapsed: [] }>()
+const emit = defineEmits<{ close: [] }>()
 
 const { translate } = useAppI18n()
 const tagStore = useTagStore()
@@ -48,24 +48,14 @@ onMounted(() => {
     class="fixed inset-y-0 left-0 z-40 flex w-64 touch-pan-y flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white p-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-transform lg:static lg:z-auto lg:w-auto lg:translate-x-0 dark:border-gray-800 dark:bg-gray-900"
     :class="props.isOpen ? 'translate-x-0' : '-translate-x-full'"
   >
-    <div class="flex items-center justify-between lg:justify-end">
+    <div class="flex items-center justify-between lg:hidden">
       <button
         type="button"
-        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+        class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
         :aria-label="translate('layout.closeMenu')"
         @click="emit('close')"
       >
         <i class="pi pi-times" />
-      </button>
-      <button
-        type="button"
-        class="hidden rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:block dark:text-gray-400 dark:hover:bg-gray-800"
-        :aria-label="props.isCollapsed
-          ? translate('layout.expandSidebar')
-          : translate('layout.collapseSidebar')"
-        @click="emit('toggleCollapsed')"
-      >
-        <i :class="props.isCollapsed ? 'pi pi-angle-right' : 'pi pi-angle-left'" />
       </button>
     </div>
 

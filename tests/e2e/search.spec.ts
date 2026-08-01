@@ -40,10 +40,12 @@ test('home lists the library and opens a detail page', async ({ page }) => {
 
   await expect(page.locator('.p-card').first()).toBeVisible()
 
-  await page.getByRole('link', { name: 'Fullmetal Alchemist: Brotherhood' }).first().click()
+  // The card link carries both the Russian name and the original, so the
+  // accessible name is a concatenation of the two.
+  await page.getByRole('link', { name: /Fullmetal Alchemist/ }).first().click()
 
   await expect(page).toHaveURL(/\/anime\/shikimori_5114/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Fullmetal Alchemist')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Стальной алхимик')
 })
 
 test('mobile viewport shows the bottom navigation without horizontal scroll', async ({ page }) => {

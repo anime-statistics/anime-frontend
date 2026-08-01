@@ -30,24 +30,36 @@ const SUGGESTION_VALUES: Record<string, readonly string[]> = {
 
 const activeToken = computed(() => store.rawQuery.split(/\s+/).at(-1) ?? '')
 
-const suggestions = computed<string[]>(() => {
+interface ISuggestion {
+  value: string
+  hint?: string
+}
+
+function keySuggestions(matching: (key: string) => boolean): ISuggestion[] {
+  return FILTER_KEYS.filter((key) => matching(key)).map((key) => ({
+    value: `${key}:`,
+    hint: translate(`filters.keyHints.${key}`),
+  }))
+}
+
+const suggestions = computed<ISuggestion[]>(() => {
   if (!isFocused.value) return []
 
   const token = activeToken.value.toLowerCase()
-  if (!token) return []
+  // An empty box lists every filter, otherwise there is no way to learn which
+  // ones exist without guessing the first letter.
+  if (!token) return keySuggestions(() => true)
 
   const colonIndex = token.indexOf(':')
   if (colonIndex === -1) {
-    return FILTER_KEYS.filter((key) => key.startsWith(token) && key !== token).map(
-      (key) => `${key}:`,
-    )
+    return keySuggestions((key) => key.startsWith(token) && key !== token)
   }
 
   const key = token.slice(0, colonIndex)
   const partial = token.slice(colonIndex + 1)
   return (SUGGESTION_VALUES[key] ?? [])
     .filter((value) => value.startsWith(partial) && value !== partial)
-    .map((value) => `${key}:${value}`)
+    .map((value) => ({ value: `${key}:${value}` }))
 })
 
 function applySuggestion(suggestion: string): void {
@@ -125,14 +137,22 @@ function onVoiceTranscript(text: string): void {
     >
       <li
         v-for="suggestion in suggestions"
-        :key="suggestion"
+        :key="suggestion.value"
       >
         <button
           type="button"
-          class="w-full px-3 py-2 text-left font-mono text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-          @mousedown.prevent="applySuggestion(suggestion)"
+          class="flex w-full items-baseline gap-2 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+          @mousedown.prevent="applySuggestion(suggestion.value)"
         >
-          {{ suggestion }}
+          <span class="font-mono text-sm text-gray-700 dark:text-gray-200">
+            {{ suggestion.value }}
+          </span>
+          <span
+            v-if="suggestion.hint"
+            class="truncate text-xs text-gray-500 dark:text-gray-400"
+          >
+            {{ suggestion.hint }}
+          </span>
         </button>
       </li>
     </ul>

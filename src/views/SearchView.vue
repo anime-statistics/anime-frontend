@@ -6,13 +6,23 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useUrlFilters } from '@/composables/useUrlFilters'
+import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
+import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 import { useSearchStore } from '@/stores/useSearchStore'
 
-const { translate, translatePlural } = useAppI18n()
+const { translate, translatePlural, locale } = useAppI18n()
 const store = useSearchStore()
 const { filters: urlFilters, setFilters } = useUrlFilters()
 
 const knownGenres = ref<string[]>([])
+
+function displayTitle(item: IMergedAnimeSearchResult): string {
+  return primaryTitle(item, locale.value)
+}
+
+function altTitle(item: IMergedAnimeSearchResult): string | undefined {
+  return secondaryTitle(item, locale.value)
+}
 
 onMounted(() => {
   if (urlFilters.value.query && urlFilters.value.query !== store.rawQuery) {
@@ -106,7 +116,15 @@ watch(
               class="flex flex-col gap-1"
             >
               <span class="flex flex-wrap items-center gap-2">
-                <span class="font-medium text-gray-900 dark:text-gray-100">{{ item.title }}</span>
+                <span class="font-medium text-gray-900 dark:text-gray-100">
+                  {{ displayTitle(item) }}
+                </span>
+                <span
+                  v-if="altTitle(item)"
+                  class="text-xs text-gray-400 dark:text-gray-500"
+                >
+                  {{ altTitle(item) }}
+                </span>
                 <span
                   class="rounded-full bg-brand-50 px-2 py-0.5 text-xs text-brand-700 dark:bg-gray-800 dark:text-brand-300"
                 >

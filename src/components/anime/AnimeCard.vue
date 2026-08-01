@@ -6,6 +6,7 @@ import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { usePrefetchRoute } from '@/composables/usePrefetchRoute'
+import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
 import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 
 const VISIBLE_TAGS = 3
@@ -33,9 +34,12 @@ const emit = defineEmits<{
   openMenu: [{ mediaId: string, source: string, x: number, y: number }]
 }>()
 
-const { translate, translatePlural } = useAppI18n()
+const { translate, translatePlural, locale } = useAppI18n()
 const { prefetch } = usePrefetchRoute()
 const hasImageError = ref(false)
+
+const displayTitle = computed(() => primaryTitle(props.anime, locale.value))
+const altTitle = computed(() => secondaryTitle(props.anime, locale.value))
 
 function onContextMenu(event: MouseEvent): void {
   emit('openMenu', {
@@ -59,7 +63,7 @@ function onContextMenu(event: MouseEvent): void {
         <img
           v-if="props.anime.imageUrl && !hasImageError"
           :src="props.anime.imageUrl"
-          :alt="props.anime.title"
+          :alt="displayTitle"
           class="h-40 w-full rounded-t-lg bg-gray-200 object-cover sm:h-48 dark:bg-gray-700"
           loading="lazy"
           decoding="async"
@@ -81,7 +85,7 @@ function onContextMenu(event: MouseEvent): void {
               type="checkbox"
               class="accent-brand-600"
               :checked="props.selected"
-              :aria-label="props.anime.title"
+              :aria-label="displayTitle"
               @change="emit('toggleSelect', props.anime.id)"
             >
           </span>
@@ -92,9 +96,15 @@ function onContextMenu(event: MouseEvent): void {
     <template #title>
       <RouterLink
         :to="{ name: 'anime-detail', params: { id: props.anime.id } }"
-        class="line-clamp-2 text-sm font-semibold hover:text-brand-600 sm:text-base dark:hover:text-brand-300"
+        class="block hover:text-brand-600 dark:hover:text-brand-300"
       >
-        {{ props.anime.title }}
+        <span class="line-clamp-2 text-sm font-semibold sm:text-base">{{ displayTitle }}</span>
+        <span
+          v-if="altTitle"
+          class="mt-0.5 line-clamp-1 text-xs font-normal text-gray-500 dark:text-gray-400"
+        >
+          {{ altTitle }}
+        </span>
       </RouterLink>
     </template>
 

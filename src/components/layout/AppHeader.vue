@@ -4,7 +4,8 @@ import { useRoute } from 'vue-router'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 
-const emit = defineEmits<{ toggleMenu: [] }>()
+const props = defineProps<{ isSidebarCollapsed: boolean }>()
+const emit = defineEmits<{ toggleMenu: [], toggleSidebar: [] }>()
 
 const route = useRoute()
 const settingsStore = useSettingsStore()
@@ -36,6 +37,46 @@ function toggleLocale(): void {
         @click="emit('toggleMenu')"
       >
         <i class="pi pi-bars" />
+      </button>
+
+      <button
+        type="button"
+        class="hidden size-11 shrink-0 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 lg:flex dark:text-gray-300 dark:hover:bg-gray-800"
+        :aria-label="props.isSidebarCollapsed
+          ? translate('layout.expandSidebar')
+          : translate('layout.collapseSidebar')"
+        :title="props.isSidebarCollapsed
+          ? translate('layout.expandSidebar')
+          : translate('layout.collapseSidebar')"
+        :aria-pressed="props.isSidebarCollapsed"
+        @click="emit('toggleSidebar')"
+      >
+        <!-- Panel-with-arrow, the shape browsers use for their own sidebar toggle. -->
+        <svg
+          class="size-5"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect
+            x="2.5"
+            y="3.5"
+            width="15"
+            height="13"
+            rx="2.5"
+          />
+          <line
+            x1="7.5"
+            y1="3.5"
+            x2="7.5"
+            y2="16.5"
+          />
+          <polyline :points="props.isSidebarCollapsed ? '11.5 7.5 14 10 11.5 12.5' : '14 7.5 11.5 10 14 12.5'" />
+        </svg>
       </button>
 
       <RouterLink

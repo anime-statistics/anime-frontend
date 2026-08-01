@@ -384,7 +384,16 @@
     "voiceInputSoon": "Voice input arrives in a later step",
     "suggestions": "Filter suggestions",
     "clearQuery": "Clear query",
-    "submit": "Search"
+    "submit": "Search",
+    "keyHints": {
+      "anime": "anime id: shiki_id: or liberty_id:",
+      "manga": "manga id: shiki_id: or liberty_id:",
+      "genre": "genre, e.g. action",
+      "year": "release year, e.g. 2024",
+      "status": "watch status",
+      "tag": "one of your tags",
+      "source": "source: shikimori or aniliberty"
+    }
   },
   "pagination": {
     "previous": "Previous",

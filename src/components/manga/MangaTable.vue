@@ -5,15 +5,20 @@ import { useRouter } from 'vue-router'
 import { MANGA_STATUSES, type IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useIsMobile } from '@/composables/useMediaQuery'
+import { primaryTitle } from '@/core/utils/mediaTitle'
 
 const props = withDefaults(
   defineProps<{ items: IMangaSearchResultDto[], rows?: number }>(),
   { rows: 20 },
 )
 
-const { translate } = useAppI18n()
+const { translate, locale } = useAppI18n()
 const router = useRouter()
 const isMobile = useIsMobile()
+
+function displayTitle(item: IMangaSearchResultDto): string {
+  return primaryTitle(item, locale.value)
+}
 
 function openDetail(event: { data: IMangaSearchResultDto }): void {
   void router.push({ name: 'manga-detail', params: { id: event.data.id } })
@@ -40,7 +45,7 @@ function statusLabel(status: string): string {
         :to="{ name: 'manga-detail', params: { id: item.id } }"
         class="block min-h-[44px] text-sm font-semibold text-gray-900 hover:text-brand-600 dark:text-gray-100 dark:hover:text-brand-300"
       >
-        {{ item.title }}
+        {{ displayTitle(item) }}
       </RouterLink>
 
       <dl class="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
@@ -95,7 +100,11 @@ function statusLabel(status: string): string {
       field="title"
       :header="translate('manga.title')"
       sortable
-    />
+    >
+      <template #body="{ data }">
+        {{ displayTitle(data) }}
+      </template>
+    </Column>
     <Column
       field="source"
       :header="translate('filters.sources')"
