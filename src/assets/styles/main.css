@@ -149,6 +149,19 @@
   }
 }
 
+/* Deliberately unlayered: PrimeVue ships its own cascade layer, and anything
+   inside Tailwind's component layer loses to it. */
+.tag-color-picker .p-colorpicker-preview {
+  @apply size-7 cursor-pointer rounded-full border-2 border-transparent;
+}
+
+.tag-color-picker .p-colorpicker-panel {
+  /* The picker is the last swatch in the row, so the panel has to grow towards
+     the dialog instead of pushing it into horizontal overflow. */
+  inset-inline-start: auto !important;
+  inset-inline-end: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-fade-enter-active,
   .page-fade-leave-active,

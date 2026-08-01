@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import ColorPicker from 'primevue/colorpicker'
 import Dialog from 'primevue/dialog'
 import Select from 'primevue/select'
 import { computed, ref, watch } from 'vue'
 import { CreateTagDto, type ICreateTagDto, type ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { TAG_ICONS } from '@/core/constants/tagIcons'
 
 const props = defineProps<{ visible: boolean, tag: ITagDto | null, nextSortOrder: number }>()
 const emit = defineEmits<{
@@ -26,24 +28,22 @@ const PRESET_COLORS = [
   '#64748b',
 ] as const
 
-const ICON_OPTIONS = [
-  '',
-  'pi-heart',
-  'pi-star',
-  'pi-replay',
-  'pi-calendar',
-  'pi-users',
-  'pi-volume-up',
-  'pi-clock',
-  'pi-book',
-  'pi-bookmark',
-].map((value) => ({ value, label: value || '—' }))
+const ICON_OPTIONS = ['', ...TAG_ICONS].map((value) => ({ value, label: value || '—' }))
+const ICON_ROW_PX = 40
 
 const name = ref('')
 const color = ref<string>(PRESET_COLORS[3])
 const icon = ref('')
 const isHidden = ref(false)
 const errorKey = ref<'tags.nameRequired' | 'tags.colorInvalid' | null>(null)
+
+// PrimeVue's hex format omits the leading '#', which the DTO requires.
+const pickerColor = computed<string>({
+  get: () => color.value.replace('#', ''),
+  set: (value) => {
+    color.value = `#${String(value).replace('#', '')}`
+  },
+})
 
 const preview = computed<ITagDto>(() => ({
   id: props.tag?.id ?? 'preview',
@@ -127,12 +127,15 @@ function submit(): void {
             :aria-pressed="color === preset"
             @click="color = preset"
           />
-          <input
-            v-model="color"
-            type="color"
-            class="size-7 cursor-pointer rounded border border-gray-200 bg-transparent dark:border-gray-700"
+          <!-- The native <input type="color"> opens the OS picker and paints its
+               own background through the rounded corners; this one is themed. -->
+          <ColorPicker
+            v-model="pickerColor"
+            format="hex"
+            append-to="self"
+            class="tag-color-picker"
             :aria-label="translate('tags.color')"
-          >
+          />
         </div>
       </fieldset>
 
@@ -151,6 +154,10 @@ function submit(): void {
           :options="ICON_OPTIONS"
           option-label="label"
           option-value="value"
+          filter
+          :filter-placeholder="translate('tags.iconSearch')"
+          :auto-filter-focus="true"
+          :virtual-scroller-options="{ itemSize: ICON_ROW_PX }"
           class="w-full"
         >
           <template #value="{ value }">

@@ -132,7 +132,8 @@
     "clearFilter": "Сбросить фильтр по тегу",
     "more": "+{count}",
     "nameRequired": "Введите название до 50 символов",
-    "colorInvalid": "Выберите цвет"
+    "colorInvalid": "Выберите цвет",
+    "iconSearch": "Поиск иконки"
   },
   "notes": {
     "title": "Заметки",

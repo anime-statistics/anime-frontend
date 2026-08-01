@@ -132,7 +132,8 @@
     "clearFilter": "Clear tag filter",
     "more": "+{count}",
     "nameRequired": "Enter a name of up to 50 characters",
-    "colorInvalid": "Pick a colour"
+    "colorInvalid": "Pick a colour",
+    "iconSearch": "Search icons"
   },
   "notes": {
     "title": "Notes",
