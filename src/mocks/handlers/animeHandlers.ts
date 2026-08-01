@@ -1,34 +1,29 @@
 import { http, HttpResponse } from 'msw'
-import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
-import { animeDetails, animeSearchResults } from '@/mocks/fixtures/animeData'
+import { animeDetails } from '@/mocks/fixtures/animeData'
 import { API_PREFIX } from '@/mocks/handlers/apiPrefix'
 import { checkRateLimit, rateLimitedResponse } from '@/mocks/handlers/rateLimit'
+import { applyTagPatch, isInCollection, mediaState } from '@/mocks/state/mediaState'
 import { isObject, toCamelCase, toSnakeCase } from '@/core/utils/caseConverter'
 
-let mutableAnime: IAnimeSearchResultDto[] = [...animeSearchResults]
-
-export function resetAnimeState(): void {
-  mutableAnime = [...animeSearchResults]
-}
-
 export const animeHandlers = [
+  // The library is the collection, not the catalogue: only titles the user has
+  // tagged show up here. Everything else is reachable through /search.
   http.get(`${API_PREFIX}/anime`, ({ request }) => {
     if (!checkRateLimit()) return rateLimitedResponse()
 
     const url = new URL(request.url)
     const query = url.searchParams.get('query')?.toLowerCase() ?? ''
-    const source = url.searchParams.get('source')
-    const status = url.searchParams.get('status')
+    const tag = url.searchParams.get('tag')
     const page = Number(url.searchParams.get('page')) || 1
     const size = Number(url.searchParams.get('size')) || 20
 
-    const filtered = mutableAnime.filter((anime) => {
+    const filtered = mediaState.anime.filter((anime) => {
+      if (!isInCollection(anime)) return false
       const matchesQuery
         = anime.title.toLowerCase().includes(query)
+          || (anime.titleRussian?.toLowerCase().includes(query) ?? false)
           || (anime.titleEnglish?.toLowerCase().includes(query) ?? false)
-      const matchesSource = !source || anime.source === source
-      const matchesStatus = !status || anime.status === status
-      return matchesQuery && matchesSource && matchesStatus
+      return matchesQuery && (!tag || anime.myTags.includes(tag))
     })
 
     const start = (page - 1) * size
@@ -46,7 +41,7 @@ export const animeHandlers = [
     if (!checkRateLimit()) return rateLimitedResponse()
 
     const id = String(params.id)
-    const item = mutableAnime.find((anime) => anime.id === id)
+    const item = mediaState.anime.find((anime) => anime.id === id)
     if (!item) return new HttpResponse(null, { status: 404 })
 
     // The mutable record wins so PATCHed fields show up here; the static detail
@@ -55,17 +50,17 @@ export const animeHandlers = [
     return HttpResponse.json(toSnakeCase(detail ? { ...detail, ...item } : item))
   }),
 
-  http.patch(`${API_PREFIX}/anime/:id/status`, async ({ params, request }) => {
+  http.patch(`${API_PREFIX}/anime/:id/progress`, async ({ params, request }) => {
     if (!checkRateLimit()) return rateLimitedResponse()
 
     const body: unknown = await request.json()
     if (!isObject(body)) return new HttpResponse(null, { status: 400 })
 
-    const index = mutableAnime.findIndex((anime) => anime.id === String(params.id))
+    const index = mediaState.anime.findIndex((anime) => anime.id === String(params.id))
     if (index === -1) return new HttpResponse(null, { status: 404 })
 
-    mutableAnime[index] = { ...mutableAnime[index], ...toCamelCase(body) }
-    return HttpResponse.json(toSnakeCase(mutableAnime[index]))
+    mediaState.anime[index] = { ...mediaState.anime[index], ...toCamelCase(body) }
+    return HttpResponse.json(toSnakeCase(mediaState.anime[index]))
   }),
 
   http.patch(`${API_PREFIX}/anime/:id/tags`, async ({ params, request }) => {
@@ -74,14 +69,19 @@ export const animeHandlers = [
     const body: unknown = await request.json()
     if (!isObject(body)) return new HttpResponse(null, { status: 400 })
 
-    const index = mutableAnime.findIndex((anime) => anime.id === String(params.id))
+    const index = mediaState.anime.findIndex((anime) => anime.id === String(params.id))
     if (index === -1) return new HttpResponse(null, { status: 404 })
 
-    mutableAnime[index] = { ...mutableAnime[index], ...toCamelCase(body) }
-    return HttpResponse.json(toSnakeCase(mutableAnime[index]))
+    const payload = toCamelCase(body)
+    const myTags = Array.isArray(payload.myTags) ? payload.myTags.map(String) : []
+    mediaState.anime[index] = { ...mediaState.anime[index], myTags }
+    return HttpResponse.json(toSnakeCase(mediaState.anime[index]))
   }),
 
-  http.post(`${API_PREFIX}/anime/bulk`, async ({ request }) => {
+  // Bulk tagging drives the tag page: strip a tag off a selection, move a
+  // selection to another tag, or clear the tags to drop titles out of the
+  // collection entirely.
+  http.post(`${API_PREFIX}/anime/tags/bulk`, async ({ request }) => {
     if (!checkRateLimit()) return rateLimitedResponse()
 
     const body: unknown = await request.json()
@@ -89,15 +89,23 @@ export const animeHandlers = [
       return new HttpResponse(null, { status: 400 })
     }
 
-    const patch = isObject(body.patch) ? toCamelCase(body.patch) : {}
-    let updated = 0
+    const payload = toCamelCase(body)
+    const patch = {
+      add: Array.isArray(payload.add) ? payload.add.map(String) : undefined,
+      remove: Array.isArray(payload.remove) ? payload.remove.map(String) : undefined,
+      clear: payload.clear === true,
+    }
 
+    let updated = 0
     for (const rawId of body.ids) {
-      const index = mutableAnime.findIndex((anime) => anime.id === String(rawId))
-      if (index !== -1) {
-        mutableAnime[index] = { ...mutableAnime[index], ...patch }
-        updated += 1
+      const index = mediaState.anime.findIndex((anime) => anime.id === String(rawId))
+      if (index === -1) continue
+
+      mediaState.anime[index] = {
+        ...mediaState.anime[index],
+        myTags: applyTagPatch(mediaState.anime[index].myTags, patch),
       }
+      updated += 1
     }
 
     return HttpResponse.json({ updated })

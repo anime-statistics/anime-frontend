@@ -8,23 +8,17 @@ import {
   withFilter,
   withoutFilter,
 } from '@/core/utils/filterParser'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = defineProps<{ modelValue: string, genres: string[] }>()
 const emit = defineEmits<{ 'update:modelValue': [string] }>()
 
 const { translate } = useAppI18n()
-
-const STATUSES = [
-  'watching',
-  'planned',
-  'completed',
-  'on_hold',
-  'dropped',
-  'rewatching',
-] as const
+const tagStore = useTagStore()
 
 const filters = computed(() => parseQueryFilters(props.modelValue))
-const activeStatus = computed(() => filters.value.include.status?.[0] ?? '')
+// Watch status is a tag now, so one control covers both.
+const activeTag = computed(() => filters.value.include.tag?.[0] ?? '')
 const activeYear = computed(() => filters.value.include.year?.[0] ?? '')
 
 function toggle(key: string, value: string): void {
@@ -42,7 +36,7 @@ function replace(key: string, value: string): void {
 }
 
 function clearAll(): void {
-  const cleared = ['source', 'status', 'genre', 'year', 'tag'].reduce(
+  const cleared = ['source', 'genre', 'year', 'tag'].reduce(
     (query, key) => withoutFilter(query, key),
     props.modelValue,
   )
@@ -86,22 +80,22 @@ function clearAll(): void {
 
     <label class="flex flex-col gap-1">
       <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-        {{ translate('filters.status') }}
+        {{ translate('filters.tag') }}
       </span>
       <select
         class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-        :value="activeStatus"
-        @change="replace('status', ($event.target as HTMLSelectElement).value)"
+        :value="activeTag"
+        @change="replace('tag', ($event.target as HTMLSelectElement).value)"
       >
         <option value="">
-          {{ translate('filters.anyStatus') }}
+          {{ translate('filters.anyTag') }}
         </option>
         <option
-          v-for="status in STATUSES"
-          :key="status"
-          :value="status"
+          v-for="tag in tagStore.tags"
+          :key="tag.id"
+          :value="tag.name"
         >
-          {{ translate(`anime.status.${status}`) }}
+          {{ tag.name }}
         </option>
       </select>
     </label>

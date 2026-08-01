@@ -17,7 +17,7 @@ const props = withDefaults(
   defineProps<{ target: IContextMenuTarget | null, kind?: MediaKind }>(),
   { kind: 'anime' },
 )
-const emit = defineEmits<{ close: [], changeStatus: [string] }>()
+const emit = defineEmits<{ close: [], editTags: [string] }>()
 
 const { translate } = useAppI18n()
 const toast = useToast()
@@ -62,10 +62,10 @@ async function copyLink(): Promise<void> {
         <button
           type="button"
           class="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-          @click="emit('changeStatus', props.target.mediaId)"
+          @click="emit('editTags', props.target.mediaId)"
         >
-          <i class="pi pi-pencil" />
-          {{ translate('contextMenu.changeStatus') }}
+          <i class="pi pi-tags" />
+          {{ translate('contextMenu.editTags') }}
         </button>
       </li>
       <li v-if="externalUrl">

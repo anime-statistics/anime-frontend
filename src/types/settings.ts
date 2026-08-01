@@ -30,6 +30,8 @@ export interface IAppSettings {
   isVoiceInputEnabled: boolean
   isAiEnabled: boolean
   notifyAnimeIds: string[]
+  // Tags the kanban board shows as columns, in board order.
+  kanbanTagIds: string[]
   aiModelId: string
   aiDeepThink: boolean
   aiTemperature: number

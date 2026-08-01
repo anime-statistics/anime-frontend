@@ -1,30 +1,64 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
+import TagBadge from '@/components/common/TagBadge.vue'
+import { useAnimeTagMutation } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { useToast } from '@/composables/useToast'
 import { useUrlFilters } from '@/composables/useUrlFilters'
+import { SYSTEM_TAG_IDS } from '@/core/constants/systemTags'
 import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
-import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 import { useSearchStore } from '@/stores/useSearchStore'
+import { useTagStore } from '@/stores/useTagStore'
 
 const { translate, translatePlural, locale } = useAppI18n()
 const store = useSearchStore()
+const tagStore = useTagStore()
+const toast = useToast()
+const tagMutation = useAnimeTagMutation()
 const { filters: urlFilters, setFilters } = useUrlFilters()
 
 const knownGenres = ref<string[]>([])
+const pendingId = ref<string | null>(null)
 
-function displayTitle(item: IMergedAnimeSearchResult): string {
+function displayTitle(item: IAnimeSearchResultDto): string {
   return primaryTitle(item, locale.value)
 }
 
-function altTitle(item: IMergedAnimeSearchResult): string | undefined {
+function altTitle(item: IAnimeSearchResultDto): string | undefined {
   return secondaryTitle(item, locale.value)
 }
 
+// Search shows the whole catalogue, so each row says whether it is already part
+// of the collection and offers the one-click way in.
+function isInCollection(item: IAnimeSearchResultDto): boolean {
+  return item.myTags.length > 0
+}
+
+async function addToCollection(item: IAnimeSearchResultDto): Promise<void> {
+  pendingId.value = item.id
+  try {
+    await tagMutation.mutateAsync({
+      mediaId: item.id,
+      tagIds: [SYSTEM_TAG_IDS.planned],
+    })
+    // The results list is a snapshot of one request; patch it so the row flips
+    // without a second round trip.
+    item.myTags = [SYSTEM_TAG_IDS.planned]
+    toast.success(translate('collection.added', { title: displayTitle(item) }))
+  } catch {
+    toast.error(translate('collection.addFailed'))
+  } finally {
+    pendingId.value = null
+  }
+}
+
 onMounted(() => {
+  if (tagStore.tags.length === 0) void tagStore.fetchTags()
   if (urlFilters.value.query && urlFilters.value.query !== store.rawQuery) {
     store.setQuery(urlFilters.value.query)
     void store.search()
@@ -108,12 +142,12 @@ watch(
           <li
             v-for="item in store.results"
             :key="item.id"
-            class="rounded-lg border border-gray-200 p-3 transition-colors hover:border-brand-400 dark:border-gray-700"
+            class="flex items-start gap-3 rounded-lg border border-gray-200 p-3 transition-colors hover:border-brand-400 dark:border-gray-700"
             data-testid="anime-card"
           >
             <RouterLink
               :to="{ name: 'anime-detail', params: { id: item.id } }"
-              class="flex flex-col gap-1"
+              class="flex min-w-0 flex-1 flex-col gap-1"
             >
               <span class="flex flex-wrap items-center gap-2">
                 <span class="font-medium text-gray-900 dark:text-gray-100">
@@ -139,10 +173,36 @@ watch(
               </span>
               <span class="text-xs text-gray-500 dark:text-gray-400">
                 {{ translatePlural('anime.episodes', item.episodesTotal) }}
-                · {{ translate(`anime.status.${item.status}`) }}
                 <template v-if="item.score">· {{ item.score }}</template>
               </span>
+              <span
+                v-if="isInCollection(item)"
+                class="flex flex-wrap items-center gap-1"
+              >
+                <TagBadge
+                  v-for="tag in tagStore.resolveTags(item.myTags)"
+                  :key="tag.id"
+                  :tag="tag"
+                  size="sm"
+                />
+              </span>
             </RouterLink>
+
+            <span
+              v-if="isInCollection(item)"
+              class="shrink-0 self-center whitespace-nowrap text-xs text-gray-400 dark:text-gray-500"
+            >
+              <i class="pi pi-check mr-1" />{{ translate('collection.inCollection') }}
+            </span>
+            <button
+              v-else
+              type="button"
+              class="shrink-0 self-center whitespace-nowrap rounded-lg border border-brand-500 px-3 py-1.5 text-xs text-brand-600 transition-colors hover:bg-brand-50 disabled:opacity-50 dark:text-brand-300 dark:hover:bg-gray-800"
+              :disabled="pendingId === item.id"
+              @click="addToCollection(item)"
+            >
+              <i class="pi pi-plus mr-1" />{{ translate('collection.add') }}
+            </button>
           </li>
         </TransitionGroup>
       </div>

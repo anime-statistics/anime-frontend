@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import Rating from 'primevue/rating'
 import { computed, onMounted, ref, toRef } from 'vue'
-import { ANIME_STATUSES, type AnimeStatus } from '@/apis/dtos/animeDto'
 import EpisodeProgress from '@/components/anime/EpisodeProgress.vue'
 import WatchHistory from '@/components/anime/WatchHistory.vue'
 import TagSelector from '@/components/common/TagSelector.vue'
 import NotesPanel from '@/components/editor/NotesPanel.vue'
-import { useAnimeDetail, useAnimeStatusMutation, useAnimeTagMutation } from '@/composables/useAnimeQueries'
+import {
+  useAnimeDetail,
+  useAnimeProgressMutation,
+  useAnimeTagMutation,
+} from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useToast } from '@/composables/useToast'
 import { DEFAULT_EPISODE_MINUTES, useWatchHistory } from '@/composables/useWatchHistory'
@@ -26,7 +29,7 @@ const settingsStore = useSettingsStore()
 const toast = useToast()
 
 const { data: anime, isPending, isError } = useAnimeDetail(mediaId)
-const statusMutation = useAnimeStatusMutation()
+const progressMutation = useAnimeProgressMutation()
 const tagMutation = useAnimeTagMutation()
 
 const history = useWatchHistory(mediaId)
@@ -58,27 +61,16 @@ onMounted(() => {
   if (tagStore.tags.length === 0) void tagStore.fetchTags()
 })
 
-async function patchAnime(payload: {
-  status?: AnimeStatus
-  score?: number
-  watchedEpisodes?: number
-}): Promise<void> {
+async function patchAnime(payload: { score?: number, watchedEpisodes?: number }): Promise<void> {
   if (!anime.value) return
 
-  await statusMutation.mutateAsync({
+  await progressMutation.mutateAsync({
     mediaId: props.id,
     payload: {
-      status: payload.status ?? anime.value.status,
       score: payload.score ?? anime.value.score,
       watchedEpisodes: payload.watchedEpisodes ?? watchedEpisodes.value,
     },
   })
-}
-
-function onStatusChange(event: Event): void {
-  const value = (event.target as HTMLSelectElement).value
-  const status = ANIME_STATUSES.find((known) => known === value)
-  if (status) void patchAnime({ status })
 }
 
 async function onProgressUpdate(next: number): Promise<void> {
@@ -207,23 +199,18 @@ async function toggleNotifications(): Promise<void> {
           </div>
 
           <div class="grid gap-3 sm:grid-cols-2">
-            <label class="flex flex-col gap-1 text-sm">
-              <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.status') }}</span>
-              <select
-                class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-                :value="anime.status"
-                :disabled="statusMutation.isPending.value"
-                @change="onStatusChange"
+            <!-- Watch status lives in the tag picker: a title can sit in several
+                 at once, so there is nothing left for a single-choice select. -->
+            <div class="flex flex-col gap-1 text-sm">
+              <span class="text-gray-500 dark:text-gray-400">{{ translate('tags.title') }}</span>
+              <TagSelector v-model="selectedTagIds" />
+              <span
+                v-if="selectedTagIds.length === 0"
+                class="text-xs text-gray-400 dark:text-gray-500"
               >
-                <option
-                  v-for="status in ANIME_STATUSES"
-                  :key="status"
-                  :value="status"
-                >
-                  {{ translate(`anime.status.${status}`) }}
-                </option>
-              </select>
-            </label>
+                {{ translate('collection.notInCollection') }}
+              </span>
+            </div>
 
             <div class="flex flex-col gap-1 text-sm">
               <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.score') }}</span>
@@ -233,14 +220,6 @@ async function toggleNotifications(): Promise<void> {
                 @update:model-value="(value) => patchAnime({ score: Number(value ?? 0) })"
               />
             </div>
-          </div>
-
-          <div class="flex flex-col gap-1 text-sm">
-            <span class="text-gray-500 dark:text-gray-400">{{ translate('tags.title') }}</span>
-            <TagSelector
-              v-model="selectedTagIds"
-              class="max-w-sm"
-            />
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
@@ -327,7 +306,7 @@ async function toggleNotifications(): Promise<void> {
           v-if="activeTab === 'episodes'"
           :watched="watchedEpisodes"
           :total="anime.episodesTotal"
-          :is-busy="statusMutation.isPending.value"
+          :is-busy="progressMutation.isPending.value"
           @update="onProgressUpdate"
         />
 

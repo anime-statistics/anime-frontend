@@ -16,10 +16,21 @@ export const useTagStore = defineStore('tag', () => {
   const hiddenTagIds = computed(() =>
     tags.value.filter((tag) => tag.isHidden).map((tag) => tag.id),
   )
+  const systemTags = computed(() => tags.value.filter((tag) => tag.isSystem))
+  const customTags = computed(() => tags.value.filter((tag) => !tag.isSystem))
   const tagsById = computed(() => new Map(tags.value.map((tag) => [tag.id, tag])))
+  const tagNamesById = computed(
+    () => new Map(tags.value.map((tag) => [tag.id, tag.name.toLowerCase()])),
+  )
 
   function findTag(id: string): ITagDto | undefined {
     return tagsById.value.get(id)
+  }
+
+  function resolveTags(ids: readonly string[] | undefined): ITagDto[] {
+    return (ids ?? [])
+      .map((id) => tagsById.value.get(id))
+      .filter((tag): tag is ITagDto => tag !== undefined)
   }
 
   async function run<T>(action: () => Promise<T>): Promise<T | null> {
@@ -62,6 +73,8 @@ export const useTagStore = defineStore('tag', () => {
   }
 
   async function deleteTag(id: string): Promise<void> {
+    if (findTag(id)?.isSystem) return
+
     await run(async () => {
       await apiClient.delete(`${TAGS}/${id}`)
       tags.value = tags.value.filter((tag) => tag.id !== id)
@@ -92,8 +105,12 @@ export const useTagStore = defineStore('tag', () => {
     errorMessage,
     visibleTags,
     hiddenTagIds,
+    systemTags,
+    customTags,
     tagsById,
+    tagNamesById,
     findTag,
+    resolveTags,
     fetchTags,
     createTag,
     updateTag,

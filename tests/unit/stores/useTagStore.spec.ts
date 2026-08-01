@@ -110,14 +110,25 @@ describe('useTagStore CRUD', () => {
     expect(store.findTag(target.id)?.name).toBe('Избранное')
   })
 
-  it('deletes a tag', async () => {
+  it('deletes a custom tag', async () => {
     const store = useTagStore()
     await store.fetchTags()
-    const target = store.tags[0]
+    const target = store.customTags[0]
 
     await store.deleteTag(target.id)
 
     expect(store.findTag(target.id)).toBeUndefined()
+  })
+
+  // The seeded watch statuses stay put so the vocabulary can never empty out.
+  it('refuses to delete a system tag', async () => {
+    const store = useTagStore()
+    await store.fetchTags()
+    const target = store.systemTags[0]
+
+    await store.deleteTag(target.id)
+
+    expect(store.findTag(target.id)).toBeDefined()
   })
 
   it('records an error message when the request fails', async () => {

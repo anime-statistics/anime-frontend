@@ -14,7 +14,7 @@ const validAnime: IAnimeSearchResultDto = {
   id: 'shikimori_12345-naruto-shippuden',
   title: 'Naruto Shippuden',
   episodesTotal: 500,
-  status: 'watching',
+  myTags: [],
   source: 'shikimori',
 }
 
@@ -27,8 +27,19 @@ describe('anime validators', () => {
     expect(isAnimeSearchResultDto({ ...validAnime, id: 'naruto' })).toBe(false)
   })
 
-  it('rejects an unknown status', () => {
-    expect(isAnimeSearchResultDto({ ...validAnime, status: 'paused' })).toBe(false)
+  it('defaults myTags so a catalogue row parses without it', () => {
+    const withoutTags = {
+      id: validAnime.id,
+      title: validAnime.title,
+      episodesTotal: validAnime.episodesTotal,
+      source: validAnime.source,
+    }
+
+    expect(validateAnimeSearchResultDto(withoutTags).myTags).toEqual([])
+  })
+
+  it('rejects an unknown secondary source', () => {
+    expect(isAnimeSearchResultDto({ ...validAnime, secondarySource: 'mal' })).toBe(false)
   })
 
   it('rejects a score above 10', () => {
@@ -59,17 +70,20 @@ describe('anime validators', () => {
 })
 
 describe('manga validators', () => {
-  it('accepts reading status and rejects rewatching', () => {
-    const base = {
-      id: 'shikimori_1-berserk',
-      title: 'Berserk',
-      volumesTotal: 41,
-      chaptersTotal: 374,
-      source: 'shikimori',
-    }
+  const base = {
+    id: 'shikimori_1-berserk',
+    title: 'Berserk',
+    volumesTotal: 41,
+    chaptersTotal: 374,
+    source: 'shikimori',
+  }
 
-    expect(isMangaSearchResultDto({ ...base, status: 'reading' })).toBe(true)
-    expect(isMangaSearchResultDto({ ...base, status: 'rewatching' })).toBe(false)
+  it('accepts a catalogue row without tags', () => {
+    expect(isMangaSearchResultDto(base)).toBe(true)
+  })
+
+  it('rejects a negative chapter count', () => {
+    expect(isMangaSearchResultDto({ ...base, chaptersTotal: -1 })).toBe(false)
   })
 })
 
@@ -81,8 +95,11 @@ describe('tag validators', () => {
     sortOrder: 0,
   }
 
-  it('applies the isHidden default', () => {
-    expect(validateTagDto(validTag).isHidden).toBe(false)
+  it('applies the isHidden and isSystem defaults', () => {
+    const parsed = validateTagDto(validTag)
+
+    expect(parsed.isHidden).toBe(false)
+    expect(parsed.isSystem).toBe(false)
   })
 
   it('rejects a non-hex colour', () => {

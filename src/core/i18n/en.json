@@ -29,10 +29,10 @@
     "toggleTheme": "Switch theme",
     "toggleLocale": "Switch language",
     "skipToContent": "Skip to content",
-    "myTags": "My tags",
     "showTag": "Show tag",
     "hideTag": "Hide tag",
-    "detailPanel": "Details"
+    "detailPanel": "Details",
+    "filterByTag": "Filter by tag"
   },
   "footer": {
     "version": "Version {version}",
@@ -74,14 +74,6 @@
       "empty": "No anime found",
       "hint": "Type at least 2 characters"
     },
-    "status": {
-      "watching": "Watching",
-      "planned": "Planned",
-      "completed": "Completed",
-      "on_hold": "On hold",
-      "dropped": "Dropped",
-      "rewatching": "Rewatching"
-    },
     "fields": {
       "score": "Score",
       "genres": "Genres",
@@ -98,13 +90,6 @@
     "search": {
       "placeholder": "Search manga…",
       "empty": "No manga found"
-    },
-    "status": {
-      "reading": "Reading",
-      "planned": "Planned",
-      "completed": "Completed",
-      "on_hold": "On hold",
-      "dropped": "Dropped"
     },
     "fields": {
       "authors": "Authors",
@@ -133,7 +118,16 @@
     "more": "+{count}",
     "nameRequired": "Enter a name of up to 50 characters",
     "colorInvalid": "Pick a colour",
-    "iconSearch": "Search icons"
+    "iconSearch": "Search icons",
+    "untagged": "Everything else",
+    "openPage": "Open tag page",
+    "itemCount": "{count} title | {count} titles",
+    "systemTag": "System tag",
+    "deleteQuestion": "What should happen to the titles carrying it?",
+    "deleteKeepItems": "Untag the titles",
+    "deleteKeepItemsHint": "They stay in the collection with their remaining tags",
+    "deleteWithItems": "Remove the titles from the collection",
+    "deleteWithItemsHint": "All their tags are dropped and they leave the library"
   },
   "notes": {
     "title": "Notes",
@@ -295,7 +289,6 @@
     "episodesTab": "Episodes",
     "notesTab": "Notes",
     "historyTab": "History",
-    "status": "Watch status",
     "score": "Your score",
     "progress": "Progress",
     "watchedOfTotal": "{watched} of {total}",
@@ -351,18 +344,22 @@
     "of": "of"
   },
   "bulk": {
-    "changeStatus": "Change status",
     "addTag": "Add tag",
-    "applied": "Applied to {count} items"
+    "applied": "Applied to {count} items",
+    "removeTag": "Remove tag",
+    "removeThisTag": "Remove this tag",
+    "removeFromCollection": "Remove from collection",
+    "moveTarget": "Move to tag",
+    "move": "Move"
   },
   "contextMenu": {
     "addTag": "Add tag",
-    "changeStatus": "Change status",
     "openShikimori": "Open on Shikimori",
     "openAniliberty": "Open on AniLiberty",
     "copyLink": "Copy link",
     "linkCopied": "Link copied",
-    "copyFailed": "Could not copy the link"
+    "copyFailed": "Could not copy the link",
+    "editTags": "Edit tags"
   },
   "empty": {
     "title": "Nothing found",
@@ -372,10 +369,8 @@
   "filters": {
     "title": "Filters",
     "sources": "Sources",
-    "status": "Status",
     "genres": "Genres",
     "year": "Year",
-    "anyStatus": "Any status",
     "anyYear": "Any year",
     "clearAll": "Clear all filters",
     "history": "Recent searches",
@@ -390,10 +385,11 @@
       "manga": "manga id: shiki_id: or liberty_id:",
       "genre": "genre, e.g. action",
       "year": "release year, e.g. 2024",
-      "status": "watch status",
       "tag": "one of your tags",
       "source": "source: shikimori or aniliberty"
-    }
+    },
+    "tag": "Tag",
+    "anyTag": "Any tag"
   },
   "pagination": {
     "previous": "Previous",
@@ -426,5 +422,17 @@
     "required": "This field is required",
     "maxLength": "No more than {max} characters",
     "hexColor": "Expected a colour like #6366f1"
+  },
+  "kanban": {
+    "columns": "Columns",
+    "pickColumns": "Pick the tags to show as columns",
+    "empty": "Pick at least one tag to build the board"
+  },
+  "collection": {
+    "add": "Add to collection",
+    "added": "\"{title}\" added to the collection",
+    "addFailed": "Could not add to the collection",
+    "inCollection": "In collection",
+    "notInCollection": "Not in the collection: add a tag to put it there"
   }
 }

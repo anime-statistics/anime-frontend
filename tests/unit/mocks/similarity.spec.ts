@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
-import { computeSimilarity, deduplicateResults } from '@/mocks/mediaAdapter'
+import { computeSimilarity, deduplicateResults } from '@/mocks/search/mergeResults'
 
 function anime(overrides: Partial<IAnimeSearchResultDto>): IAnimeSearchResultDto {
   return {
     id: 'shikimori_1-placeholder',
     title: 'Placeholder',
     episodesTotal: 12,
-    status: 'completed',
+    myTags: [],
     source: 'shikimori',
     ...overrides,
   }
@@ -99,6 +99,20 @@ describe('deduplicateResults', () => {
     const [merged] = deduplicateResults(items)
 
     expect(merged.synopsis).toBe('A mad scientist sends messages to the past.')
+  })
+
+  it('keeps the collection membership of whichever twin carries the tags', () => {
+    const items = [
+      anime({ id: 'aniliberty_1-steins-gate', title: 'Steins Gate', source: 'aniliberty' }),
+      anime({
+        id: 'shikimori_2-steins-gate',
+        title: 'Steins;Gate',
+        source: 'shikimori',
+        myTags: ['tag-id'],
+      }),
+    ]
+
+    expect(deduplicateResults(items)[0].myTags).toEqual(['tag-id'])
   })
 
   it('leaves same-source duplicates without a secondarySource', () => {

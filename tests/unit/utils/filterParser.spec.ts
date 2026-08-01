@@ -21,11 +21,11 @@ describe('parseQueryFilters', () => {
   })
 
   it('splits key:value filters out of the free text', () => {
-    const filters = parseQueryFilters('titan genre:action status:watching')
+    const filters = parseQueryFilters('titan genre:action tag:watching')
 
     expect(filters.text).toBe('titan')
     expect(filters.include.genre).toEqual(['action'])
-    expect(filters.include.status).toEqual(['watching'])
+    expect(filters.include.tag).toEqual(['watching'])
   })
 
   it('keeps colons inside a value', () => {
@@ -93,38 +93,36 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery('anime:mal_id:5').animeId).toBeUndefined()
   })
 
-  it('reads genre, year, status and tag', () => {
-    const filters = parseSearchQuery('genre:action year:2013 status:watching tag:favorite titan')
+  it('reads genre, year and tag', () => {
+    const filters = parseSearchQuery('genre:action year:2013 tag:favorite titan')
 
     expect(filters.genre).toBe('action')
     expect(filters.year).toBe(2013)
-    expect(filters.status).toBe('watching')
     expect(filters.tag).toBe('favorite')
     expect(filters.freeText).toBe('titan')
-  })
-
-  it('rejects an unknown status', () => {
-    expect(parseSearchQuery('status:paused').status).toBeUndefined()
   })
 
   it('rejects a non-numeric year', () => {
     expect(parseSearchQuery('year:soon').year).toBeUndefined()
   })
 
-  it('is case-insensitive on filter keys and status values', () => {
-    const filters = parseSearchQuery('STATUS:Watching ANIME:SHIKI_ID:9')
+  it('is case-insensitive on filter keys', () => {
+    const filters = parseSearchQuery('TAG:favorite ANIME:SHIKI_ID:9')
 
-    expect(filters.status).toBe('watching')
+    expect(filters.tag).toBe('favorite')
     expect(filters.animeId).toEqual({ source: 'shikimori', id: 9 })
   })
 })
 
 describe('applyParsedFilters', () => {
   const items: IFilterableItem[] = [
-    { status: 'watching', genres: ['Action', 'Drama'], airedFrom: '2013-04-07', myTags: ['fav'] },
-    { status: 'completed', genres: ['Sci-Fi'], airedFrom: '2011-04-06', myTags: [] },
-    { status: 'watching', genres: ['Action'], airedFrom: '2011-10-02' },
+    { genres: ['Action', 'Drama'], airedFrom: '2013-04-07', myTags: ['fav', 'watching-id'] },
+    { genres: ['Sci-Fi'], airedFrom: '2011-04-06', myTags: [] },
+    { genres: ['Action'], airedFrom: '2011-10-02', myTags: ['watching-id'] },
   ]
+
+  // Tags are stored by id, so filtering by the name the user typed needs the map.
+  const tagNames = new Map([['watching-id', 'смотрю']])
 
   it('filters by genre substring', () => {
     expect(applyParsedFilters(items, { genre: 'action', freeText: '' })).toHaveLength(2)
@@ -134,17 +132,18 @@ describe('applyParsedFilters', () => {
     expect(applyParsedFilters(items, { year: 2011, freeText: '' })).toHaveLength(2)
   })
 
-  it('filters by exact status', () => {
-    expect(applyParsedFilters(items, { status: 'completed', freeText: '' })).toHaveLength(1)
+  it('filters by tag id', () => {
+    expect(applyParsedFilters(items, { tag: 'fav', freeText: '' })).toHaveLength(1)
   })
 
-  it('filters by tag', () => {
-    expect(applyParsedFilters(items, { tag: 'fav', freeText: '' })).toHaveLength(1)
+  it('filters by tag name once the lookup is supplied', () => {
+    expect(applyParsedFilters(items, { tag: 'Смотрю', freeText: '' }, tagNames)).toHaveLength(2)
+    expect(applyParsedFilters(items, { tag: 'Смотрю', freeText: '' })).toHaveLength(0)
   })
 
   it('combines every filter', () => {
     expect(
-      applyParsedFilters(items, { genre: 'action', year: 2013, status: 'watching', freeText: '' }),
+      applyParsedFilters(items, { genre: 'action', year: 2013, tag: 'fav', freeText: '' }),
     ).toHaveLength(1)
   })
 
@@ -155,11 +154,11 @@ describe('applyParsedFilters', () => {
 
 describe('matchesFilters', () => {
   const item: IFilterableItem = {
-    status: 'watching',
     genres: ['Action', 'Drama'],
     airedFrom: '2013-04-07',
-    myTags: ['favorite'],
+    myTags: ['favorite', 'watching-id'],
   }
+  const tagNames = new Map([['watching-id', 'смотрю']])
 
   it('requires every included genre', () => {
     expect(matchesFilters(item, parseQueryFilters('genre:action genre:drama'))).toBe(true)
@@ -170,11 +169,15 @@ describe('matchesFilters', () => {
     expect(matchesFilters(item, parseQueryFilters('-genre:action'))).toBe(false)
   })
 
-  it('matches on status, tag and year', () => {
-    expect(matchesFilters(item, parseQueryFilters('status:watching'))).toBe(true)
+  it('matches on tag id, tag name and year', () => {
     expect(matchesFilters(item, parseQueryFilters('tag:favorite'))).toBe(true)
+    expect(matchesFilters(item, parseQueryFilters('tag:Смотрю'), tagNames)).toBe(true)
     expect(matchesFilters(item, parseQueryFilters('year:2013'))).toBe(true)
     expect(matchesFilters(item, parseQueryFilters('year:2011'))).toBe(false)
+  })
+
+  it('rejects an excluded tag', () => {
+    expect(matchesFilters(item, parseQueryFilters('-tag:favorite'))).toBe(false)
   })
 })
 

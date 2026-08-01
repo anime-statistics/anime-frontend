@@ -8,6 +8,12 @@ export {
   type ApiValidationIssue,
 } from '@/apis/http/errorHandler'
 export { clearOAuthToken, getOAuthToken, setOAuthToken } from '@/apis/http/tokenStore'
+export {
+  mediaApi,
+  type ILibraryParams,
+  type IPaginatedResult,
+  type ISearchParams,
+} from '@/apis/mediaApi'
 
 export * from '@/apis/dtos'
 

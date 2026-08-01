@@ -6,11 +6,13 @@ import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useSearchHistory } from '@/composables/useSearchHistory'
 import { ALL_SOURCES, FILTER_KEYS } from '@/core/utils/filterParser'
 import { useSearchStore } from '@/stores/useSearchStore'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = withDefaults(defineProps<{ autofocus?: boolean }>(), { autofocus: false })
 
 const { translate } = useAppI18n()
 const store = useSearchStore()
+const tagStore = useTagStore()
 const { searchNow } = useDebouncedSearch()
 const history = useSearchHistory()
 
@@ -21,12 +23,13 @@ onMounted(() => {
   if (props.autofocus) input.value?.focus()
 })
 
-const SUGGESTION_VALUES: Record<string, readonly string[]> = {
-  status: ['watching', 'planned', 'completed', 'on_hold', 'dropped', 'rewatching'],
+// Watch statuses are tags now, so their values come from the user's own list.
+const suggestionValues = computed<Record<string, readonly string[]>>(() => ({
+  tag: tagStore.tags.map((tag) => tag.name.toLowerCase()),
   source: ALL_SOURCES,
   anime: ['shiki_id:', 'liberty_id:'],
   manga: ['shiki_id:', 'liberty_id:'],
-}
+}))
 
 const activeToken = computed(() => store.rawQuery.split(/\s+/).at(-1) ?? '')
 
@@ -57,9 +60,9 @@ const suggestions = computed<ISuggestion[]>(() => {
 
   const key = token.slice(0, colonIndex)
   const partial = token.slice(colonIndex + 1)
-  return (SUGGESTION_VALUES[key] ?? [])
+  return (suggestionValues.value[key] ?? [])
     .filter((value) => value.startsWith(partial) && value !== partial)
-    .map((value) => ({ value: `${key}:${value}` }))
+    .map((value) => ({ value: value.includes(' ') ? `${key}:"${value}"` : `${key}:${value}` }))
 })
 
 function applySuggestion(suggestion: string): void {

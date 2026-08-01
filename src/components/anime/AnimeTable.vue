@@ -2,32 +2,36 @@
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import { useRouter } from 'vue-router'
-import { ANIME_STATUSES } from '@/apis/dtos/animeDto'
+import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useIsMobile } from '@/composables/useMediaQuery'
 import { primaryTitle } from '@/core/utils/mediaTitle'
-import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = withDefaults(
-  defineProps<{ items: IMergedAnimeSearchResult[], rows?: number }>(),
+  defineProps<{ items: IAnimeSearchResultDto[], rows?: number }>(),
   { rows: 20 },
 )
 
 const { translate, locale } = useAppI18n()
 const router = useRouter()
 const isMobile = useIsMobile()
+const tagStore = useTagStore()
 
-function displayTitle(item: IMergedAnimeSearchResult): string {
+function displayTitle(item: IAnimeSearchResultDto): string {
   return primaryTitle(item, locale.value)
 }
 
-function openDetail(event: { data: IMergedAnimeSearchResult }): void {
+function openDetail(event: { data: IAnimeSearchResultDto }): void {
   void router.push({ name: 'anime-detail', params: { id: event.data.id } })
 }
 
-function statusLabel(status: string): string {
-  const known = ANIME_STATUSES.find((value) => value === status)
-  return known ? translate(`anime.status.${known}`) : status
+// Sorting on a joined label keeps the column sortable without a nested render.
+function tagLabel(item: { myTags?: string[] }): string {
+  return tagStore
+    .resolveTags(item.myTags)
+    .map((tag) => tag.name)
+    .join(', ')
 }
 </script>
 
@@ -66,10 +70,10 @@ function statusLabel(status: string): string {
         </div>
         <div class="flex justify-between gap-2">
           <dt class="text-gray-500 dark:text-gray-400">
-            {{ translate('filters.status') }}
+            {{ translate('tags.title') }}
           </dt>
           <dd class="truncate">
-            {{ statusLabel(item.status) }}
+            {{ tagLabel(item) || '—' }}
           </dd>
         </div>
         <div class="flex justify-between gap-2">
@@ -117,12 +121,12 @@ function statusLabel(status: string): string {
       sortable
     />
     <Column
-      field="status"
-      :header="translate('filters.status')"
+      :header="translate('tags.title')"
+      :sort-field="tagLabel"
       sortable
     >
       <template #body="{ data }">
-        {{ statusLabel(data.status) }}
+        {{ tagLabel(data) || '—' }}
       </template>
     </Column>
     <Column

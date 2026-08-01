@@ -1,82 +1,156 @@
+<script lang="ts">
+export interface ITagMovePayload {
+  mediaId: string
+  removeTagId?: string
+  addTagId?: string
+}
+</script>
+
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import MultiSelect from 'primevue/multiselect'
+import { computed, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
-import type { AnimeStatus } from '@/apis/dtos/animeDto'
+import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
+import type { ITagDto } from '@/apis/dtos/tagDto'
 import AnimeCard from '@/components/anime/AnimeCard.vue'
+import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useHaptic } from '@/composables/useHaptic'
-import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
+import { useSettingsStore } from '@/stores/useSettingsStore'
+import { useTagStore } from '@/stores/useTagStore'
 
-const props = defineProps<{ items: IMergedAnimeSearchResult[] }>()
-const emit = defineEmits<{ statusChange: [{ mediaId: string, status: AnimeStatus }] }>()
+// The column that catches everything the chosen tags do not.
+const REST_COLUMN = ''
+
+const props = defineProps<{ items: IAnimeSearchResultDto[] }>()
+const emit = defineEmits<{ tagMove: [ITagMovePayload] }>()
 
 const { translate } = useAppI18n()
 const haptic = useHaptic()
+const tagStore = useTagStore()
+const settingsStore = useSettingsStore()
 
-const KANBAN_STATUSES = ['watching', 'planned', 'completed', 'on_hold', 'dropped'] as const
-type KanbanStatus = (typeof KANBAN_STATUSES)[number]
+const columnTags = computed<ITagDto[]>(() =>
+  tagStore.resolveTags(settingsStore.settings.kanbanTagIds),
+)
+const columnIds = computed(() => [...columnTags.value.map((tag) => tag.id), REST_COLUMN])
 
-const columns = ref<Record<KanbanStatus, IMergedAnimeSearchResult[]>>(groupByStatus(props.items))
+const selectedTagIds = computed<string[]>({
+  get: () => settingsStore.settings.kanbanTagIds,
+  set: (ids) => {
+    settingsStore.update({ kanbanTagIds: ids })
+    settingsStore.persist()
+  },
+})
 
-function groupByStatus(
-  items: IMergedAnimeSearchResult[],
-): Record<KanbanStatus, IMergedAnimeSearchResult[]> {
+// A title can hold several column tags at once; it is shown in the first one so
+// dragging stays unambiguous.
+function columnOf(item: IAnimeSearchResultDto): string {
+  return columnTags.value.find((tag) => item.myTags.includes(tag.id))?.id ?? REST_COLUMN
+}
+
+function group(items: IAnimeSearchResultDto[]): Record<string, IAnimeSearchResultDto[]> {
   const grouped = Object.fromEntries(
-    KANBAN_STATUSES.map((status) => [status, [] as IMergedAnimeSearchResult[]]),
-  ) as Record<KanbanStatus, IMergedAnimeSearchResult[]>
+    columnIds.value.map((id) => [id, [] as IAnimeSearchResultDto[]]),
+  )
 
-  for (const item of items) {
-    const status = KANBAN_STATUSES.find((known) => known === item.status)
-    // Rewatching has no column of its own, so it rides along with "watching".
-    grouped[status ?? 'watching'].push(item)
-  }
-
+  for (const item of items) grouped[columnOf(item)].push(item)
   return grouped
 }
 
+const columns = ref<Record<string, IAnimeSearchResultDto[]>>(group(props.items))
+
 watch(
-  () => props.items,
-  (items) => {
-    columns.value = groupByStatus(items)
+  [() => props.items, columnIds],
+  () => {
+    columns.value = group(props.items)
   },
+  { immediate: true },
 )
 
-function onAdd(status: KanbanStatus, event: { data: IMergedAnimeSearchResult }): void {
+function labelOf(tagId: string): string {
+  return tagStore.findTag(tagId)?.name ?? translate('tags.untagged')
+}
+
+function onAdd(targetId: string, event: { data: IAnimeSearchResultDto }): void {
   haptic.success()
-  emit('statusChange', { mediaId: event.data.id, status })
+
+  const removeTagId = columnTags.value.find((tag) => event.data.myTags.includes(tag.id))?.id
+  emit('tagMove', {
+    mediaId: event.data.id,
+    removeTagId,
+    addTagId: targetId === REST_COLUMN ? undefined : targetId,
+  })
 }
 </script>
 
 <template>
-  <div class="flex gap-3 overflow-x-auto pb-2">
-    <section
-      v-for="status in KANBAN_STATUSES"
-      :key="status"
-      class="flex w-64 shrink-0 flex-col gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800/50"
-    >
-      <h3 class="flex items-center justify-between px-1 text-sm font-semibold text-gray-700 dark:text-gray-200">
-        {{ translate(`anime.status.${status}`) }}
-        <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
-          {{ columns[status].length }}
-        </span>
-      </h3>
-
-      <VueDraggable
-        v-model="columns[status]"
-        group="anime-kanban"
-        :animation="150"
-        item-key="id"
-        class="flex min-h-24 flex-col gap-2 rounded-lg p-1 transition-colors"
-        ghost-class="opacity-40"
-        @add="onAdd(status, $event)"
+  <div class="flex flex-col gap-3">
+    <label class="flex flex-wrap items-center gap-2 text-sm">
+      <span class="text-gray-500 dark:text-gray-400">{{ translate('kanban.columns') }}</span>
+      <MultiSelect
+        v-model="selectedTagIds"
+        :options="tagStore.tags"
+        option-label="name"
+        option-value="id"
+        filter
+        display="chip"
+        class="min-w-64 max-w-full"
+        :placeholder="translate('kanban.pickColumns')"
+        :aria-label="translate('kanban.columns')"
       >
-        <AnimeCard
-          v-for="item in columns[status]"
-          :key="item.id"
-          :anime="item"
-          compact
-        />
-      </VueDraggable>
-    </section>
+        <template #option="{ option }">
+          <TagBadge
+            :tag="option"
+            size="sm"
+          />
+        </template>
+      </MultiSelect>
+    </label>
+
+    <p
+      v-if="columnTags.length === 0"
+      class="text-sm text-gray-500 dark:text-gray-400"
+    >
+      {{ translate('kanban.empty') }}
+    </p>
+
+    <div class="flex gap-3 overflow-x-auto pb-2">
+      <section
+        v-for="columnId in columnIds"
+        :key="columnId || 'rest'"
+        class="flex w-64 shrink-0 flex-col gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800/50"
+      >
+        <h3 class="flex items-center justify-between gap-2 px-1 text-sm font-semibold text-gray-700 dark:text-gray-200">
+          <TagBadge
+            v-if="tagStore.findTag(columnId)"
+            :tag="tagStore.findTag(columnId)!"
+            size="sm"
+          />
+          <span v-else>{{ labelOf(columnId) }}</span>
+          <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
+            {{ columns[columnId]?.length ?? 0 }}
+          </span>
+        </h3>
+
+        <VueDraggable
+          v-model="columns[columnId]"
+          group="anime-kanban"
+          :animation="150"
+          item-key="id"
+          class="flex min-h-24 flex-col gap-2 rounded-lg p-1 transition-colors"
+          ghost-class="opacity-40"
+          @add="onAdd(columnId, $event)"
+        >
+          <AnimeCard
+            v-for="item in columns[columnId]"
+            :key="item.id"
+            :anime="item"
+            :tags="tagStore.resolveTags(item.myTags)"
+            compact
+          />
+        </VueDraggable>
+      </section>
+    </div>
   </div>
 </template>

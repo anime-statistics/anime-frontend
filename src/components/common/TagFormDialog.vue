@@ -51,6 +51,7 @@ const preview = computed<ITagDto>(() => ({
   color: color.value,
   icon: icon.value || undefined,
   isHidden: isHidden.value,
+  isSystem: props.tag?.isSystem ?? false,
   sortOrder: props.tag?.sortOrder ?? props.nextSortOrder,
 }))
 

@@ -4,13 +4,13 @@ import { describe, expect, it } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import AnimeCard from '@/components/anime/AnimeCard.vue'
 import { i18n } from '@/core/i18n'
-import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
+import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
 
-const anime: IMergedAnimeSearchResult = {
+const anime: IAnimeSearchResultDto = {
   id: 'shikimori_9253-steins-gate',
   title: 'Steins;Gate',
   episodesTotal: 24,
-  status: 'completed',
+  myTags: [],
   score: 9,
   imageUrl: 'https://example.com/steins-gate.jpg',
   genres: ['Sci-Fi', 'Thriller', 'Drama', 'Psychological'],

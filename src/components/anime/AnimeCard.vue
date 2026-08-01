@@ -2,18 +2,18 @@
 import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import { computed, ref } from 'vue'
+import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
 import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { usePrefetchRoute } from '@/composables/usePrefetchRoute'
 import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
-import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
 
 const VISIBLE_TAGS = 3
 
 const props = withDefaults(
   defineProps<{
-    anime: IMergedAnimeSearchResult
+    anime: IAnimeSearchResultDto
     tags?: ITagDto[]
     selected?: boolean
     selectable?: boolean
@@ -118,10 +118,6 @@ function onContextMenu(event: MouseEvent): void {
           v-if="props.anime.secondarySource"
           :value="props.anime.secondarySource"
           severity="secondary"
-        />
-        <Tag
-          :value="translate(`anime.status.${props.anime.status}`)"
-          severity="contrast"
         />
       </div>
     </template>

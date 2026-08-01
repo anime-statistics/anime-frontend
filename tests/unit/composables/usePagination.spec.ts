@@ -43,7 +43,6 @@ describe('useUrlFilters', () => {
       query: '',
       page: 1,
       size: 20,
-      status: '',
       genre: '',
       year: undefined,
       tag: '',
@@ -53,14 +52,13 @@ describe('useUrlFilters', () => {
 
   it('reads every filter from the query string', async () => {
     const router = makeRouter()
-    await router.push('/?q=titan&page=3&size=10&status=watching&genre=action&year=2013&tag=t1&source=shikimori')
+    await router.push('/?q=titan&page=3&size=10&genre=action&year=2013&tag=t1&source=shikimori')
     const { filters } = await mountUrlFilters(router)
 
     expect(filters()).toEqual({
       query: 'titan',
       page: 3,
       size: 10,
-      status: 'watching',
       genre: 'action',
       year: 2013,
       tag: 't1',

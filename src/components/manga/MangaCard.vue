@@ -3,9 +3,11 @@ import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import { computed, ref } from 'vue'
 import type { IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
+import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { usePrefetchRoute } from '@/composables/usePrefetchRoute'
 import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = withDefaults(
   defineProps<{ manga: IMangaSearchResultDto, selected?: boolean, selectable?: boolean }>(),
@@ -17,12 +19,14 @@ const emit = defineEmits<{
   openMenu: [{ mediaId: string, source: string, x: number, y: number }]
 }>()
 
-const { translate, translatePlural, locale } = useAppI18n()
+const { translatePlural, locale } = useAppI18n()
 const { prefetch } = usePrefetchRoute()
+const tagStore = useTagStore()
 const hasImageError = ref(false)
 
 const displayTitle = computed(() => primaryTitle(props.manga, locale.value))
 const altTitle = computed(() => secondaryTitle(props.manga, locale.value))
+const tags = computed(() => tagStore.resolveTags(props.manga.myTags))
 
 function onContextMenu(event: MouseEvent): void {
   emit('openMenu', {
@@ -97,10 +101,6 @@ function onContextMenu(event: MouseEvent): void {
           :value="props.manga.source"
           severity="info"
         />
-        <Tag
-          :value="translate(`manga.status.${props.manga.status}`)"
-          severity="contrast"
-        />
       </div>
     </template>
 
@@ -119,6 +119,18 @@ function onContextMenu(event: MouseEvent): void {
           :key="genre"
           :value="genre"
           severity="secondary"
+        />
+      </div>
+
+      <div
+        v-if="tags.length"
+        class="mt-2 flex flex-wrap items-center gap-1"
+      >
+        <TagBadge
+          v-for="tag in tags"
+          :key="tag.id"
+          :tag="tag"
+          size="sm"
         />
       </div>
     </template>

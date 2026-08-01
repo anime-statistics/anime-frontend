@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSwipe } from '@vueuse/core'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useTagStore } from '@/stores/useTagStore'
@@ -11,9 +12,16 @@ const props = defineProps<{ isOpen: boolean, isCollapsed: boolean }>()
 const emit = defineEmits<{ close: [] }>()
 
 const { translate } = useAppI18n()
+const route = useRoute()
 const tagStore = useTagStore()
 
 const drawer = ref<HTMLElement | null>(null)
+
+// The sidebar list is a quick filter over the library, so the tag currently
+// filtering it is the one worth highlighting.
+const activeTagId = computed(() =>
+  route.name === 'home' && typeof route.query.tag === 'string' ? route.query.tag : null,
+)
 
 // Either horizontal swipe dismisses the drawer: it slides in from the left, so
 // swiping it back is natural, and there is nothing to the right to reveal.
@@ -81,11 +89,11 @@ onMounted(() => {
       <h2
         class="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
       >
-        {{ translate('layout.myTags') }}
+        {{ translate('layout.filterByTag') }}
       </h2>
 
       <p
-        v-if="tagStore.tags.length === 0"
+        v-if="tagStore.visibleTags.length === 0"
         class="px-3 text-sm text-gray-500 dark:text-gray-400"
       >
         {{ translate('tags.empty') }}
@@ -96,30 +104,39 @@ onMounted(() => {
         class="flex flex-col gap-0.5"
       >
         <li
-          v-for="tag in tagStore.tags"
+          v-for="tag in tagStore.visibleTags"
           :key="tag.id"
-          class="flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+          class="flex items-center gap-1 rounded-lg px-2 py-1"
+          :class="activeTagId === tag.id
+            ? 'bg-brand-50 dark:bg-gray-800'
+            : 'hover:bg-gray-100 dark:hover:bg-gray-800'"
         >
           <RouterLink
-            :to="{ name: 'home', query: { tag: tag.id } }"
+            :to="activeTagId === tag.id
+              ? { name: 'home' }
+              : { name: 'home', query: { tag: tag.id } }"
             class="min-w-0 flex-1"
-            :title="translate('tags.filterBy')"
+            :title="activeTagId === tag.id
+              ? translate('tags.clearFilter')
+              : translate('tags.filterBy')"
+            :aria-current="activeTagId === tag.id ? 'true' : undefined"
             @click="emit('close')"
           >
             <TagBadge
               :tag="tag"
               size="sm"
-              :dimmed="tag.isHidden"
+              :dimmed="activeTagId !== null && activeTagId !== tag.id"
             />
           </RouterLink>
-          <button
-            type="button"
+          <RouterLink
+            :to="{ name: 'tag-detail', params: { id: tag.id } }"
             class="shrink-0 rounded p-1 text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-            :aria-label="tag.isHidden ? translate('layout.showTag') : translate('layout.hideTag')"
-            @click="tagStore.toggleTagVisibility(tag.id)"
+            :aria-label="translate('tags.openPage')"
+            :title="translate('tags.openPage')"
+            @click="emit('close')"
           >
-            <i :class="['pi', tag.isHidden ? 'pi-eye-slash' : 'pi-eye']" />
-          </button>
+            <i class="pi pi-arrow-up-right" />
+          </RouterLink>
         </li>
       </ul>
     </section>

@@ -2,10 +2,11 @@
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import { useRouter } from 'vue-router'
-import { MANGA_STATUSES, type IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
+import type { IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useIsMobile } from '@/composables/useMediaQuery'
 import { primaryTitle } from '@/core/utils/mediaTitle'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = withDefaults(
   defineProps<{ items: IMangaSearchResultDto[], rows?: number }>(),
@@ -15,6 +16,7 @@ const props = withDefaults(
 const { translate, locale } = useAppI18n()
 const router = useRouter()
 const isMobile = useIsMobile()
+const tagStore = useTagStore()
 
 function displayTitle(item: IMangaSearchResultDto): string {
   return primaryTitle(item, locale.value)
@@ -24,9 +26,11 @@ function openDetail(event: { data: IMangaSearchResultDto }): void {
   void router.push({ name: 'manga-detail', params: { id: event.data.id } })
 }
 
-function statusLabel(status: string): string {
-  const known = MANGA_STATUSES.find((value) => value === status)
-  return known ? translate(`manga.status.${known}`) : status
+function tagLabel(item: { myTags?: string[] }): string {
+  return tagStore
+    .resolveTags(item.myTags)
+    .map((tag) => tag.name)
+    .join(', ')
 }
 </script>
 
@@ -65,10 +69,10 @@ function statusLabel(status: string): string {
         </div>
         <div class="flex justify-between gap-2">
           <dt class="text-gray-500 dark:text-gray-400">
-            {{ translate('filters.status') }}
+            {{ translate('tags.title') }}
           </dt>
           <dd class="truncate">
-            {{ statusLabel(item.status) }}
+            {{ tagLabel(item) || '—' }}
           </dd>
         </div>
         <div class="flex justify-between gap-2">
@@ -121,12 +125,12 @@ function statusLabel(status: string): string {
       sortable
     />
     <Column
-      field="status"
-      :header="translate('filters.status')"
+      :header="translate('tags.title')"
+      :sort-field="tagLabel"
       sortable
     >
       <template #body="{ data }">
-        {{ statusLabel(data.status) }}
+        {{ tagLabel(data) || '—' }}
       </template>
     </Column>
     <Column

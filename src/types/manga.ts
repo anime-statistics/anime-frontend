@@ -1,7 +1,5 @@
 import type { MediaSource } from '@/core/utils/slugGenerator'
 
-export type IMangaStatus = 'reading' | 'planned' | 'completed' | 'on_hold' | 'dropped'
-
 export interface IMangaChapter {
   number: number
   title?: string
@@ -30,7 +28,6 @@ export interface IManga {
   chaptersTotal: number
   volumesRead: number
   chaptersRead: number
-  status: IMangaStatus
   score?: number
   imageUrl?: string
   synopsis?: string
@@ -39,7 +36,7 @@ export interface IManga {
   publishedFrom?: string
   publishedTo?: string
   source: MediaSource
-  tagIds: string[]
+  myTags: string[]
   volumes: IMangaVolume[]
   relatedManga: IMangaRelation[]
   createdAt: string

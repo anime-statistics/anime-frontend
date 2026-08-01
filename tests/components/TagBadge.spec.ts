@@ -10,6 +10,7 @@ function tag(overrides: Partial<ITagDto> = {}): ITagDto {
     name: 'Любимое',
     color: '#ef4444',
     isHidden: false,
+    isSystem: false,
     sortOrder: 0,
     ...overrides,
   }

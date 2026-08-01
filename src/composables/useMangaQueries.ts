@@ -1,35 +1,32 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, type Ref } from 'vue'
-import { apiClient } from '@/apis/http/client'
-import type { IMangaStatusUpdateDto } from '@/apis/dtos/mangaDto'
-import { validateMangaSearchResultDto } from '@/apis/validators/mangaValidators'
-import { MANGA } from '@/core/constants/apiRoutes'
+import { computed, unref, type MaybeRef, type Ref } from 'vue'
+import type { IMangaProgressUpdateDto } from '@/apis/dtos/mangaDto'
+import type { IBulkTagUpdateDto } from '@/apis/dtos/tagDto'
+import { mediaApi } from '@/apis/mediaApi'
 import type { MediaSource } from '@/core/utils/slugGenerator'
-import { mediaAdapter } from '@/mocks/mediaAdapter'
-
-const ALL_SOURCES: MediaSource[] = ['shikimori', 'aniliberty']
 
 export const mangaKeys = {
   all: ['manga'] as const,
   searches: () => [...mangaKeys.all, 'search'] as const,
-  search: (query: Ref<string> | string, sources: MediaSource[]) =>
-    [...mangaKeys.searches(), query, sources] as const,
-  library: (sources: MediaSource[]) => [...mangaKeys.all, 'library', sources] as const,
+  search: (query: MaybeRef<string>, sources?: MediaSource[]) =>
+    [...mangaKeys.searches(), query, sources ?? null] as const,
+  library: (tag?: MaybeRef<string | null>) => [...mangaKeys.all, 'library', tag ?? null] as const,
   details: () => [...mangaKeys.all, 'detail'] as const,
-  detail: (mediaId: Ref<string> | string) => [...mangaKeys.details(), mediaId] as const,
+  detail: (mediaId: MaybeRef<string>) => [...mangaKeys.details(), mediaId] as const,
 }
 
-export function useMangaLibrary(sources: MediaSource[] = ALL_SOURCES) {
+export function useMangaLibrary(tag?: Ref<string | null>) {
   return useQuery({
-    queryKey: mangaKeys.library(sources),
-    queryFn: ({ signal }) => mediaAdapter.searchManga({ query: '', sources }, signal),
+    queryKey: mangaKeys.library(tag),
+    queryFn: ({ signal }) =>
+      mediaApi.getMangaLibrary({ tag: unref(tag) ?? undefined }, signal),
   })
 }
 
-export function useMangaSearch(query: Ref<string>, sources: MediaSource[] = ALL_SOURCES) {
+export function useMangaSearch(query: Ref<string>, sources?: MediaSource[]) {
   return useQuery({
     queryKey: mangaKeys.search(query, sources),
-    queryFn: ({ signal }) => mediaAdapter.searchManga({ query: query.value, sources }, signal),
+    queryFn: ({ signal }) => mediaApi.searchManga({ query: query.value, sources }, signal),
     enabled: computed(() => query.value.length > 0),
   })
 }
@@ -37,27 +34,54 @@ export function useMangaSearch(query: Ref<string>, sources: MediaSource[] = ALL_
 export function useMangaDetail(mediaId: Ref<string>) {
   return useQuery({
     queryKey: mangaKeys.detail(mediaId),
-    queryFn: ({ signal }) => mediaAdapter.getMangaById(mediaId.value, signal),
+    queryFn: ({ signal }) => mediaApi.getMangaById(mediaId.value, signal),
     enabled: computed(() => mediaId.value.length > 0),
   })
 }
 
-export interface IMangaStatusVariables {
+export interface IMangaProgressVariables {
   mediaId: string
-  payload: IMangaStatusUpdateDto
+  payload: IMangaProgressUpdateDto
 }
 
-export function useMangaStatusMutation() {
+export interface IMangaTagVariables {
+  mediaId: string
+  tagIds: string[]
+}
+
+export function useMangaProgressMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ mediaId, payload }: IMangaStatusVariables) => {
-      const { data } = await apiClient.patch<unknown>(`${MANGA}/${mediaId}/status`, payload)
-      return validateMangaSearchResultDto(data)
-    },
+    mutationFn: ({ mediaId, payload }: IMangaProgressVariables) =>
+      mediaApi.updateMangaProgress(mediaId, payload),
     onSuccess: async (_result, { mediaId }) => {
       await queryClient.invalidateQueries({ queryKey: mangaKeys.detail(mediaId) })
-      await queryClient.invalidateQueries({ queryKey: mangaKeys.searches() })
+      await queryClient.invalidateQueries({ queryKey: mangaKeys.all })
+    },
+  })
+}
+
+export function useMangaTagMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ mediaId, tagIds }: IMangaTagVariables) =>
+      mediaApi.updateMangaTags(mediaId, tagIds),
+    onSuccess: async (_result, { mediaId }) => {
+      await queryClient.invalidateQueries({ queryKey: mangaKeys.detail(mediaId) })
+      await queryClient.invalidateQueries({ queryKey: mangaKeys.all })
+    },
+  })
+}
+
+export function useMangaBulkTagMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: IBulkTagUpdateDto) => mediaApi.bulkUpdateMangaTags(payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: mangaKeys.all })
     },
   })
 }

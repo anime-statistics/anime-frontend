@@ -7,8 +7,8 @@ interface ITestItem extends IFilterableItem {
 }
 
 const items: ITestItem[] = [
-  { title: 'Naruto', genres: ['Action'], status: 'completed', airedFrom: '2002-10-03' },
-  { title: 'Frieren', genres: ['Adventure'], status: 'watching', airedFrom: '2023-09-29' },
+  { title: 'Naruto', genres: ['Action'], myTags: ['completed'], airedFrom: '2002-10-03' },
+  { title: 'Frieren', genres: ['Adventure'], myTags: ['watching'], airedFrom: '2023-09-29' },
 ]
 
 const EMPTY_FILTERS: IParsedFilters = { freeText: '' }

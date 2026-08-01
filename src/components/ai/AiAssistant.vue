@@ -9,6 +9,7 @@ import { useAiPanel } from '@/composables/useAiPanel'
 import { useAiUsage } from '@/composables/useAiUsage'
 import { useAnimeLibrary } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
+import { SYSTEM_TAG_IDS } from '@/core/constants/systemTags'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useTagStore } from '@/stores/useTagStore'
 
@@ -41,11 +42,13 @@ const activeModel = computed(() =>
   modelsQuery.data.value?.find((model) => model.id === settingsStore.settings.aiModelId),
 )
 
+const WATCHED_TAG_IDS = [SYSTEM_TAG_IDS.completed, SYSTEM_TAG_IDS.watching]
+
 const context = computed<IAiContext | undefined>(() => {
   if (!settingsStore.settings.aiShareContext) return undefined
   return {
     watchedTitles: (animeLibrary.data.value?.items ?? [])
-      .filter((item) => item.status === 'completed' || item.status === 'watching')
+      .filter((item) => WATCHED_TAG_IDS.some((tagId) => item.myTags.includes(tagId)))
       .map((item) => item.title)
       .slice(0, 50),
     tags: tagStore.tags.map((tag) => tag.name),

@@ -9,6 +9,7 @@ import { SEARCH_HISTORY_KEY } from '@/composables/useSearchHistory'
 import { i18n } from '@/core/i18n'
 import { handlers, resetMockState } from '@/mocks/handlers'
 import { useSearchStore } from '@/stores/useSearchStore'
+import { useTagStore } from '@/stores/useTagStore'
 
 const server = setupServer(...handlers)
 
@@ -159,14 +160,32 @@ describe('SearchBar filter suggestions', () => {
     wrapper.unmount()
   })
 
-  it('suggests values once the key is typed', async () => {
+  // Watch statuses are tags now, so the value list comes from the tag store.
+  it('suggests tag values once the key is typed', async () => {
+    const tagStore = useTagStore()
+    await tagStore.fetchTags()
+
     const wrapper = mountSearchBar()
     const input = wrapper.find('input[type="search"]')
 
     await input.trigger('focus')
-    await input.setValue('status:wat')
+    await input.setValue('tag:смот')
 
-    expect(wrapper.find('ul').text()).toContain('status:watching')
+    expect(wrapper.find('ul').text()).toContain('tag:смотрю')
+    wrapper.unmount()
+  })
+
+  it('quotes a multi-word tag value', async () => {
+    const tagStore = useTagStore()
+    await tagStore.fetchTags()
+
+    const wrapper = mountSearchBar()
+    const input = wrapper.find('input[type="search"]')
+
+    await input.trigger('focus')
+    await input.setValue('tag:с')
+
+    expect(wrapper.find('ul').text()).toContain('tag:"с друзьями"')
     wrapper.unmount()
   })
 
@@ -174,11 +193,11 @@ describe('SearchBar filter suggestions', () => {
     const wrapper = mountSearchBar()
     const input = wrapper.find('input[type="search"]')
     await input.trigger('focus')
-    await input.setValue('naruto sta')
+    await input.setValue('naruto gen')
 
     await wrapper.find('ul button').trigger('mousedown')
 
-    expect(useSearchStore().rawQuery).toBe('naruto status:')
+    expect(useSearchStore().rawQuery).toBe('naruto genre:')
     wrapper.unmount()
   })
 

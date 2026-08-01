@@ -1,16 +1,5 @@
 import { z } from 'zod'
 
-export const ANIME_STATUSES = [
-  'watching',
-  'planned',
-  'completed',
-  'on_hold',
-  'dropped',
-  'rewatching',
-] as const
-
-export type AnimeStatus = (typeof ANIME_STATUSES)[number]
-
 export const MEDIA_SOURCES = ['shikimori', 'aniliberty'] as const
 
 export const AnimeSearchResultDto = z.object({
@@ -21,15 +10,18 @@ export const AnimeSearchResultDto = z.object({
   titleEnglish: z.string().optional(),
   // Announced titles have no episode count yet, so zero is a valid answer.
   episodesTotal: z.number().int().nonnegative(),
-  status: z.enum(ANIME_STATUSES),
   score: z.number().min(0).max(10).optional(),
   imageUrl: z.string().url().optional(),
   synopsis: z.string().optional(),
   genres: z.array(z.string()).optional(),
   airedFrom: z.string().optional(),
   airedTo: z.string().optional(),
-  myTags: z.array(z.string()).optional(),
+  // The only per-title state the user owns. An empty array means the title is in
+  // the catalogue but not in the collection.
+  myTags: z.array(z.string()).default([]),
   source: z.enum(MEDIA_SOURCES),
+  // Set by the backend when it merged the same title from a second source.
+  secondarySource: z.enum(MEDIA_SOURCES).optional(),
 })
 export type IAnimeSearchResultDto = z.infer<typeof AnimeSearchResultDto>
 
@@ -41,15 +33,18 @@ export const AnimeDetailDto = AnimeSearchResultDto.extend({
   relatedAnime: z
     .array(z.object({ id: z.string(), title: z.string(), relation: z.string() }))
     .optional(),
-  myTags: z.array(z.string()).optional(),
   watchedEpisodes: z.number().int().min(0).optional(),
   externalLinks: z.array(z.object({ source: z.string(), url: z.string().url() })).optional(),
 })
 export type IAnimeDetailDto = z.infer<typeof AnimeDetailDto>
 
-export const AnimeStatusUpdateDto = z.object({
-  status: z.enum(ANIME_STATUSES),
+export const AnimeProgressUpdateDto = z.object({
   score: z.number().min(0).max(10).optional(),
   watchedEpisodes: z.number().int().min(0).optional(),
 })
-export type IAnimeStatusUpdateDto = z.infer<typeof AnimeStatusUpdateDto>
+export type IAnimeProgressUpdateDto = z.infer<typeof AnimeProgressUpdateDto>
+
+export const AnimeTagsUpdateDto = z.object({
+  myTags: z.array(z.string()),
+})
+export type IAnimeTagsUpdateDto = z.infer<typeof AnimeTagsUpdateDto>

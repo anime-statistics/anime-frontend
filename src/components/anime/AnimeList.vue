@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import Tag from 'primevue/tag'
 import { ref } from 'vue'
+import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
+import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
-import type { IMergedAnimeSearchResult } from '@/mocks/mediaAdapter'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = withDefaults(
   defineProps<{
-    items: IMergedAnimeSearchResult[]
+    items: IAnimeSearchResultDto[]
     selectedIds?: Set<string>
     selectable?: boolean
   }>(),
@@ -19,14 +21,15 @@ const emit = defineEmits<{
   openMenu: [{ mediaId: string, source: string, x: number, y: number }]
 }>()
 
-const { translate, translatePlural, locale } = useAppI18n()
+const { translatePlural, locale } = useAppI18n()
+const tagStore = useTagStore()
 const brokenImages = ref<Set<string>>(new Set())
 
-function displayTitle(item: IMergedAnimeSearchResult): string {
+function displayTitle(item: IAnimeSearchResultDto): string {
   return primaryTitle(item, locale.value)
 }
 
-function altTitle(item: IMergedAnimeSearchResult): string | undefined {
+function altTitle(item: IAnimeSearchResultDto): string | undefined {
   return secondaryTitle(item, locale.value)
 }
 
@@ -34,7 +37,7 @@ function markBroken(id: string): void {
   brokenImages.value = new Set(brokenImages.value).add(id)
 }
 
-function onContextMenu(event: MouseEvent, item: IMergedAnimeSearchResult): void {
+function onContextMenu(event: MouseEvent, item: IAnimeSearchResultDto): void {
   emit('openMenu', { mediaId: item.id, source: item.source, x: event.clientX, y: event.clientY })
 }
 </script>
@@ -94,11 +97,21 @@ function onContextMenu(event: MouseEvent, item: IMergedAnimeSearchResult): void 
         </p>
         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
           {{ translatePlural('anime.episodes', item.episodesTotal) }}
-          · {{ translate(`anime.status.${item.status}`) }}
           <template v-if="item.score">
             · {{ item.score }}/10
           </template>
         </p>
+        <div
+          v-if="item.myTags.length"
+          class="mt-1 flex flex-wrap items-center gap-1"
+        >
+          <TagBadge
+            v-for="tag in tagStore.resolveTags(item.myTags)"
+            :key="tag.id"
+            :tag="tag"
+            size="sm"
+          />
+        </div>
       </div>
 
       <div class="hidden shrink-0 items-center gap-1 sm:flex">

@@ -2,12 +2,15 @@
 import Tag from 'primevue/tag'
 import { ref } from 'vue'
 import type { IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
+import TagBadge from '@/components/common/TagBadge.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { primaryTitle, secondaryTitle } from '@/core/utils/mediaTitle'
+import { useTagStore } from '@/stores/useTagStore'
 
 const props = defineProps<{ items: IMangaSearchResultDto[] }>()
 
-const { translate, translatePlural, locale } = useAppI18n()
+const { translatePlural, locale } = useAppI18n()
+const tagStore = useTagStore()
 const brokenImages = ref<Set<string>>(new Set())
 
 function displayTitle(item: IMangaSearchResultDto): string {
@@ -62,8 +65,18 @@ function markBroken(id: string): void {
         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
           {{ translatePlural('manga.volumes', item.volumesTotal) }}
           · {{ translatePlural('manga.chapters', item.chaptersTotal) }}
-          · {{ translate(`manga.status.${item.status}`) }}
         </p>
+        <div
+          v-if="item.myTags.length"
+          class="mt-1 flex flex-wrap items-center gap-1"
+        >
+          <TagBadge
+            v-for="tag in tagStore.resolveTags(item.myTags)"
+            :key="tag.id"
+            :tag="tag"
+            size="sm"
+          />
+        </div>
       </div>
 
       <Tag

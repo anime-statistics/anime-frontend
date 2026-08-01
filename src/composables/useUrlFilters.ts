@@ -7,7 +7,6 @@ export interface IUrlFilters {
   query: string
   page: number
   size: number
-  status: string
   genre: string
   year?: number
   tag: string
@@ -47,7 +46,6 @@ export function useUrlFilters(options: IUrlFiltersOptions = {}): {
       query: firstValue(route.query.q),
       page: positiveInt(route.query.page, 1),
       size: positiveInt(route.query.size, defaultSize),
-      status: firstValue(route.query.status),
       genre: firstValue(route.query.genre),
       year: Number.isInteger(year) && year > 0 ? year : undefined,
       tag: firstValue(route.query.tag),
@@ -66,7 +64,6 @@ export function useUrlFilters(options: IUrlFiltersOptions = {}): {
     if ('query' in partial) assign('q', partial.query)
     if ('page' in partial) assign('page', partial.page === 1 ? undefined : partial.page)
     if ('size' in partial) assign('size', partial.size === defaultSize ? undefined : partial.size)
-    if ('status' in partial) assign('status', partial.status)
     if ('genre' in partial) assign('genre', partial.genre)
     if ('year' in partial) assign('year', partial.year)
     if ('tag' in partial) assign('tag', partial.tag)

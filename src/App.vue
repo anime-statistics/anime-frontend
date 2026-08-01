@@ -35,10 +35,11 @@ const hasDetailPanel = computed(() =>
 )
 
 const ROUTE_TITLE_KEYS = {
-  home: 'pages.homeTitle',
-  search: 'pages.searchTitle',
-  tags: 'pages.tagsTitle',
-  settings: 'pages.settingsTitle',
+  'home': 'pages.homeTitle',
+  'search': 'pages.searchTitle',
+  'tags': 'pages.tagsTitle',
+  'tag-detail': 'pages.tagsTitle',
+  'settings': 'pages.settingsTitle',
 } as const
 
 const pageTitle = computed(() => {

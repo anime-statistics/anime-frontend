@@ -5,7 +5,9 @@ interface IRateLimitBody {
 }
 
 const requestTimestamps: number[] = []
-const RATE_LIMIT = 5
+// Loose enough that paging through the collection is not mistaken for abuse,
+// tight enough that a runaway loop still trips it.
+const RATE_LIMIT = 20
 const RATE_WINDOW = 1000
 
 export function checkRateLimit(): boolean {

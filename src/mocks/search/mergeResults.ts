@@ -1,18 +1,9 @@
 import Fuse from 'fuse.js'
-import type { IAnimeDetailDto, IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
-import type { IMangaDetailDto, IMangaSearchResultDto } from '@/apis/dtos/mangaDto'
-import { parseMediaId, type MediaSource } from '@/core/utils/slugGenerator'
-import { anilibertyAdapter } from '@/mocks/aniliberty/anilibertyAdapter'
-import { shikimoriAdapter, type IPaginatedResult } from '@/mocks/shikimori/shikimoriAdapter'
+import type { IAnimeSearchResultDto } from '@/apis/dtos/animeDto'
 
-export interface IMergedAnimeSearchResult extends IAnimeSearchResultDto {
-  secondarySource?: MediaSource
-}
-
-export interface ISearchParams {
-  query: string
-  sources: MediaSource[]
-}
+// Merging the same title coming from two sources is the backend's job: the
+// client asks once and gets one card back. This module is the mock's stand-in
+// for that server-side step.
 
 const SIMILARITY_THRESHOLD = 0.7
 
@@ -93,20 +84,20 @@ export function computeSimilarity(
 function mergeDuplicates(
   left: IAnimeSearchResultDto,
   right: IAnimeSearchResultDto,
-): IMergedAnimeSearchResult {
+): IAnimeSearchResultDto {
   const primary = right.source === 'shikimori' && left.source !== 'shikimori' ? right : left
   const secondary = primary === left ? right : left
 
   return {
     ...secondary,
     ...primary,
+    // Collection membership belongs to whichever record carries the tags.
+    myTags: primary.myTags.length ? primary.myTags : secondary.myTags,
     secondarySource: secondary.source === primary.source ? undefined : secondary.source,
   }
 }
 
-export function deduplicateResults(
-  items: IAnimeSearchResultDto[],
-): IMergedAnimeSearchResult[] {
+export function deduplicateResults(items: IAnimeSearchResultDto[]): IAnimeSearchResultDto[] {
   const fuse = new Fuse(items, {
     keys: [
       { name: 'title', weight: 0.5 },
@@ -117,7 +108,7 @@ export function deduplicateResults(
     includeScore: true,
   })
 
-  const merged: IMergedAnimeSearchResult[] = []
+  const merged: IAnimeSearchResultDto[] = []
   const usedIndices = new Set<number>()
 
   for (let index = 0; index < items.length; index += 1) {
@@ -156,79 +147,4 @@ export function deduplicateResults(
   }
 
   return merged
-}
-
-// Partial failures degrade gracefully, but if every source failed the caller must
-// see an error rather than an empty result set.
-async function collectFulfilled<T>(
-  promises: Promise<IPaginatedResult<T>>[],
-): Promise<T[]> {
-  if (promises.length === 0) return []
-
-  const results = await Promise.allSettled(promises)
-  const fulfilled = results.filter(
-    (result): result is PromiseFulfilledResult<IPaginatedResult<T>> =>
-      result.status === 'fulfilled',
-  )
-
-  if (fulfilled.length === 0) {
-    const rejected = results.find(
-      (result): result is PromiseRejectedResult => result.status === 'rejected',
-    )
-    throw rejected?.reason ?? new Error('All media sources failed')
-  }
-
-  return fulfilled.flatMap((result) => result.value.items)
-}
-
-export const mediaAdapter = {
-  async search(
-    params: ISearchParams,
-    signal?: AbortSignal,
-  ): Promise<IPaginatedResult<IMergedAnimeSearchResult>> {
-    const promises: Promise<IPaginatedResult<IAnimeSearchResultDto>>[] = []
-    if (params.sources.includes('shikimori')) {
-      promises.push(shikimoriAdapter.searchAnime(params.query, signal))
-    }
-    if (params.sources.includes('aniliberty')) {
-      promises.push(anilibertyAdapter.searchAnime(params.query, signal))
-    }
-
-    const deduped = deduplicateResults(await collectFulfilled(promises))
-    return { items: deduped, total: deduped.length }
-  },
-
-  async searchManga(
-    params: ISearchParams,
-    signal?: AbortSignal,
-  ): Promise<IPaginatedResult<IMangaSearchResultDto>> {
-    const promises: Promise<IPaginatedResult<IMangaSearchResultDto>>[] = []
-    if (params.sources.includes('shikimori')) {
-      promises.push(shikimoriAdapter.searchManga(params.query, signal))
-    }
-    if (params.sources.includes('aniliberty')) {
-      promises.push(anilibertyAdapter.searchManga(params.query, signal))
-    }
-
-    const items = await collectFulfilled(promises)
-    return { items, total: items.length }
-  },
-
-  async getAnimeById(mediaId: string, signal?: AbortSignal): Promise<IAnimeDetailDto> {
-    const parsed = parseMediaId(mediaId)
-    if (!parsed) throw new Error(`Invalid mediaId: ${mediaId}`)
-
-    return parsed.source === 'shikimori'
-      ? shikimoriAdapter.getAnimeById(mediaId, signal)
-      : anilibertyAdapter.getAnimeById(mediaId, signal)
-  },
-
-  async getMangaById(mediaId: string, signal?: AbortSignal): Promise<IMangaDetailDto> {
-    const parsed = parseMediaId(mediaId)
-    if (!parsed) throw new Error(`Invalid mediaId: ${mediaId}`)
-
-    return parsed.source === 'shikimori'
-      ? shikimoriAdapter.getMangaById(mediaId, signal)
-      : anilibertyAdapter.getMangaById(mediaId, signal)
-  },
 }

@@ -18,6 +18,12 @@ const routes: RouteRecordRaw[] = [
   },
   { path: '/search', name: 'search', component: () => import('@/views/SearchView.vue') },
   { path: '/tags', name: 'tags', component: () => import('@/views/TagsView.vue') },
+  {
+    path: '/tags/:id',
+    name: 'tag-detail',
+    component: () => import('@/views/TagDetailView.vue'),
+    props: true,
+  },
   { path: '/settings', name: 'settings', component: () => import('@/views/SettingsView.vue') },
   {
     path: '/:pathMatch(.*)*',

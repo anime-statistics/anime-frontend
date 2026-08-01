@@ -6,6 +6,8 @@ export interface ITag {
   color: ITagColor
   icon?: string
   isHidden: boolean
+  // Seeded watch statuses: renameable and recolourable, but not deletable.
+  isSystem: boolean
   sortOrder: number
   groupId?: string
 }

@@ -2,13 +2,13 @@
 import { useSwipe } from '@vueuse/core'
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { AnimeStatus } from '@/apis/dtos/animeDto'
 import type { ITagDto } from '@/apis/dtos/tagDto'
 import TagBadge from '@/components/common/TagBadge.vue'
 import AnimeCard from '@/components/anime/AnimeCard.vue'
 import AnimeCardSkeleton from '@/components/anime/AnimeCardSkeleton.vue'
 import AnimeList from '@/components/anime/AnimeList.vue'
-import BulkActionBar from '@/components/anime/BulkActionBar.vue'
+import BulkActionBar, { type IBulkTagAction } from '@/components/anime/BulkActionBar.vue'
+import type { ITagMovePayload } from '@/components/anime/AnimeKanban.vue'
 import SortSelector from '@/components/anime/SortSelector.vue'
 import ColumnSlider from '@/components/common/ColumnSlider.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
@@ -18,7 +18,7 @@ import Pagination from '@/components/common/Pagination.vue'
 import ViewModeToggle from '@/components/common/ViewModeToggle.vue'
 import MangaCard from '@/components/manga/MangaCard.vue'
 import MangaList from '@/components/manga/MangaList.vue'
-import { useAnimeLibrary, useAnimeStatusMutation } from '@/composables/useAnimeQueries'
+import { useAnimeBulkTagMutation, useAnimeLibrary } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useHaptic } from '@/composables/useHaptic'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
@@ -55,7 +55,7 @@ const isMobile = useIsMobile()
 const maxColumns = useMaxColumns()
 const haptic = useHaptic()
 const toast = useToast()
-const statusMutation = useAnimeStatusMutation()
+const bulkTagMutation = useAnimeBulkTagMutation()
 
 const mediaType = computed(() => (route.query.type === 'manga' ? 'manga' : 'anime'))
 
@@ -199,23 +199,29 @@ function openMenu(target: IContextMenuTarget): void {
   contextTarget.value = target
 }
 
-async function applyStatus(status: AnimeStatus): Promise<void> {
+async function applyTags(action: IBulkTagAction): Promise<void> {
   const ids = [...animeStore.selectedIds]
-  await Promise.all(
-    ids.map((mediaId) => statusMutation.mutateAsync({ mediaId, payload: { status } })),
-  )
-  toast.success(translate('bulk.applied', { count: ids.length }))
+  if (ids.length === 0) return
+
+  const updated = await bulkTagMutation.mutateAsync({ ids, ...action })
+  toast.success(translate('bulk.applied', { count: updated }))
   animeStore.clearSelection()
 }
 
-async function onKanbanStatusChange(payload: {
-  mediaId: string
-  status: AnimeStatus
-}): Promise<void> {
-  await statusMutation.mutateAsync({
-    mediaId: payload.mediaId,
-    payload: { status: payload.status },
+// Dragging a card across the board swaps one column tag for another; tags that
+// are not columns are left alone.
+async function onKanbanTagMove(payload: ITagMovePayload): Promise<void> {
+  await bulkTagMutation.mutateAsync({
+    ids: [payload.mediaId],
+    add: payload.addTagId ? [payload.addTagId] : undefined,
+    remove: payload.removeTagId ? [payload.removeTagId] : undefined,
   })
+}
+
+function openTagEditor(mediaId: string): void {
+  contextTarget.value = null
+  const name = mediaType.value === 'manga' ? 'manga-detail' : 'anime-detail'
+  void router.push({ name, params: { id: mediaId } })
 }
 
 function onKeydown(event: KeyboardEvent): void {
@@ -290,10 +296,15 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <p class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <span>{{ translatePlural('pagination.results', itemCount) }}</span>
           <template v-if="activeTag">
-            <TagBadge
-              :tag="activeTag"
-              size="sm"
-            />
+            <RouterLink
+              :to="{ name: 'tag-detail', params: { id: activeTag.id } }"
+              :title="translate('tags.openPage')"
+            >
+              <TagBadge
+                :tag="activeTag"
+                size="sm"
+              />
+            </RouterLink>
             <RouterLink
               :to="{ name: 'home', query: { type: route.query.type } }"
               class="underline underline-offset-2"
@@ -340,7 +351,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       <AnimeKanban
         v-if="viewMode === 'kanban'"
         :items="sortedAnime"
-        @status-change="onKanbanStatusChange"
+        @tag-move="onKanbanTagMove"
       />
 
       <AnimeTable
@@ -367,7 +378,6 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           :key="item.id"
           v-memo="[
             item.id,
-            item.status,
             item.score,
             item.myTags,
             tagStore.tags,
@@ -405,8 +415,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
       <BulkActionBar
         :selected-count="animeStore.selectedCount"
-        :is-busy="statusMutation.isPending.value"
-        @change-status="applyStatus"
+        :is-busy="bulkTagMutation.isPending.value"
+        @apply-tags="applyTags"
         @clear="animeStore.clearSelection()"
       />
     </template>
@@ -430,7 +440,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <MangaCard
           v-for="item in visibleManga"
           :key="item.id"
-          v-memo="[item.id, item.status, item.score]"
+          v-memo="[item.id, item.score, item.myTags, tagStore.tags]"
           v-reveal
           :manga="item"
           @open-menu="openMenu"
@@ -462,7 +472,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       :target="contextTarget"
       :kind="mediaType"
       @close="contextTarget = null"
-      @change-status="contextTarget = null"
+      @edit-tags="openTagEditor"
     />
   </section>
 </template>

@@ -1,13 +1,5 @@
 import type { MediaSource } from '@/core/utils/slugGenerator'
 
-export type IAnimeStatus
-  = | 'watching'
-    | 'planned'
-    | 'completed'
-    | 'on_hold'
-    | 'dropped'
-    | 'rewatching'
-
 export interface IAnimeExternalLink {
   source: string
   url: string
@@ -34,7 +26,6 @@ export interface IAnime {
   titleEnglish?: string
   episodesTotal: number
   watchedEpisodes: number
-  status: IAnimeStatus
   score?: number
   imageUrl?: string
   synopsis?: string
@@ -44,7 +35,8 @@ export interface IAnime {
   rating?: string
   duration?: number
   source: MediaSource
-  tagIds: string[]
+  // Watch status lives here too: it is a tag like any other.
+  myTags: string[]
   episodes: IAnimeEpisode[]
   externalLinks: IAnimeExternalLink[]
   relatedAnime: IAnimeRelation[]

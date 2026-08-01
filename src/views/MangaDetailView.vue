@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import Rating from 'primevue/rating'
-import { computed, ref, toRef } from 'vue'
-import { MANGA_STATUSES, type MangaStatus } from '@/apis/dtos/mangaDto'
+import { computed, onMounted, ref, toRef } from 'vue'
+import TagSelector from '@/components/common/TagSelector.vue'
 import EpisodeProgress from '@/components/anime/EpisodeProgress.vue'
 import NotesPanel from '@/components/editor/NotesPanel.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
-import { useMangaDetail, useMangaStatusMutation } from '@/composables/useMangaQueries'
+import {
+  useMangaDetail,
+  useMangaProgressMutation,
+  useMangaTagMutation,
+} from '@/composables/useMangaQueries'
 import { buildExternalUrl } from '@/core/utils/externalLinks'
 import { primaryTitle } from '@/core/utils/mediaTitle'
+import { useTagStore } from '@/stores/useTagStore'
 
 type DetailTab = 'chapters' | 'notes'
 
@@ -15,9 +20,11 @@ const props = defineProps<{ id: string }>()
 
 const mediaId = toRef(props, 'id')
 const { translate, translatePlural, locale } = useAppI18n()
+const tagStore = useTagStore()
 
 const { data: manga, isPending, isError } = useMangaDetail(mediaId)
-const statusMutation = useMangaStatusMutation()
+const progressMutation = useMangaProgressMutation()
+const tagMutation = useMangaTagMutation()
 
 const activeTab = ref<DetailTab>('chapters')
 const hasImageError = ref(false)
@@ -29,29 +36,32 @@ const volumesRead = computed(() => manga.value?.volumesRead ?? 0)
 const chaptersRead = computed(() => manga.value?.chaptersRead ?? 0)
 const externalUrl = computed(() => buildExternalUrl(props.id, 'manga'))
 
+const selectedTagIds = computed({
+  get: () => manga.value?.myTags ?? [],
+  set: (tagIds: string[]) => {
+    void tagMutation.mutateAsync({ mediaId: props.id, tagIds })
+  },
+})
+
+onMounted(() => {
+  if (tagStore.tags.length === 0) void tagStore.fetchTags()
+})
+
 async function patchManga(payload: {
-  status?: MangaStatus
   score?: number
   volumesRead?: number
   chaptersRead?: number
 }): Promise<void> {
   if (!manga.value) return
 
-  await statusMutation.mutateAsync({
+  await progressMutation.mutateAsync({
     mediaId: props.id,
     payload: {
-      status: payload.status ?? manga.value.status,
       score: payload.score ?? manga.value.score,
       volumesRead: payload.volumesRead ?? volumesRead.value,
       chaptersRead: payload.chaptersRead ?? chaptersRead.value,
     },
   })
-}
-
-function onStatusChange(event: Event): void {
-  const value = (event.target as HTMLSelectElement).value
-  const status = MANGA_STATUSES.find((known) => known === value)
-  if (status) void patchManga({ status })
 }
 </script>
 
@@ -131,23 +141,16 @@ function onStatusChange(event: Event): void {
           </p>
 
           <div class="grid gap-3 sm:grid-cols-2">
-            <label class="flex flex-col gap-1 text-sm">
-              <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.status') }}</span>
-              <select
-                class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-                :value="manga.status"
-                :disabled="statusMutation.isPending.value"
-                @change="onStatusChange"
+            <div class="flex flex-col gap-1 text-sm">
+              <span class="text-gray-500 dark:text-gray-400">{{ translate('tags.title') }}</span>
+              <TagSelector v-model="selectedTagIds" />
+              <span
+                v-if="selectedTagIds.length === 0"
+                class="text-xs text-gray-400 dark:text-gray-500"
               >
-                <option
-                  v-for="status in MANGA_STATUSES"
-                  :key="status"
-                  :value="status"
-                >
-                  {{ translate(`manga.status.${status}`) }}
-                </option>
-              </select>
-            </label>
+                {{ translate('collection.notInCollection') }}
+              </span>
+            </div>
 
             <div class="flex flex-col gap-1 text-sm">
               <span class="text-gray-500 dark:text-gray-400">{{ translate('detail.score') }}</span>
@@ -221,7 +224,7 @@ function onStatusChange(event: Event): void {
             <EpisodeProgress
               :watched="volumesRead"
               :total="manga.volumesTotal"
-              :is-busy="statusMutation.isPending.value"
+              :is-busy="progressMutation.isPending.value"
               plural-key="manga.volumes"
               next-label-key="detail.markNextVolume"
               grid-label-key="detail.volumeGrid"
@@ -238,7 +241,7 @@ function onStatusChange(event: Event): void {
             <EpisodeProgress
               :watched="chaptersRead"
               :total="manga.chaptersTotal"
-              :is-busy="statusMutation.isPending.value"
+              :is-busy="progressMutation.isPending.value"
               plural-key="manga.chapters"
               next-label-key="detail.markNextChapter"
               grid-label-key="detail.chapterGrid"

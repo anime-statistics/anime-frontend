@@ -7,8 +7,8 @@ import { apiClient } from '@/apis/http/client'
 import {
   useAnimeDetail,
   useAnimeLibrary,
+  useAnimeProgressMutation,
   useAnimeSearch,
-  useAnimeStatusMutation,
   useAnimeTagMutation,
 } from '@/composables/useAnimeQueries'
 import { animeSearchResults } from '@/mocks/fixtures/animeData'
@@ -17,9 +17,10 @@ import { API_PREFIX } from '@/mocks/handlers/apiPrefix'
 import { useAnimeStore } from '@/stores/useAnimeStore'
 import { withQueryClient } from '../../helpers/withQueryClient'
 
-// Anchored on generated fixture data rather than a hard-coded title.
+// Anchored on generated fixture data rather than a hard-coded title. The
+// library only returns the collection, so the anchor has to be a tagged row.
 const ANCHOR = animeSearchResults.find(
-  (item) => item.source === 'shikimori' && item.titleEnglish !== undefined,
+  (item) => item.source === 'shikimori' && item.titleEnglish !== undefined && item.myTags.length > 0,
 )!
 const ANCHOR_ID = ANCHOR.id
 
@@ -68,7 +69,7 @@ describe('anime library over MSW', () => {
         HttpResponse.json({ items: [{ id: 42, title: null }], total: 1, page: 1, size: 20 })),
     )
 
-    const { result, wrapper } = withQueryClient(() => useAnimeLibrary(['shikimori']))
+    const { result, wrapper } = withQueryClient(() => useAnimeLibrary())
 
     await vi.waitFor(() => expect(result.isError.value).toBe(true))
     expect(result.error.value).toBeInstanceOf(Error)
@@ -101,46 +102,51 @@ describe('anime library over MSW', () => {
 })
 
 describe('anime mutations over MSW', () => {
-  it('patches the status and invalidates the cached detail', async () => {
+  it('patches the progress and invalidates the cached detail', async () => {
     const mediaId = ref(ANCHOR_ID)
     const { result: detail, wrapper, queryClient } = withQueryClient(() => useAnimeDetail(mediaId))
     await vi.waitFor(() => expect(detail.isSuccess.value).toBe(true))
 
     const { result: mutation, wrapper: mutationWrapper } = withQueryClient(
-      () => useAnimeStatusMutation(),
+      () => useAnimeProgressMutation(),
       queryClient,
     )
 
     const updated = await mutation.mutateAsync({
       mediaId: ANCHOR_ID,
-      payload: { status: 'rewatching' },
+      payload: { watchedEpisodes: 3 },
     })
 
-    expect(updated.status).toBe('rewatching')
-    await vi.waitFor(() => expect(detail.data.value?.status).toBe('rewatching'))
+    expect(updated.id).toBe(ANCHOR_ID)
+    await vi.waitFor(() => expect(detail.data.value?.watchedEpisodes).toBe(3))
 
     mutationWrapper.unmount()
     wrapper.unmount()
   })
 
-  it('patches the tag list', async () => {
+  it('drops the title out of the collection when its last tag goes', async () => {
     const { result: mutation, wrapper } = withQueryClient(() => useAnimeTagMutation())
 
     const updated = await mutation.mutateAsync({ mediaId: ANCHOR_ID, tagIds: [] })
-
     expect(updated.myTags).toEqual([])
+
+    const { result: library, wrapper: libraryWrapper } = withQueryClient(() => useAnimeLibrary())
+    await vi.waitFor(() => expect(library.isSuccess.value).toBe(true))
+    expect(library.data.value?.items.some((item) => item.id === ANCHOR_ID)).toBe(false)
+
+    libraryWrapper.unmount()
     wrapper.unmount()
   })
 
   // A 4xx is deliberate: axios-retry backs 5xx off for seconds before giving up.
   it('surfaces a server error to the caller', async () => {
     server.use(
-      http.patch(`${API_PREFIX}/anime/:id/status`, () => new HttpResponse(null, { status: 404 })),
+      http.patch(`${API_PREFIX}/anime/:id/progress`, () => new HttpResponse(null, { status: 404 })),
     )
-    const { result: mutation, wrapper } = withQueryClient(() => useAnimeStatusMutation())
+    const { result: mutation, wrapper } = withQueryClient(() => useAnimeProgressMutation())
 
     await expect(
-      mutation.mutateAsync({ mediaId: ANCHOR_ID, payload: { status: 'dropped' } }),
+      mutation.mutateAsync({ mediaId: ANCHOR_ID, payload: { score: 7 } }),
     ).rejects.toThrow()
 
     wrapper.unmount()

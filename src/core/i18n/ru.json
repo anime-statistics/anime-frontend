@@ -29,10 +29,10 @@
     "toggleTheme": "Сменить тему",
     "toggleLocale": "Сменить язык",
     "skipToContent": "Перейти к содержимому",
-    "myTags": "Мои теги",
     "showTag": "Показать тег",
     "hideTag": "Скрыть тег",
-    "detailPanel": "Подробности"
+    "detailPanel": "Подробности",
+    "filterByTag": "Фильтр по тегу"
   },
   "footer": {
     "version": "Версия {version}",
@@ -74,14 +74,6 @@
       "empty": "Аниме не найдено",
       "hint": "Введите минимум 2 символа"
     },
-    "status": {
-      "watching": "Смотрю",
-      "planned": "Запланировано",
-      "completed": "Просмотрено",
-      "on_hold": "Отложено",
-      "dropped": "Брошено",
-      "rewatching": "Пересматриваю"
-    },
     "fields": {
       "score": "Оценка",
       "genres": "Жанры",
@@ -98,13 +90,6 @@
     "search": {
       "placeholder": "Поиск манги…",
       "empty": "Манга не найдена"
-    },
-    "status": {
-      "reading": "Читаю",
-      "planned": "Запланировано",
-      "completed": "Прочитано",
-      "on_hold": "Отложено",
-      "dropped": "Брошено"
     },
     "fields": {
       "authors": "Авторы",
@@ -133,7 +118,16 @@
     "more": "+{count}",
     "nameRequired": "Введите название до 50 символов",
     "colorInvalid": "Выберите цвет",
-    "iconSearch": "Поиск иконки"
+    "iconSearch": "Поиск иконки",
+    "untagged": "Остальное",
+    "openPage": "Открыть страницу тега",
+    "itemCount": "{count} работа | {count} работы | {count} работ",
+    "systemTag": "Системный тег",
+    "deleteQuestion": "Что сделать с работами, у которых он стоит?",
+    "deleteKeepItems": "Снять тег с работ",
+    "deleteKeepItemsHint": "Работы останутся в коллекции со своими остальными тегами",
+    "deleteWithItems": "Убрать работы из коллекции",
+    "deleteWithItemsHint": "С работ снимутся все теги, и они уйдут из библиотеки"
   },
   "notes": {
     "title": "Заметки",
@@ -295,7 +289,6 @@
     "episodesTab": "Эпизоды",
     "notesTab": "Заметки",
     "historyTab": "История",
-    "status": "Статус просмотра",
     "score": "Ваша оценка",
     "progress": "Прогресс",
     "watchedOfTotal": "{watched} из {total}",
@@ -351,18 +344,22 @@
     "of": "из"
   },
   "bulk": {
-    "changeStatus": "Сменить статус",
     "addTag": "Добавить тег",
-    "applied": "Применено к {count} элементам"
+    "applied": "Применено к {count} элементам",
+    "removeTag": "Снять тег",
+    "removeThisTag": "Снять этот тег",
+    "removeFromCollection": "Убрать из коллекции",
+    "moveTarget": "Перенести в тег",
+    "move": "Перенести"
   },
   "contextMenu": {
     "addTag": "Добавить тег",
-    "changeStatus": "Сменить статус",
     "openShikimori": "Открыть на Shikimori",
     "openAniliberty": "Открыть на AniLiberty",
     "copyLink": "Копировать ссылку",
     "linkCopied": "Ссылка скопирована",
-    "copyFailed": "Не удалось скопировать ссылку"
+    "copyFailed": "Не удалось скопировать ссылку",
+    "editTags": "Изменить теги"
   },
   "empty": {
     "title": "Ничего не найдено",
@@ -372,10 +369,8 @@
   "filters": {
     "title": "Фильтры",
     "sources": "Источники",
-    "status": "Статус",
     "genres": "Жанры",
     "year": "Год",
-    "anyStatus": "Любой статус",
     "anyYear": "Любой год",
     "clearAll": "Сбросить фильтры",
     "history": "Недавние запросы",
@@ -390,10 +385,11 @@
       "manga": "ID манги: shiki_id: или liberty_id:",
       "genre": "жанр, например action",
       "year": "год выхода, например 2024",
-      "status": "статус просмотра",
       "tag": "ваш тег",
       "source": "источник: shikimori или aniliberty"
-    }
+    },
+    "tag": "Тег",
+    "anyTag": "Любой тег"
   },
   "pagination": {
     "previous": "Назад",
@@ -426,5 +422,17 @@
     "required": "Обязательное поле",
     "maxLength": "Не более {max} символов",
     "hexColor": "Ожидается цвет вида #6366f1"
+  },
+  "kanban": {
+    "columns": "Колонки",
+    "pickColumns": "Выберите теги для колонок",
+    "empty": "Выберите хотя бы один тег, чтобы построить доску"
+  },
+  "collection": {
+    "add": "В коллекцию",
+    "added": "«{title}» добавлено в коллекцию",
+    "addFailed": "Не удалось добавить в коллекцию",
+    "inCollection": "В коллекции",
+    "notInCollection": "Не в коллекции: присвойте тег, чтобы добавить"
   }
 }

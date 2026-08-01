@@ -5,8 +5,9 @@ import { apiClient } from '@/apis/http/client'
 import {
   useMangaDetail,
   useMangaLibrary,
+  useMangaProgressMutation,
   useMangaSearch,
-  useMangaStatusMutation,
+  useMangaTagMutation,
 } from '@/composables/useMangaQueries'
 import {
   useCreateNote,
@@ -61,7 +62,23 @@ describe('manga queries', () => {
     wrapper.unmount()
   })
 
-  it('loads a manga detail and patches its status', async () => {
+  it('finds a catalogue title that the collection does not hold', async () => {
+    const query = ref('Berserk')
+    const { result, wrapper } = withQueryClient(() => useMangaSearch(query))
+
+    await vi.waitFor(() => expect(result.isSuccess.value).toBe(true))
+    const found = result.data.value?.items.find((item) => item.title === 'Berserk')
+    expect(found?.myTags).toEqual([])
+
+    const { result: library, wrapper: libraryWrapper } = withQueryClient(() => useMangaLibrary())
+    await vi.waitFor(() => expect(library.isSuccess.value).toBe(true))
+    expect(library.data.value?.items.some((item) => item.title === 'Berserk')).toBe(false)
+
+    libraryWrapper.unmount()
+    wrapper.unmount()
+  })
+
+  it('loads a manga detail and patches its progress', async () => {
     const { result: library, wrapper: libraryWrapper, queryClient } = withQueryClient(
       () => useMangaLibrary(),
     )
@@ -75,16 +92,25 @@ describe('manga queries', () => {
     await vi.waitFor(() => expect(detail.isSuccess.value).toBe(true))
 
     const { result: mutation, wrapper: mutationWrapper } = withQueryClient(
-      () => useMangaStatusMutation(),
+      () => useMangaProgressMutation(),
       queryClient,
     )
     const updated = await mutation.mutateAsync({
       mediaId: mediaId.value,
-      payload: { status: 'reading' },
+      payload: { chaptersRead: 4 },
     })
 
-    expect(updated.status).toBe('reading')
+    expect(updated.id).toBe(mediaId.value)
+    await vi.waitFor(() => expect(detail.data.value?.chaptersRead).toBe(4))
 
+    const { result: tagMutation, wrapper: tagWrapper } = withQueryClient(
+      () => useMangaTagMutation(),
+      queryClient,
+    )
+    const tagged = await tagMutation.mutateAsync({ mediaId: mediaId.value, tagIds: [] })
+    expect(tagged.myTags).toEqual([])
+
+    tagWrapper.unmount()
     mutationWrapper.unmount()
     detailWrapper.unmount()
     libraryWrapper.unmount()

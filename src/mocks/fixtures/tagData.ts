@@ -1,13 +1,15 @@
 import type { ITagDto } from '@/apis/dtos/tagDto'
+import { SYSTEM_TAGS } from '@/core/constants/systemTags'
 
-export const tags: ITagDto[] = [
+const customTags: ITagDto[] = [
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f601',
     name: 'Любимое',
     color: '#ef4444',
     icon: 'pi-heart',
     isHidden: false,
-    sortOrder: 0,
+    isSystem: false,
+    sortOrder: 6,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f602',
@@ -15,7 +17,8 @@ export const tags: ITagDto[] = [
     color: '#f59e0b',
     icon: 'pi-star',
     isHidden: false,
-    sortOrder: 1,
+    isSystem: false,
+    sortOrder: 7,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f603',
@@ -23,7 +26,8 @@ export const tags: ITagDto[] = [
     color: '#10b981',
     icon: 'pi-replay',
     isHidden: false,
-    sortOrder: 2,
+    isSystem: false,
+    sortOrder: 8,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f604',
@@ -31,7 +35,8 @@ export const tags: ITagDto[] = [
     color: '#6366f1',
     icon: 'pi-calendar',
     isHidden: false,
-    sortOrder: 3,
+    isSystem: false,
+    sortOrder: 9,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f605',
@@ -39,7 +44,8 @@ export const tags: ITagDto[] = [
     color: '#8b5cf6',
     icon: 'pi-users',
     isHidden: false,
-    sortOrder: 4,
+    isSystem: false,
+    sortOrder: 10,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f606',
@@ -47,7 +53,8 @@ export const tags: ITagDto[] = [
     color: '#ec4899',
     icon: 'pi-volume-up',
     isHidden: false,
-    sortOrder: 5,
+    isSystem: false,
+    sortOrder: 11,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f607',
@@ -55,7 +62,8 @@ export const tags: ITagDto[] = [
     color: '#0ea5e9',
     icon: 'pi-clock',
     isHidden: false,
-    sortOrder: 6,
+    isSystem: false,
+    sortOrder: 12,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f608',
@@ -63,7 +71,8 @@ export const tags: ITagDto[] = [
     color: '#64748b',
     icon: 'pi-question-circle',
     isHidden: true,
-    sortOrder: 7,
+    isSystem: false,
+    sortOrder: 13,
   },
   {
     id: '0f1a2b3c-4d5e-4f60-8a91-b2c3d4e5f609',
@@ -71,6 +80,9 @@ export const tags: ITagDto[] = [
     color: '#14b8a6',
     icon: 'pi-book',
     isHidden: false,
-    sortOrder: 8,
+    isSystem: false,
+    sortOrder: 14,
   },
 ]
+
+export const tags: ITagDto[] = [...SYSTEM_TAGS, ...customTags]

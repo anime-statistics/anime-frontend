@@ -3,10 +3,12 @@ import { setupServer } from 'msw/node'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { apiClient } from '@/apis/http/client'
+import { SYSTEM_TAG_IDS } from '@/core/constants/systemTags'
 import { toSnakeCase } from '@/core/utils/caseConverter'
 import { animeSearchResults } from '@/mocks/fixtures/animeData'
 import { handlers, resetMockState } from '@/mocks/handlers'
 import { useSearchStore } from '@/stores/useSearchStore'
+import { useTagStore } from '@/stores/useTagStore'
 
 const server = setupServer(...handlers)
 
@@ -34,6 +36,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  server.events.removeAllListeners('request:start')
   server.resetHandlers()
 })
 
@@ -42,19 +45,36 @@ afterAll(() => {
 })
 
 describe('useSearchStore.search', () => {
-  it('fetches deduplicated results through mediaAdapter', async () => {
+  it('fetches merged results in a single request', async () => {
+    let requests = 0
+    server.events.on('request:start', () => {
+      requests += 1
+    })
+
     const store = useSearchStore()
     store.setQuery(PAIRED.title)
 
     await store.search()
 
+    // The whole point of the rewrite: one call, the backend fans out.
+    expect(requests).toBe(1)
     expect(store.isSearching).toBe(false)
     const merged = store.results.find((item) => item.id === PAIRED.id)
     expect(merged?.secondarySource).toBe('aniliberty')
     expect(store.total).toBe(store.results.length)
   })
 
-  it('applies genre filters on top of the adapter response', async () => {
+  it('returns catalogue titles that are not in the collection', async () => {
+    const store = useSearchStore()
+    store.setQuery('Steins;Gate')
+
+    await store.search()
+
+    expect(store.results.length).toBeGreaterThan(0)
+    expect(store.results.some((item) => item.myTags.length === 0)).toBe(true)
+  })
+
+  it('applies genre filters on top of the backend response', async () => {
     const store = useSearchStore()
     store.setQuery('genre:романтика')
 
@@ -81,14 +101,17 @@ describe('useSearchStore.search', () => {
     ).toBe(false)
   })
 
-  it('filters by status', async () => {
+  it('filters by tag name once the tags are loaded', async () => {
+    const tagStore = useTagStore()
+    await tagStore.fetchTags()
+
     const store = useSearchStore()
-    store.setQuery('status:planned')
+    store.setQuery('tag:Просмотрено')
 
     await store.search()
 
     expect(store.results.length).toBeGreaterThan(0)
-    expect(store.results.every((item) => item.status === 'planned')).toBe(true)
+    expect(store.results.every((item) => item.myTags.includes(SYSTEM_TAG_IDS.completed))).toBe(true)
   })
 
   it('restricts the query to a single source', async () => {
@@ -97,19 +120,20 @@ describe('useSearchStore.search', () => {
 
     await store.search()
 
+    expect(store.results.length).toBeGreaterThan(0)
     expect(store.results.every((item) => item.source === 'aniliberty')).toBe(true)
   })
 
   it('retries 5xx responses and surfaces the failure', async () => {
     let attempts = 0
     server.use(
-      http.get('*/api/v1/anime', () => {
+      http.get('*/api/v1/search', () => {
         attempts += 1
         return new HttpResponse(null, { status: 500 })
       }),
     )
     const store = useSearchStore()
-    store.setQuery('source:shikimori steins')
+    store.setQuery('steins')
 
     await store.search()
 
@@ -119,38 +143,16 @@ describe('useSearchStore.search', () => {
     expect(store.isSearching).toBe(false)
   }, 30_000)
 
-  it('still returns results when only one source fails', async () => {
-    server.use(
-      http.get('*/api/v1/anime', ({ request }) => {
-        const source = new URL(request.url).searchParams.get('source')
-        if (source === 'aniliberty') return new HttpResponse(null, { status: 503 })
-        return HttpResponse.json({
-          items: toSnakeCase(animeSearchResults.filter((anime) => anime.source === 'shikimori')),
-          total: 1,
-          page: 1,
-          size: 20,
-        })
-      }),
-    )
-    const store = useSearchStore()
-    store.setQuery('steins')
-
-    await store.search()
-
-    expect(store.results.length).toBeGreaterThan(0)
-    expect(store.errorMessage).toBeNull()
-  }, 30_000)
-
   it('does not let a slow earlier search overwrite a newer one', async () => {
     server.use(
-      http.get('*/api/v1/anime', async ({ request }) => {
+      http.get('*/api/v1/search', async ({ request }) => {
         const query = new URL(request.url).searchParams.get('query') ?? ''
         if (query === 'naruto') await delay(80)
 
         const items = animeSearchResults.filter((anime) =>
           anime.title.toLowerCase().includes(query),
         )
-        return HttpResponse.json({ items: toSnakeCase(items), total: items.length, page: 1, size: 20 })
+        return HttpResponse.json({ items: toSnakeCase(items), total: items.length })
       }),
     )
 

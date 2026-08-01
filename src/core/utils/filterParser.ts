@@ -16,30 +16,22 @@ export interface IParsedFilters {
   mangaId?: IMediaReference
   genre?: string
   year?: number
-  status?: string
   tag?: string
   freeText: string
 }
 
 export interface IFilterableItem {
-  status: string
   genres?: string[]
   airedFrom?: string
   myTags?: string[]
 }
 
+// Tags are stored by id but typed by name, so filtering needs the mapping.
+export type TagNameLookup = ReadonlyMap<string, string>
+
 export const ALL_SOURCES: MediaSource[] = ['shikimori', 'aniliberty']
 
-export const FILTER_KEYS = ['anime', 'manga', 'genre', 'year', 'status', 'tag', 'source'] as const
-
-const MEDIA_STATUSES = [
-  'watching',
-  'completed',
-  'planned',
-  'on_hold',
-  'dropped',
-  'rewatching',
-] as const
+export const FILTER_KEYS = ['anime', 'manga', 'genre', 'year', 'tag', 'source'] as const
 
 const TOKEN_PATTERN = /(?:[^\s"]+|"[^"]*")+/g
 const FILTER_PATTERN = /^([a-zA-Z][\w]*):(.*)$/
@@ -90,22 +82,36 @@ export function resolveSources(filters: ISearchFilters): MediaSource[] {
   return resolved.length ? resolved : ALL_SOURCES
 }
 
-export function matchesFilters(item: IFilterableItem, filters: ISearchFilters): boolean {
+// An item's tags are matched by id and by name, so both `tag:Любимое` and a
+// pasted id work.
+function tagKeys(item: IFilterableItem, tagNames?: TagNameLookup): Set<string> {
+  const keys = new Set<string>()
+  for (const id of item.myTags ?? []) {
+    keys.add(id.toLowerCase())
+    const name = tagNames?.get(id)
+    if (name) keys.add(name)
+  }
+  return keys
+}
+
+export function matchesFilters(
+  item: IFilterableItem,
+  filters: ISearchFilters,
+  tagNames?: TagNameLookup,
+): boolean {
   const genres = new Set((item.genres ?? []).map((genre) => genre.toLowerCase()))
-  const tags = new Set((item.myTags ?? []).map((tag) => tag.toLowerCase()))
+  const tags = tagKeys(item, tagNames)
 
   const includedGenres = filters.include.genre ?? []
   const excludedGenres = filters.exclude.genre ?? []
-  const includedStatuses = new Set(filters.include.status ?? [])
-  const excludedStatuses = new Set(filters.exclude.status ?? [])
   const includedTags = filters.include.tag ?? []
+  const excludedTags = filters.exclude.tag ?? []
   const includedYears = filters.include.year ?? []
 
   if (includedGenres.some((genre) => !genres.has(genre.toLowerCase()))) return false
   if (excludedGenres.some((genre) => genres.has(genre.toLowerCase()))) return false
-  if (includedStatuses.size && !includedStatuses.has(item.status)) return false
-  if (excludedStatuses.has(item.status)) return false
   if (includedTags.some((tag) => !tags.has(tag.toLowerCase()))) return false
+  if (excludedTags.some((tag) => tags.has(tag.toLowerCase()))) return false
   if (includedYears.length && !includedYears.includes(item.airedFrom?.slice(0, 4) ?? '')) {
     return false
   }
@@ -127,14 +133,12 @@ export function parseSearchQuery(rawQuery: string): IParsedFilters {
   const { text, include } = parseQueryFilters(rawQuery)
 
   const year = Number(include.year?.[0])
-  const status = include.status?.[0]?.toLowerCase()
 
   return {
     animeId: parseMediaReference(include.anime?.[0]),
     mangaId: parseMediaReference(include.manga?.[0]),
     genre: include.genre?.[0],
     year: Number.isInteger(year) && year > 0 ? year : undefined,
-    status: MEDIA_STATUSES.some((known) => known === status) ? status : undefined,
     tag: include.tag?.[0],
     freeText: text,
   }
@@ -143,6 +147,7 @@ export function parseSearchQuery(rawQuery: string): IParsedFilters {
 export function applyParsedFilters<T extends IFilterableItem>(
   items: T[],
   filters: IParsedFilters,
+  tagNames?: TagNameLookup,
 ): T[] {
   let result = items
 
@@ -156,14 +161,9 @@ export function applyParsedFilters<T extends IFilterableItem>(
     const year = String(filters.year)
     result = result.filter((item) => item.airedFrom?.startsWith(year))
   }
-  if (filters.status) {
-    result = result.filter((item) => item.status === filters.status)
-  }
   if (filters.tag) {
     const tag = filters.tag.toLowerCase()
-    result = result.filter((item) =>
-      item.myTags?.some((value) => value.toLowerCase() === tag),
-    )
+    result = result.filter((item) => tagKeys(item, tagNames).has(tag))
   }
 
   return result

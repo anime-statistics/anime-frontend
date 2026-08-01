@@ -75,7 +75,7 @@ describe('i18n instance', () => {
 
   it('falls back to english when the locale is switched', () => {
     locale.value = 'en'
-    expect(t('anime.status.watching')).toBe('Watching')
+    expect(t('collection.inCollection')).toBe('In collection')
     expect(t('anime.episodes', { count: 2 }, 2)).toBe('2 episodes')
     locale.value = 'ru'
   })
