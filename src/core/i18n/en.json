@@ -36,9 +36,6 @@
   },
   "footer": {
     "version": "Version {version}",
-    "synced": "Synced at {time}",
-    "neverSynced": "Not synced yet",
-    "pendingConflicts": "{count} unresolved conflict | {count} unresolved conflicts",
     "rights": "Personal anime and manga tracker"
   },
   "pages": {
@@ -442,5 +439,10 @@
     "addFailed": "Could not add to the collection",
     "inCollection": "In collection",
     "notInCollection": "Not in the collection: add a tag to put it there"
+  },
+  "sync": {
+    "at": "Synced at {time}",
+    "never": "Not synced yet",
+    "conflicts": "{count} unresolved conflict | {count} unresolved conflicts"
   }
 }

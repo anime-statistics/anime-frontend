@@ -3,6 +3,7 @@ import { useSwipe } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TagBadge from '@/components/common/TagBadge.vue'
+import SyncIndicator from '@/components/layout/SyncIndicator.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useTagStore } from '@/stores/useTagStore'
 
@@ -57,7 +58,7 @@ onMounted(() => {
        20px icon box puts these in the same place. -->
   <aside
     ref="drawer"
-    class="fixed inset-y-0 left-0 z-40 flex w-64 touch-pan-y flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white p-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-transform lg:static lg:z-auto lg:w-auto lg:translate-x-0 lg:pl-4 dark:border-gray-800 dark:bg-gray-900"
+    class="fixed inset-y-0 left-0 z-40 flex w-64 touch-pan-y flex-col gap-2 overflow-y-auto border-r border-gray-200 bg-white p-3 pt-[max(0.75rem,env(safe-area-inset-top))] transition-transform lg:sticky lg:top-14 lg:z-auto lg:h-[calc(100vh-3.5rem)] lg:w-auto lg:translate-x-0 lg:self-start lg:overflow-hidden lg:pl-4 dark:border-gray-800 dark:bg-gray-900"
     :class="props.isOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <div class="flex items-center justify-between lg:hidden">
@@ -91,7 +92,9 @@ onMounted(() => {
       </RouterLink>
     </nav>
 
-    <section :class="['mt-4 min-h-0', props.isCollapsed ? 'lg:hidden' : '']">
+    <!-- The tag list is the only part that may outgrow the panel, so it takes
+         the scrollbar and the sync row below it stays pinned in view. -->
+    <section :class="['mt-4 min-h-0 flex-1 overflow-y-auto', props.isCollapsed ? 'lg:hidden' : '']">
       <h2
         class="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
       >
@@ -146,5 +149,9 @@ onMounted(() => {
         </li>
       </ul>
     </section>
+
+    <div class="mt-auto shrink-0 border-t border-gray-200 pt-2 dark:border-gray-800">
+      <SyncIndicator :compact="props.isCollapsed" />
+    </div>
   </aside>
 </template>
