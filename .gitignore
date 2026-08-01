@@ -14,7 +14,6 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
-public/mockServiceWorker.js
 dev-dist
 playwright-report
 test-results
