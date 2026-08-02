@@ -1,5 +1,6 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 import { chatResponse, type IAiRequestOptions, type IChatApiMessage } from '@/apis/aiApi'
+import { toApiRequestError } from '@/apis/http/errorHandler'
 import { useAiStream } from '@/composables/useAiStream'
 import { estimateTokens, useAiUsage } from '@/composables/useAiUsage'
 import type { IChatMessage, ILLmModel } from '@/types/ai'
@@ -67,6 +68,10 @@ export function useAiChat(): {
       }
 
       pushMessage('assistant', reply)
+    } catch (error) {
+      // Both transports failed; the server's `message` is user-readable, so it
+      // becomes the reply instead of dying as an unhandled rejection.
+      pushMessage('assistant', toApiRequestError(error).message)
     } finally {
       isSending.value = false
       stream.partialResponse.value = ''

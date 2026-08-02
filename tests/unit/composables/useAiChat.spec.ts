@@ -78,16 +78,24 @@ describe('useAiChat', () => {
     expect(first.messages.value).toHaveLength(0)
   })
 
-  it('keeps the user message even when both transports fail', async () => {
+  it('turns a failure of both transports into an assistant reply', async () => {
     server.use(
       http.post('*/api/v1/ai/chat/stream', () => new HttpResponse(null, { status: 503 })),
-      http.post('*/api/v1/ai/chat', () => new HttpResponse(null, { status: 503 })),
+      http.post(
+        '*/api/v1/ai/chat',
+        () => HttpResponse.json(
+          { message: 'AI-ассистент не подключён в этой версии бэкенда' },
+          { status: 404 },
+        ),
+      ),
     )
     const chat = useAiChat()
 
-    await expect(chat.sendMessage('привет', options)).rejects.toThrow()
+    await chat.sendMessage('привет', options)
 
-    expect(chat.messages.value).toHaveLength(1)
+    expect(chat.messages.value).toHaveLength(2)
+    expect(chat.messages.value[1].role).toBe('assistant')
+    expect(chat.messages.value[1].content).toBe('AI-ассистент не подключён в этой версии бэкенда')
     expect(chat.isBusy.value).toBe(false)
-  }, 30_000)
+  })
 })
