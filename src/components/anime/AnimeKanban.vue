@@ -35,6 +35,19 @@ const columnTags = computed<ITagDto[]>(() =>
 )
 const columnIds = computed(() => [...columnTags.value.map((tag) => tag.id), REST_COLUMN])
 
+// The outer draggable needs a mutable list, so the settings order is mirrored
+// here and written back once a column drop lands.
+const orderedTags = ref<ITagDto[]>([])
+watch(columnTags, (tags) => {
+  orderedTags.value = [...tags]
+}, { immediate: true })
+
+function onColumnReorder(): void {
+  haptic.lightTap()
+  settingsStore.update({ kanbanTagIds: orderedTags.value.map((tag) => tag.id) })
+  settingsStore.persist()
+}
+
 const selectedTagIds = computed<string[]>({
   get: () => settingsStore.settings.kanbanTagIds,
   set: (ids) => {
@@ -116,34 +129,80 @@ function onAdd(targetId: string, event: { data: IAnimeSearchResultDto }): void {
     </p>
 
     <div class="flex gap-3 overflow-x-auto pb-2">
-      <section
-        v-for="columnId in columnIds"
-        :key="columnId || 'rest'"
-        class="flex w-64 shrink-0 flex-col gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800/50"
+      <!-- Tag columns can swap places by their grip; the catch-all column is not
+           a tag, so it sits outside the draggable and always stays last. -->
+      <VueDraggable
+        v-model="orderedTags"
+        :animation="150"
+        handle=".kanban-column-grip"
+        ghost-class="opacity-40"
+        class="flex gap-3"
+        @update="onColumnReorder"
       >
+        <section
+          v-for="tag in orderedTags"
+          :key="tag.id"
+          class="flex w-64 shrink-0 flex-col gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800/50"
+        >
+          <h3 class="flex items-center justify-between gap-2 px-1 text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <span class="flex min-w-0 items-center gap-1.5">
+              <button
+                type="button"
+                class="kanban-column-grip cursor-grab touch-none text-gray-400 transition-colors hover:text-gray-600 active:cursor-grabbing dark:text-gray-500 dark:hover:text-gray-300"
+                :title="translate('kanban.reorder')"
+                :aria-label="translate('kanban.reorder')"
+              >
+                <i class="pi pi-bars" />
+              </button>
+              <TagBadge
+                :tag="tag"
+                size="sm"
+              />
+            </span>
+            <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
+              {{ columns[tag.id]?.length ?? 0 }}
+            </span>
+          </h3>
+
+          <VueDraggable
+            v-model="columns[tag.id]"
+            group="anime-kanban"
+            :animation="150"
+            item-key="id"
+            class="flex min-h-24 flex-col gap-2 rounded-lg p-1 transition-colors"
+            ghost-class="opacity-40"
+            @add="onAdd(tag.id, $event)"
+          >
+            <AnimeCard
+              v-for="item in columns[tag.id]"
+              :key="item.id"
+              :anime="item"
+              :tags="tagStore.resolveTags(item.myTags)"
+              compact
+            />
+          </VueDraggable>
+        </section>
+      </VueDraggable>
+
+      <section class="flex w-64 shrink-0 flex-col gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800/50">
         <h3 class="flex items-center justify-between gap-2 px-1 text-sm font-semibold text-gray-700 dark:text-gray-200">
-          <TagBadge
-            v-if="tagStore.findTag(columnId)"
-            :tag="tagStore.findTag(columnId)!"
-            size="sm"
-          />
-          <span v-else>{{ labelOf(columnId) }}</span>
+          <span>{{ labelOf(REST_COLUMN) }}</span>
           <span class="text-xs font-normal text-gray-500 dark:text-gray-400">
-            {{ columns[columnId]?.length ?? 0 }}
+            {{ columns[REST_COLUMN]?.length ?? 0 }}
           </span>
         </h3>
 
         <VueDraggable
-          v-model="columns[columnId]"
+          v-model="columns[REST_COLUMN]"
           group="anime-kanban"
           :animation="150"
           item-key="id"
           class="flex min-h-24 flex-col gap-2 rounded-lg p-1 transition-colors"
           ghost-class="opacity-40"
-          @add="onAdd(columnId, $event)"
+          @add="onAdd(REST_COLUMN, $event)"
         >
           <AnimeCard
-            v-for="item in columns[columnId]"
+            v-for="item in columns[REST_COLUMN]"
             :key="item.id"
             :anime="item"
             :tags="tagStore.resolveTags(item.myTags)"
