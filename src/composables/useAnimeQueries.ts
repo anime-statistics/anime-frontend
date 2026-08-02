@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, unref, type MaybeRef, type Ref } from 'vue'
 import type { IAnimeProgressUpdateDto } from '@/apis/dtos/animeDto'
+import type { IExternalLinkDto } from '@/apis/dtos/externalLinkDto'
 import type { IBulkTagUpdateDto } from '@/apis/dtos/tagDto'
 import { mediaApi } from '@/apis/mediaApi'
 import type { MediaSource } from '@/core/utils/slugGenerator'
@@ -75,6 +76,23 @@ export function useAnimeTagMutation() {
     onSuccess: async (_result, { mediaId }) => {
       await queryClient.invalidateQueries({ queryKey: animeKeys.detail(mediaId) })
       await queryClient.invalidateQueries({ queryKey: animeKeys.all })
+    },
+  })
+}
+
+export interface IAnimeLinksVariables {
+  mediaId: string
+  externalLinks: IExternalLinkDto[]
+}
+
+export function useAnimeLinksMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ mediaId, externalLinks }: IAnimeLinksVariables) =>
+      mediaApi.updateAnimeLinks(mediaId, externalLinks),
+    onSuccess: async (_result, { mediaId }) => {
+      await queryClient.invalidateQueries({ queryKey: animeKeys.detail(mediaId) })
     },
   })
 }

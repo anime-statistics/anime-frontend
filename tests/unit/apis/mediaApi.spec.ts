@@ -116,12 +116,13 @@ describe('mediaApi.getAnimeLibrary', () => {
 })
 
 describe('mediaApi.getAnimeById', () => {
-  it('loads details and the external link', async () => {
+  it('loads details and both halves of the external link', async () => {
     const detail = await mediaApi.getAnimeById(soloItem.id)
     const numericId = soloItem.id.split('_')[1].split('-')[0]
 
     expect(detail.title).toBe(soloItem.title)
     expect(detail.externalLinks?.[0].url).toBe(`https://shikimori.one/animes/${numericId}`)
+    expect(detail.externalLinks?.[0].apiUrl).toBe(`https://shikimori.one/api/animes/${numericId}`)
   })
 
   it('rejects a malformed media id', async () => {
@@ -169,6 +170,44 @@ describe('stateful mutations', () => {
 
     const { items } = await mediaApi.getAnimeLibrary()
     expect(items.some((item) => item.id === soloItem.id)).toBe(false)
+  })
+
+  it('untags a single title to drop it out of the collection', async () => {
+    await mediaApi.updateAnimeTags(soloItem.id, [])
+
+    const { items } = await mediaApi.getAnimeLibrary()
+    expect(items.some((item) => item.id === soloItem.id)).toBe(false)
+  })
+
+  // A source the importer missed can be pointed at by hand; the edited pair
+  // then replaces whatever the detail used to carry.
+  it('replaces the external links with the edited pair', async () => {
+    const links = [
+      {
+        source: 'aniliberty',
+        url: 'https://aniliberty.top/anime/frieren',
+        apiUrl: 'https://aniliberty.top/api/anime/frieren',
+      },
+    ]
+    await mediaApi.updateAnimeLinks(soloItem.id, links)
+
+    const detail = await mediaApi.getAnimeById(soloItem.id)
+    expect(detail.externalLinks).toEqual(links)
+  })
+
+  it('edits the manga links through the same route', async () => {
+    const target = mangaSearchResults[0]
+    const links = [
+      {
+        source: 'shikimori',
+        url: 'https://shikimori.one/mangas/1',
+        apiUrl: 'https://shikimori.one/api/mangas/1',
+      },
+    ]
+    await mediaApi.updateMangaLinks(target.id, links)
+
+    const detail = await mediaApi.getMangaById(target.id)
+    expect(detail.externalLinks).toEqual(links)
   })
 })
 

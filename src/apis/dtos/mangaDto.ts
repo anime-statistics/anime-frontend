@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { MEDIA_SOURCES } from '@/apis/dtos/animeDto'
+import { ExternalLinkDto } from '@/apis/dtos/externalLinkDto'
 
 export const MangaSearchResultDto = z.object({
   id: z.string().regex(/^(shikimori|aniliberty)_\d+-[\w-]+$/),
@@ -28,7 +29,7 @@ export const MangaDetailDto = MangaSearchResultDto.extend({
   relatedManga: z
     .array(z.object({ id: z.string(), title: z.string(), relation: z.string() }))
     .optional(),
-  externalLinks: z.array(z.object({ source: z.string(), url: z.string().url() })).optional(),
+  externalLinks: z.array(ExternalLinkDto).optional(),
 })
 export type IMangaDetailDto = z.infer<typeof MangaDetailDto>
 

@@ -57,6 +57,20 @@ async function addToCollection(item: IAnimeSearchResultDto): Promise<void> {
   }
 }
 
+// The way back out: clearing the tags is what drops a title from the collection.
+async function removeFromCollection(item: IAnimeSearchResultDto): Promise<void> {
+  pendingId.value = item.id
+  try {
+    await tagMutation.mutateAsync({ mediaId: item.id, tagIds: [] })
+    item.myTags = []
+    toast.success(translate('collection.removed', { title: displayTitle(item) }))
+  } catch {
+    toast.error(translate('collection.removeFailed'))
+  } finally {
+    pendingId.value = null
+  }
+}
+
 onMounted(() => {
   if (tagStore.tags.length === 0) void tagStore.fetchTags()
   if (urlFilters.value.query && urlFilters.value.query !== store.rawQuery) {
@@ -190,9 +204,19 @@ watch(
 
             <span
               v-if="isInCollection(item)"
-              class="shrink-0 self-center whitespace-nowrap text-xs text-gray-400 dark:text-gray-500"
+              class="flex shrink-0 flex-col items-end gap-1 self-center"
             >
-              <i class="pi pi-check mr-1" />{{ translate('collection.inCollection') }}
+              <span class="whitespace-nowrap text-xs text-gray-400 dark:text-gray-500">
+                <i class="pi pi-check mr-1" />{{ translate('collection.inCollection') }}
+              </span>
+              <button
+                type="button"
+                class="whitespace-nowrap rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 transition-colors hover:border-red-400 hover:text-red-600 disabled:opacity-50 dark:border-gray-700 dark:text-gray-400 dark:hover:border-red-500 dark:hover:text-red-400"
+                :disabled="pendingId === item.id"
+                @click="removeFromCollection(item)"
+              >
+                <i class="pi pi-times mr-1" />{{ translate('collection.remove') }}
+              </button>
             </span>
             <button
               v-else

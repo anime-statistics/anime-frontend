@@ -304,6 +304,19 @@
     "chapter": "Chapter {number}",
     "related": "Related entries",
     "externalLinks": "External links",
+    "links": {
+      "edit": "Edit the links",
+      "editTitle": "External links",
+      "page": "Page",
+      "api": "API",
+      "pageUrl": "Page URL",
+      "apiUrl": "API URL",
+      "apiHint": "The API URL fills itself in: /api is added whenever the address does not carry it.",
+      "invalidUrl": "The {source} link is not a valid URL",
+      "empty": "No links yet",
+      "saved": "Links saved",
+      "saveFailed": "Could not save the links"
+    },
     "notify": "Notify about new episodes",
     "notifyEnabled": "Notifications on",
     "notifyDisabled": "Notifications off",
@@ -434,14 +447,18 @@
   "kanban": {
     "columns": "Columns",
     "pickColumns": "Pick the tags to show as columns",
-    "empty": "Pick at least one tag to build the board"
+    "empty": "Pick at least one tag to build the board",
+    "reorder": "Drag to reorder the columns"
   },
   "collection": {
     "add": "Add to collection",
     "added": "\"{title}\" added to the collection",
     "addFailed": "Could not add to the collection",
     "inCollection": "In collection",
-    "notInCollection": "Not in the collection: add a tag to put it there"
+    "notInCollection": "Not in the collection: add a tag to put it there",
+    "remove": "Remove from collection",
+    "removed": "\"{title}\" removed from the collection",
+    "removeFailed": "Could not remove from the collection"
   },
   "sync": {
     "at": "Synced at {time}",

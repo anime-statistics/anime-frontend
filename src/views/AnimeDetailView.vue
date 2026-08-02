@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import Rating from 'primevue/rating'
 import { computed, onMounted, ref, toRef } from 'vue'
+import type { IExternalLinkDto } from '@/apis/dtos/externalLinkDto'
 import EpisodeProgress from '@/components/anime/EpisodeProgress.vue'
 import WatchHistory from '@/components/anime/WatchHistory.vue'
+import ExternalLinksPanel from '@/components/common/ExternalLinksPanel.vue'
 import TagSelector from '@/components/common/TagSelector.vue'
 import NotesPanel from '@/components/editor/NotesPanel.vue'
 import {
   useAnimeDetail,
+  useAnimeLinksMutation,
   useAnimeProgressMutation,
   useAnimeTagMutation,
 } from '@/composables/useAnimeQueries'
 import { useAppI18n } from '@/composables/useAppI18n'
 import { useToast } from '@/composables/useToast'
 import { DEFAULT_EPISODE_MINUTES, useWatchHistory } from '@/composables/useWatchHistory'
-import { buildExternalUrl } from '@/core/utils/externalLinks'
 import { primaryTitle } from '@/core/utils/mediaTitle'
 import { totalRuntime, type IRuntime } from '@/core/utils/runtime'
 import { useSettingsStore } from '@/stores/useSettingsStore'
@@ -32,6 +34,7 @@ const toast = useToast()
 const { data: anime, isPending, isError } = useAnimeDetail(mediaId)
 const progressMutation = useAnimeProgressMutation()
 const tagMutation = useAnimeTagMutation()
+const linksMutation = useAnimeLinksMutation()
 
 const history = useWatchHistory(mediaId)
 
@@ -64,8 +67,16 @@ function formatRuntime(value: IRuntime): string {
     : translate('detail.runtimeM', { minutes: value.minutes })
 }
 
-const externalUrl = computed(() => buildExternalUrl(props.id, 'anime'))
 const isNotified = computed(() => settingsStore.isNotified(props.id))
+
+async function saveLinks(externalLinks: IExternalLinkDto[]): Promise<void> {
+  try {
+    await linksMutation.mutateAsync({ mediaId: props.id, externalLinks })
+    toast.success(translate('detail.links.saved'))
+  } catch {
+    toast.error(translate('detail.links.saveFailed'))
+  }
+}
 
 const selectedTagIds = computed({
   get: () => anime.value?.myTags ?? [],
@@ -73,6 +84,16 @@ const selectedTagIds = computed({
     void tagMutation.mutateAsync({ mediaId: props.id, tagIds })
   },
 })
+
+// Clearing every tag is what fully drops the title out of the collection.
+async function removeFromCollection(): Promise<void> {
+  try {
+    await tagMutation.mutateAsync({ mediaId: props.id, tagIds: [] })
+    toast.success(translate('collection.removed', { title: displayTitle.value }))
+  } catch {
+    toast.error(translate('collection.removeFailed'))
+  }
+}
 
 onMounted(() => {
   if (tagStore.tags.length === 0) void tagStore.fetchTags()
@@ -303,6 +324,16 @@ async function toggleNotifications(): Promise<void> {
             >
               {{ translate('collection.notInCollection') }}
             </span>
+            <button
+              v-else
+              type="button"
+              class="mt-1 inline-flex items-center gap-1.5 self-start rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 transition-colors hover:border-red-400 hover:text-red-600 disabled:opacity-50 dark:border-gray-700 dark:text-gray-400 dark:hover:border-red-500 dark:hover:text-red-400"
+              :disabled="tagMutation.isPending.value"
+              @click="removeFromCollection"
+            >
+              <i class="pi pi-times" />
+              {{ translate('collection.remove') }}
+            </button>
           </div>
 
           <div class="flex flex-col gap-1 text-sm">
@@ -324,17 +355,14 @@ async function toggleNotifications(): Promise<void> {
             />
           </div>
 
-          <div class="flex flex-col gap-2">
-            <a
-              v-if="externalUrl"
-              :href="externalUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm transition-colors hover:border-brand-400 dark:border-gray-700"
-            >
-              <i class="pi pi-external-link" />
-              {{ translate('detail.externalLinks') }}
-            </a>
+          <div class="flex flex-col gap-3 border-t border-gray-200 pt-4 dark:border-gray-800">
+            <ExternalLinksPanel
+              :media-id="props.id"
+              kind="anime"
+              :links="anime.externalLinks"
+              :is-busy="linksMutation.isPending.value"
+              @save="saveLinks"
+            />
 
             <button
               type="button"

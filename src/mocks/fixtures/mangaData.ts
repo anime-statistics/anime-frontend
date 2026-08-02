@@ -110,7 +110,11 @@ export const mangaDetails: Record<string, IMangaDetailDto> = Object.fromEntries(
       ...item,
       ...DETAIL_EXTRAS[item.id],
       externalLinks: [
-        { source: 'Shikimori', url: `https://shikimori.one/mangas/${shikimoriId(item.id)}` },
+        {
+          source: 'shikimori',
+          url: `https://shikimori.one/mangas/${shikimoriId(item.id)}`,
+          apiUrl: `https://shikimori.one/api/mangas/${shikimoriId(item.id)}`,
+        },
       ],
     },
   ]),

@@ -20,3 +20,20 @@ export function buildExternalUrl(mediaId: string, kind: MediaKind = 'anime'): st
 export function buildInternalUrl(mediaId: string, kind: MediaKind = 'anime'): string {
   return `/${kind}/${mediaId}`
 }
+
+// Both sources expose their data under /api on the same host, so the API twin
+// of a page URL is that URL with /api pushed in front of the path — unless the
+// address already points at the API.
+export function ensureApiUrl(url: string): string | null {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    return null
+  }
+
+  if (parsed.pathname === '/api' || parsed.pathname.startsWith('/api/')) return parsed.toString()
+
+  parsed.pathname = parsed.pathname === '/' ? '/api' : `/api${parsed.pathname}`
+  return parsed.toString()
+}

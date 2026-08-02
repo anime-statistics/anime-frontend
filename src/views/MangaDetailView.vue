@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import Rating from 'primevue/rating'
 import { computed, onMounted, ref, toRef } from 'vue'
+import type { IExternalLinkDto } from '@/apis/dtos/externalLinkDto'
+import ExternalLinksPanel from '@/components/common/ExternalLinksPanel.vue'
 import TagSelector from '@/components/common/TagSelector.vue'
 import EpisodeProgress from '@/components/anime/EpisodeProgress.vue'
 import NotesPanel from '@/components/editor/NotesPanel.vue'
 import { useAppI18n } from '@/composables/useAppI18n'
 import {
   useMangaDetail,
+  useMangaLinksMutation,
   useMangaProgressMutation,
   useMangaTagMutation,
 } from '@/composables/useMangaQueries'
-import { buildExternalUrl } from '@/core/utils/externalLinks'
+import { useToast } from '@/composables/useToast'
 import { primaryTitle } from '@/core/utils/mediaTitle'
 import { useTagStore } from '@/stores/useTagStore'
 
@@ -21,10 +24,12 @@ const props = defineProps<{ id: string }>()
 const mediaId = toRef(props, 'id')
 const { translate, translatePlural, locale } = useAppI18n()
 const tagStore = useTagStore()
+const toast = useToast()
 
 const { data: manga, isPending, isError } = useMangaDetail(mediaId)
 const progressMutation = useMangaProgressMutation()
 const tagMutation = useMangaTagMutation()
+const linksMutation = useMangaLinksMutation()
 
 const activeTab = ref<DetailTab>('chapters')
 const hasImageError = ref(false)
@@ -34,7 +39,15 @@ const displayTitle = computed(() =>
 )
 const volumesRead = computed(() => manga.value?.volumesRead ?? 0)
 const chaptersRead = computed(() => manga.value?.chaptersRead ?? 0)
-const externalUrl = computed(() => buildExternalUrl(props.id, 'manga'))
+
+async function saveLinks(externalLinks: IExternalLinkDto[]): Promise<void> {
+  try {
+    await linksMutation.mutateAsync({ mediaId: props.id, externalLinks })
+    toast.success(translate('detail.links.saved'))
+  } catch {
+    toast.error(translate('detail.links.saveFailed'))
+  }
+}
 
 const selectedTagIds = computed({
   get: () => manga.value?.myTags ?? [],
@@ -42,6 +55,16 @@ const selectedTagIds = computed({
     void tagMutation.mutateAsync({ mediaId: props.id, tagIds })
   },
 })
+
+// Clearing every tag is what fully drops the title out of the collection.
+async function removeFromCollection(): Promise<void> {
+  try {
+    await tagMutation.mutateAsync({ mediaId: props.id, tagIds: [] })
+    toast.success(translate('collection.removed', { title: displayTitle.value }))
+  } catch {
+    toast.error(translate('collection.removeFailed'))
+  }
+}
 
 onMounted(() => {
   if (tagStore.tags.length === 0) void tagStore.fetchTags()
@@ -150,6 +173,16 @@ async function patchManga(payload: {
               >
                 {{ translate('collection.notInCollection') }}
               </span>
+              <button
+                v-else
+                type="button"
+                class="mt-1 inline-flex items-center gap-1.5 self-start rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-500 transition-colors hover:border-red-400 hover:text-red-600 disabled:opacity-50 dark:border-gray-700 dark:text-gray-400 dark:hover:border-red-500 dark:hover:text-red-400"
+                :disabled="tagMutation.isPending.value"
+                @click="removeFromCollection"
+              >
+                <i class="pi pi-times" />
+                {{ translate('collection.remove') }}
+              </button>
             </div>
 
             <div class="flex flex-col gap-1 text-sm">
@@ -162,16 +195,14 @@ async function patchManga(payload: {
             </div>
           </div>
 
-          <a
-            v-if="externalUrl"
-            :href="externalUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex w-fit items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-sm transition-colors hover:border-brand-400 dark:border-gray-700"
-          >
-            <i class="pi pi-external-link" />
-            {{ translate('detail.externalLinks') }}
-          </a>
+          <ExternalLinksPanel
+            :media-id="props.id"
+            kind="manga"
+            :links="manga.externalLinks"
+            :is-busy="linksMutation.isPending.value"
+            class="max-w-md"
+            @save="saveLinks"
+          />
         </div>
       </div>
 
