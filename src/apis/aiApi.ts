@@ -3,7 +3,7 @@ import { isObject } from '@/core/utils/caseConverter'
 import type { IAiRecommendation, IChatRole, ILLmModel } from '@/types/ai'
 
 export const AI = '/ai' as const
-export const AI_TIMEOUT_MS = 30_000
+export const AI_TIMEOUT_MS = 180_000
 
 export interface IProcessVoiceResult {
   processedText: string

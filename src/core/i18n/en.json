@@ -158,7 +158,7 @@
     "deepThink": "Deep thinking",
     "temperature": "Temperature",
     "shareContext": "Share my library as context",
-    "sessionUsage": "Session: {tokens} tokens (~${cost})",
+    "sessionUsage": "Session: {tokens} tokens (~{cost} RUB)",
     "unavailable": "AI is unavailable, try again later",
     "retry": "Retry",
     "sourceText": "Source text",

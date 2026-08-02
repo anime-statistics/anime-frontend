@@ -158,7 +158,7 @@
     "deepThink": "Глубокое мышление",
     "temperature": "Температура",
     "shareContext": "Передавать мою библиотеку как контекст",
-    "sessionUsage": "За сессию: {tokens} токенов (~${cost})",
+    "sessionUsage": "За сессию: {tokens} токенов (~{cost} ₽)",
     "unavailable": "AI недоступен, попробуйте позже",
     "retry": "Повторить",
     "sourceText": "Исходный текст",
