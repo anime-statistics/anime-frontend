@@ -2,8 +2,24 @@ import { http, HttpResponse } from 'msw'
 import { mangaDetails } from '@/mocks/fixtures/mangaData'
 import { API_PREFIX } from '@/mocks/handlers/apiPrefix'
 import { checkRateLimit, rateLimitedResponse } from '@/mocks/handlers/rateLimit'
-import { applyTagPatch, isInCollection, mediaState } from '@/mocks/state/mediaState'
+import {
+  applyTagPatch,
+  isInCollection,
+  mediaState,
+  readExternalLinks,
+} from '@/mocks/state/mediaState'
 import { isObject, toCamelCase, toSnakeCase } from '@/core/utils/caseConverter'
+
+function mangaDetailOf(id: string): Record<string, unknown> | null {
+  const item = mediaState.manga.find((manga) => manga.id === id)
+  if (!item) return null
+
+  const detail = mangaDetails[id]
+  const merged: Record<string, unknown> = detail ? { ...detail, ...item } : { ...item }
+  const links = mediaState.mangaLinks[id]
+  if (links) merged.externalLinks = links
+  return merged
+}
 
 export const mangaHandlers = [
   http.get(`${API_PREFIX}/manga`, ({ request }) => {
@@ -38,12 +54,28 @@ export const mangaHandlers = [
   http.get(`${API_PREFIX}/manga/:id`, ({ params }) => {
     if (!checkRateLimit()) return rateLimitedResponse()
 
-    const id = String(params.id)
-    const item = mediaState.manga.find((manga) => manga.id === id)
-    if (!item) return new HttpResponse(null, { status: 404 })
+    const detail = mangaDetailOf(String(params.id))
+    if (!detail) return new HttpResponse(null, { status: 404 })
 
-    const detail = mangaDetails[id]
-    return HttpResponse.json(toSnakeCase(detail ? { ...detail, ...item } : item))
+    return HttpResponse.json(toSnakeCase(detail))
+  }),
+
+  http.patch(`${API_PREFIX}/manga/:id/links`, async ({ params, request }) => {
+    if (!checkRateLimit()) return rateLimitedResponse()
+
+    const body: unknown = await request.json()
+    if (!isObject(body)) return new HttpResponse(null, { status: 400 })
+
+    const id = String(params.id)
+    if (!mediaState.manga.some((manga) => manga.id === id)) {
+      return new HttpResponse(null, { status: 404 })
+    }
+
+    const links = readExternalLinks(toCamelCase(body).externalLinks)
+    if (!links) return new HttpResponse(null, { status: 400 })
+
+    mediaState.mangaLinks[id] = links
+    return HttpResponse.json(toSnakeCase(mangaDetailOf(id)))
   }),
 
   http.patch(`${API_PREFIX}/manga/:id/progress`, async ({ params, request }) => {

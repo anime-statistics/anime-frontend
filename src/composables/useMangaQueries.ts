@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, unref, type MaybeRef, type Ref } from 'vue'
+import type { IExternalLinkDto } from '@/apis/dtos/externalLinkDto'
 import type { IMangaProgressUpdateDto } from '@/apis/dtos/mangaDto'
 import type { IBulkTagUpdateDto } from '@/apis/dtos/tagDto'
 import { mediaApi } from '@/apis/mediaApi'
@@ -71,6 +72,23 @@ export function useMangaTagMutation() {
     onSuccess: async (_result, { mediaId }) => {
       await queryClient.invalidateQueries({ queryKey: mangaKeys.detail(mediaId) })
       await queryClient.invalidateQueries({ queryKey: mangaKeys.all })
+    },
+  })
+}
+
+export interface IMangaLinksVariables {
+  mediaId: string
+  externalLinks: IExternalLinkDto[]
+}
+
+export function useMangaLinksMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ mediaId, externalLinks }: IMangaLinksVariables) =>
+      mediaApi.updateMangaLinks(mediaId, externalLinks),
+    onSuccess: async (_result, { mediaId }) => {
+      await queryClient.invalidateQueries({ queryKey: mangaKeys.detail(mediaId) })
     },
   })
 }

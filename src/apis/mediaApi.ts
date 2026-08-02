@@ -9,6 +9,7 @@ import type {
   IMangaProgressUpdateDto,
   IMangaSearchResultDto,
 } from '@/apis/dtos/mangaDto'
+import type { IExternalLinkDto } from '@/apis/dtos/externalLinkDto'
 import type { IBulkTagUpdateDto } from '@/apis/dtos/tagDto'
 import {
   validateAnimeDetailDto,
@@ -165,6 +166,22 @@ export const mediaApi = {
   async updateMangaTags(mediaId: string, myTags: string[]): Promise<IMangaSearchResultDto> {
     const { data } = await apiClient.patch<unknown>(`${MANGA}/${mediaId}/tags`, { myTags })
     return validateMangaSearchResultDto(data)
+  },
+
+  async updateAnimeLinks(
+    mediaId: string,
+    externalLinks: IExternalLinkDto[],
+  ): Promise<IAnimeDetailDto> {
+    const { data } = await apiClient.patch<unknown>(`${ANIME}/${mediaId}/links`, { externalLinks })
+    return validateAnimeDetailDto(data)
+  },
+
+  async updateMangaLinks(
+    mediaId: string,
+    externalLinks: IExternalLinkDto[],
+  ): Promise<IMangaDetailDto> {
+    const { data } = await apiClient.patch<unknown>(`${MANGA}/${mediaId}/links`, { externalLinks })
+    return validateMangaDetailDto(data)
   },
 
   async bulkUpdateAnimeTags(payload: IBulkTagUpdateDto): Promise<number> {

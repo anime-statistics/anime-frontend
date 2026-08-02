@@ -36,8 +36,8 @@ test('search and tag flow', async ({ page }) => {
 })
 
 // Search covers the whole catalogue, so it turns up titles the collection does
-// not hold; one click puts them in.
-test('adds a catalogue title to the collection from search', async ({ page }) => {
+// not hold; one click puts them in and one click takes them back out.
+test('adds a catalogue title to the collection from search and removes it again', async ({ page }) => {
   await page.goto('/search')
 
   await page.fill(SEARCH_INPUT, 'Steins;Gate')
@@ -50,6 +50,10 @@ test('adds a catalogue title to the collection from search', async ({ page }) =>
   await addButton.click()
 
   await expect(row.getByText('В коллекции')).toBeVisible()
+
+  await row.getByRole('button', { name: 'Убрать из коллекции' }).click()
+
+  await expect(addButton).toBeVisible()
 })
 
 test('home lists the library and opens a detail page', async ({ page }) => {

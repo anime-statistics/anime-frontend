@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ExternalLinkDto } from '@/apis/dtos/externalLinkDto'
 
 export const MEDIA_SOURCES = ['shikimori', 'aniliberty'] as const
 
@@ -34,7 +35,7 @@ export const AnimeDetailDto = AnimeSearchResultDto.extend({
     .array(z.object({ id: z.string(), title: z.string(), relation: z.string() }))
     .optional(),
   watchedEpisodes: z.number().int().min(0).optional(),
-  externalLinks: z.array(z.object({ source: z.string(), url: z.string().url() })).optional(),
+  externalLinks: z.array(ExternalLinkDto).optional(),
 })
 export type IAnimeDetailDto = z.infer<typeof AnimeDetailDto>
 

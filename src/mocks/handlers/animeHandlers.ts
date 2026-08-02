@@ -2,8 +2,26 @@ import { http, HttpResponse } from 'msw'
 import { animeDetails } from '@/mocks/fixtures/animeData'
 import { API_PREFIX } from '@/mocks/handlers/apiPrefix'
 import { checkRateLimit, rateLimitedResponse } from '@/mocks/handlers/rateLimit'
-import { applyTagPatch, isInCollection, mediaState } from '@/mocks/state/mediaState'
+import {
+  applyTagPatch,
+  isInCollection,
+  mediaState,
+  readExternalLinks,
+} from '@/mocks/state/mediaState'
 import { isObject, toCamelCase, toSnakeCase } from '@/core/utils/caseConverter'
+
+// The detail is the mutable record layered over the static fixture, plus any
+// links the user has edited by hand.
+function animeDetailOf(id: string): Record<string, unknown> | null {
+  const item = mediaState.anime.find((anime) => anime.id === id)
+  if (!item) return null
+
+  const detail = animeDetails[id]
+  const merged: Record<string, unknown> = detail ? { ...detail, ...item } : { ...item }
+  const links = mediaState.animeLinks[id]
+  if (links) merged.externalLinks = links
+  return merged
+}
 
 export const animeHandlers = [
   // The library is the collection, not the catalogue: only titles the user has
@@ -40,14 +58,30 @@ export const animeHandlers = [
   http.get(`${API_PREFIX}/anime/:id`, ({ params }) => {
     if (!checkRateLimit()) return rateLimitedResponse()
 
-    const id = String(params.id)
-    const item = mediaState.anime.find((anime) => anime.id === id)
-    if (!item) return new HttpResponse(null, { status: 404 })
-
     // The mutable record wins so PATCHed fields show up here; the static detail
     // fixture only contributes the extra detail-only fields.
-    const detail = animeDetails[id]
-    return HttpResponse.json(toSnakeCase(detail ? { ...detail, ...item } : item))
+    const detail = animeDetailOf(String(params.id))
+    if (!detail) return new HttpResponse(null, { status: 404 })
+
+    return HttpResponse.json(toSnakeCase(detail))
+  }),
+
+  http.patch(`${API_PREFIX}/anime/:id/links`, async ({ params, request }) => {
+    if (!checkRateLimit()) return rateLimitedResponse()
+
+    const body: unknown = await request.json()
+    if (!isObject(body)) return new HttpResponse(null, { status: 400 })
+
+    const id = String(params.id)
+    if (!mediaState.anime.some((anime) => anime.id === id)) {
+      return new HttpResponse(null, { status: 404 })
+    }
+
+    const links = readExternalLinks(toCamelCase(body).externalLinks)
+    if (!links) return new HttpResponse(null, { status: 400 })
+
+    mediaState.animeLinks[id] = links
+    return HttpResponse.json(toSnakeCase(animeDetailOf(id)))
   }),
 
   http.patch(`${API_PREFIX}/anime/:id/progress`, async ({ params, request }) => {
