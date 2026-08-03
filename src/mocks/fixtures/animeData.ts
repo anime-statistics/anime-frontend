@@ -4859,8 +4859,8 @@ export const animeDetails: Record<string, IAnimeDetailDto> = Object.fromEntries(
       externalLinks: [
         {
           source: 'shikimori',
-          url: `https://shikimori.one/animes/${shikimoriId(item.id)}`,
-          apiUrl: `https://shikimori.one/api/animes/${shikimoriId(item.id)}`,
+          url: `https://shikimori.io/animes/${shikimoriId(item.id)}`,
+          apiUrl: `https://shikimori.io/api/animes/${shikimoriId(item.id)}`,
         },
       ],
     },

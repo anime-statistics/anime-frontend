@@ -4,13 +4,13 @@ import { buildExternalUrl, buildInternalUrl, ensureApiUrl } from '@/core/utils/e
 describe('buildExternalUrl', () => {
   it('builds a shikimori anime url from the numeric id', () => {
     expect(buildExternalUrl('shikimori_5114-fullmetal-alchemist-brotherhood')).toBe(
-      'https://shikimori.one/animes/5114',
+      'https://shikimori.io/animes/5114',
     )
   })
 
   it('builds a shikimori manga url', () => {
     expect(buildExternalUrl('shikimori_2-berserk', 'manga')).toBe(
-      'https://shikimori.one/mangas/2',
+      'https://shikimori.io/mangas/2',
     )
   })
 
@@ -34,14 +34,14 @@ describe('buildInternalUrl', () => {
 
 describe('ensureApiUrl', () => {
   it('inserts /api in front of the path', () => {
-    expect(ensureApiUrl('https://shikimori.one/animes/5114')).toBe(
-      'https://shikimori.one/api/animes/5114',
+    expect(ensureApiUrl('https://shikimori.io/animes/5114')).toBe(
+      'https://shikimori.io/api/animes/5114',
     )
   })
 
   it('leaves an address that already points at the api alone', () => {
-    expect(ensureApiUrl('https://shikimori.one/api/animes/5114')).toBe(
-      'https://shikimori.one/api/animes/5114',
+    expect(ensureApiUrl('https://shikimori.io/api/animes/5114')).toBe(
+      'https://shikimori.io/api/animes/5114',
     )
   })
 
@@ -59,7 +59,7 @@ describe('ensureApiUrl', () => {
   })
 
   it('returns null for something that is not a url', () => {
-    expect(ensureApiUrl('shikimori.one/animes/5114')).toBeNull()
+    expect(ensureApiUrl('shikimori.io/animes/5114')).toBeNull()
     expect(ensureApiUrl('')).toBeNull()
   })
 })

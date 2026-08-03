@@ -41,26 +41,26 @@ describe('ExternalLinksPanel display', () => {
     const wrapper = mountPanel([
       {
         source: 'shikimori',
-        url: 'https://shikimori.one/animes/5114',
-        apiUrl: 'https://shikimori.one/api/animes/5114',
+        url: 'https://shikimori.io/animes/5114',
+        apiUrl: 'https://shikimori.io/api/animes/5114',
       },
     ])
     const hrefs = wrapper.findAll('a').map((anchor) => anchor.attributes('href'))
 
     expect(hrefs).toEqual([
-      'https://shikimori.one/animes/5114',
-      'https://shikimori.one/api/animes/5114',
+      'https://shikimori.io/animes/5114',
+      'https://shikimori.io/api/animes/5114',
     ])
   })
 
   // A link imported before the api half existed still gets one.
   it('derives the api link when the saved one has none', () => {
     const wrapper = mountPanel([
-      { source: 'shikimori', url: 'https://shikimori.one/animes/5114' },
+      { source: 'shikimori', url: 'https://shikimori.io/animes/5114' },
     ])
 
     expect(wrapper.findAll('a')[1].attributes('href')).toBe(
-      'https://shikimori.one/api/animes/5114',
+      'https://shikimori.io/api/animes/5114',
     )
   })
 
@@ -68,7 +68,7 @@ describe('ExternalLinksPanel display', () => {
     const wrapper = mountPanel()
 
     expect(wrapper.findAll('a')[0].attributes('href')).toBe(
-      'https://shikimori.one/animes/5114',
+      'https://shikimori.io/animes/5114',
     )
   })
 })
@@ -76,7 +76,7 @@ describe('ExternalLinksPanel display', () => {
 describe('ExternalLinksPanel editing', () => {
   it('offers a row for every known source, filled or not', async () => {
     const wrapper = mountPanel([
-      { source: 'shikimori', url: 'https://shikimori.one/animes/5114' },
+      { source: 'shikimori', url: 'https://shikimori.io/animes/5114' },
     ])
     await openEditor(wrapper)
 
@@ -102,15 +102,15 @@ describe('ExternalLinksPanel editing', () => {
     const wrapper = mountPanel()
     await openEditor(wrapper)
 
-    await setInput(inputs()[0], 'https://shikimori.one/animes/9999')
+    await setInput(inputs()[0], 'https://shikimori.io/animes/9999')
     await clickSave()
 
     expect(wrapper.emitted('save')?.[0]).toEqual([
       [
         {
           source: 'shikimori',
-          url: 'https://shikimori.one/animes/9999',
-          apiUrl: 'https://shikimori.one/api/animes/9999',
+          url: 'https://shikimori.io/animes/9999',
+          apiUrl: 'https://shikimori.io/api/animes/9999',
         },
       ],
     ])
@@ -122,7 +122,7 @@ describe('ExternalLinksPanel editing', () => {
     const wrapper = mountPanel()
     await openEditor(wrapper)
 
-    await setInput(inputs()[0], 'shikimori.one/animes/9999')
+    await setInput(inputs()[0], 'shikimori.io/animes/9999')
     await clickSave()
 
     expect(wrapper.emitted('save')).toBeUndefined()

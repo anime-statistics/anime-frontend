@@ -2,8 +2,10 @@ import { parseMediaId, type MediaSource } from '@/core/utils/slugGenerator'
 
 export type MediaKind = 'anime' | 'manga'
 
+// shikimori.one заблокирован РКН — официальный адрес источника теперь .io,
+// туда же ходит бэкенд.
 const BASE_URLS: Record<MediaSource, string> = {
-  shikimori: 'https://shikimori.one',
+  shikimori: 'https://shikimori.io',
   aniliberty: 'https://aniliberty.top',
 }
 
