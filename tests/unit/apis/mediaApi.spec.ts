@@ -121,8 +121,8 @@ describe('mediaApi.getAnimeById', () => {
     const numericId = soloItem.id.split('_')[1].split('-')[0]
 
     expect(detail.title).toBe(soloItem.title)
-    expect(detail.externalLinks?.[0].url).toBe(`https://shikimori.one/animes/${numericId}`)
-    expect(detail.externalLinks?.[0].apiUrl).toBe(`https://shikimori.one/api/animes/${numericId}`)
+    expect(detail.externalLinks?.[0].url).toBe(`https://shikimori.io/animes/${numericId}`)
+    expect(detail.externalLinks?.[0].apiUrl).toBe(`https://shikimori.io/api/animes/${numericId}`)
   })
 
   it('rejects a malformed media id', async () => {
@@ -200,8 +200,8 @@ describe('stateful mutations', () => {
     const links = [
       {
         source: 'shikimori',
-        url: 'https://shikimori.one/mangas/1',
-        apiUrl: 'https://shikimori.one/api/mangas/1',
+        url: 'https://shikimori.io/mangas/1',
+        apiUrl: 'https://shikimori.io/api/mangas/1',
       },
     ]
     await mediaApi.updateMangaLinks(target.id, links)

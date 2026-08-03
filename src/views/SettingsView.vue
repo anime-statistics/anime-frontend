@@ -643,7 +643,7 @@ const CHANGELOG = [
               class="text-brand-600 hover:underline dark:text-brand-300"
             >GitHub</a>
             <a
-              href="https://shikimori.one"
+              href="https://shikimori.io"
               target="_blank"
               rel="noopener noreferrer"
               class="text-brand-600 hover:underline dark:text-brand-300"
